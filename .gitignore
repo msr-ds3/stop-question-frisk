@@ -1,0 +1,11 @@
+.Rhistory
+*~
+*.zip
+*.ipynb_checkpoints
+*.Rproj.user
+*.Rdata
+*.RData
+*.rdata
+cache
+*.csv
+*.tsv
