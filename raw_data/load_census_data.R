@@ -41,7 +41,7 @@ totals_by_race <- data.frame(vars, label, totals)
 data <- spread(census, variable, value)
 
 #rename columns for clarity
-colnames(data) = c("GEOID", "Block Name", "Total", "White", "Black_African_American", 
+colnames(data) = c("GEOID", "Block Name", "Geometry", "Total", "White", "Black_African_American", 
                    "American_Indian_Alaska_Native", 
                    "Asian", "Native_Hawaiian_Pacific_Islander", "Other", "Two_Or_More_Races")
 
@@ -54,27 +54,24 @@ data <- data %>% mutate(frac_white = White/Total, frac_black = Black_African_Ame
 
 df10 <- read.csv("sqf_2010.csv")
 
-
-
-
-
-
-
-
-
-
-census %>%
-  ggplot(aes(fill = value)) +
-  facet_grid(~variable,) +
-  geom_sf(color = NA) +
-  coord_sf(crs = 26915) + 
-  scale_fill_viridis_c()
-
-
-r <- GET('http://data.beta.nyc//dataset/0ff93d2d-90ba-457c-9f7e-39e47bf2ac5f/resource/35dd04fb-81b3-479b-a074-a27a37888ce7/download/d085e2f8d0b54d4590b1e7d1f35594c1pediacitiesnycneighborhoods.geojson')
-nyc_precincts <- readOGR(content(r,'text'), 'OGRGeoJSON', verbose = F)
-
 leaflet(census) %>%
-  addTiles() %>% 
-  addPolygons(popup = ~neighborhood) %>%
+  addTiles() %>%
+  addPolygons(popup = ~geometry) %>%
   addProviderTiles("CartoDB.Positron")
+
+
+#Getting and reading police precincts JSON file
+r <- GET('http://services5.arcgis.com/GfwWNkhOj9bNBqoJ/arcgis/rest/services/nypp/FeatureServer/0/query?where=1=1&outFields=*&outSR=4326&f=geojson')
+police_precincts <- readOGR(content(r,'text'), 'OGRGeoJSON', verbose = F)
+
+#tidying the police precincts
+police_precinct <- tidy(police_precincts)
+
+#Using leaflet to plot the precinct area polygons
+leaflet(police_precincts) %>%
+  addTiles() %>% 
+  addPolygons(popup = ~Precinct) %>%
+  addProviderTiles("CartoDB.Positron")
+
+
+
