@@ -57,7 +57,7 @@ df6 <- df6 %>%
          "premname" = "prenam", "dettypcm" = "dettyp_c", "addrnum" = "adrnum", "addrpct" = "adrpct",
          "detailcm" = "details_")
 
-
+#change the "ï..year" column name to "year"
 df16 <- df16 %>%
   rename("year" = "ï..year")
 
@@ -73,8 +73,6 @@ df18 <- df18 %>%
 
 
 
-
-
 #bind the rows of all the data from 2003 - 2010
 data_03_10 <- rbind(df3, df4, df5, df7, df8, df9, df10) %>%
   mutate(forceuse = NA, wepfound = NA)
@@ -87,9 +85,8 @@ data_11_13 <- rbind(df11, df12, df13) %>%
 data_03_13 <- rbind(data_03_10, data_11_13)
 
 #bind the rows of all the data from 2003 - 2013 including 2006
-sf_data1 <- rbind(df3,df4,df5,df6,df7,df8,df9,df10,df11,df12,df13)
+sf_data1 <- rbind(df6, data_03_13)
 
-sf_data2 <- rbind(sf_data1, df14, df15, df16)
-sf_2017_2018 <- rbind(df17, df18)
+
 
 
