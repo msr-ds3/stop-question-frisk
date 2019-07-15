@@ -1,6 +1,3 @@
-#Installing and loading packages
-install.packages("tidycensus")
-install.packages("totalcensus")
 library(tidyverse)
 library(dplyr)
 library(tidycensus)
