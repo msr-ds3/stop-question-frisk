@@ -13,7 +13,7 @@ df4 <- read.csv("sqf_2004.csv")
 
 df5 <- read.csv("sqf_2005.csv") 
 
-df6 <- read.csv("sqf_2006.csv") %>% mutate(forceuse = NA, linecm = NA)
+df6 <- read.csv("sqf_2006.csv")
 
 df7 <- read.csv("sqf_2007.csv") 
 
@@ -55,7 +55,7 @@ colnames(df18) <- tolower(colnames(df18))
 df6 <- df6 %>%
   rename("stname" = "strname", "stinter" = "strintr", "rescode" = "rescod", "premtype" = "premtyp",
          "premname" = "prenam", "dettypcm" = "dettyp_c", "addrnum" = "adrnum", "addrpct" = "adrpct",
-         "detailcm" = "details_")
+         "detailcm" = "details_") %>% mutate(forceuse = NA, linecm = NA)
 
 #change the "ï..year" column name to "year"
 df16 <- df16 %>%
@@ -87,6 +87,7 @@ data_03_13 <- rbind(data_03_10, data_11_13)
 #bind the rows of all the data from 2003 - 2013 including 2006
 sf_data1 <- rbind(df6, data_03_13)
 
+#bind the ro
 
 
 
