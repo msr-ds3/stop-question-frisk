@@ -13,8 +13,6 @@ library(ggmap)
 library(broom)
 library(httr)
 library(rgdal)
-library(raster)
-library(tibble)
 library(rgeos)
 library(maptools)
 
@@ -86,14 +84,10 @@ census %>%
 r <- GET('http://services5.arcgis.com/GfwWNkhOj9bNBqoJ/arcgis/rest/services/nypp/FeatureServer/0/query?where=1=1&outFields=*&outSR=4326&f=geojson')
 police_precincts <- readOGR(content(r,'text'), 'OGRGeoJSON', verbose = F)
 
-glimpse(police_precincts)
-
 #tidying the police precincts
 police_precinct <- tidy(police_precincts)
 
-
 #Creating points from lat and long from police_precincts
-
 lats<- police_precinct$lat
 lngs<-police_precinct$long
 points <- data.frame(lats, lngs)
@@ -105,7 +99,6 @@ proj4string(points_spdf) <- proj4string(police_precincts)
 police_precincts$Precinct <- as.factor(police_precincts$Precinct)
 matches <- over(points_spdf, police_precincts)
 points <- cbind(points, matches)
-points
 
 
 #There are NA Values in precinct, this here will remove them and also count all precinct points
@@ -120,7 +113,7 @@ plot_data <- tidy(police_precincts, region="Precinct") %>%
   filter(!is.na(num_points))
 
 
-#Using leaflect to plot the precinct area polygons
+#Using leaflet to plot the precinct area polygons
 leaflet(police_precincts) %>%
   addTiles() %>% 
   addPolygons(popup = ~Precinct) %>%
