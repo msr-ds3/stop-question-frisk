@@ -3,17 +3,20 @@ library(dplyr)
 library(tidycensus)
 library(totalcensus)
 library(sf) 
-library(ggplot2)
 library(tmap)
 library(tmaptools)
 library(tigris)
 library(leaflet)
 library(sp)
+library(ggplot2)
 library(ggmap)
-library(maptools)
 library(broom)
 library(httr)
 library(rgdal)
+library(raster)
+library(tibble)
+library(rgeos)
+library(maptools)
 
 #Cencus API key retrieved from ACS website
 census_api_key("5365371ad843ba3249f2e88162f10edcfe529d87", install=TRUE)
@@ -67,6 +70,7 @@ census <- get_decennial(geography = "block", variables = wob,
                         state = "NY", county = counties,
                         year = 2010, geometry = TRUE, tigris_use_cache = TRUE)
 
+#Plotting the Census data heatmap
 census %>%
   ggplot(aes(fill = value)) +
   facet_grid(~variable,) +
@@ -78,19 +82,59 @@ census %>%
 
 
 
+#Getting and reading police precincts JSON file
+r <- GET('http://services5.arcgis.com/GfwWNkhOj9bNBqoJ/arcgis/rest/services/nypp/FeatureServer/0/query?where=1=1&outFields=*&outSR=4326&f=geojson')
+police_precincts <- readOGR(content(r,'text'), 'OGRGeoJSON', verbose = F)
+
+glimpse(police_precincts)
+
+#tidying the police precincts
+police_precinct <- tidy(police_precincts)
 
 
+#Creating points from lat and long from police_precincts
+
+lats<- police_precinct$lat
+lngs<-police_precinct$long
+points <- data.frame(lats, lngs)
+
+#Creating spatial joins with inbuilt functions (make sure to load libraries on top)
+points_spdf <- points
+coordinates(points_spdf) <- ~lngs + lats 
+proj4string(points_spdf) <- proj4string(police_precincts)
+police_precincts$Precinct <- as.factor(police_precincts$Precinct)
+matches <- over(points_spdf, police_precincts)
+points <- cbind(points, matches)
+points
 
 
+#There are NA Values in precinct, this here will remove them and also count all precinct points
+points_by_precinct<- points %>% filter(!is.na(Precinct))%>% 
+  group_by(Precinct) %>%
+  summarize(num_points=n()) 
 
 
+#Tried to plot the precinct data however this needs follow up (Google API)
+plot_data <- tidy(police_precincts, region="Precinct") %>%
+  left_join(., points_by_precinct, by=c("id"="Precinct")) %>%
+  filter(!is.na(num_points))
 
-r <- GET('http://data.beta.nyc//dataset/0ff93d2d-90ba-457c-9f7e-39e47bf2ac5f/resource/35dd04fb-81b3-479b-a074-a27a37888ce7/download/d085e2f8d0b54d4590b1e7d1f35594c1pediacitiesnycneighborhoods.geojson')
-nyc_neighborhoods <- readOGR(content(r,'text'), 'OGRGeoJSON', verbose = F)
+
+#Using leaflect to plot the precinct area polygons
+leaflet(police_precincts) %>%
+  addTiles() %>% 
+  addPolygons(popup = ~Precinct) %>%
+  addProviderTiles("CartoDB.Positron")
+
+
+#Creating spatial ggplot of the police_precinct data
+ggplot() + 
+  geom_polygon(data=police_precincts, aes(x=long, y=lat, group=group))
+
 
 leaflet(census) %>%
   addTiles() %>% 
-  addPolygons(popup = ~neighborhood) %>%
+  addPolygons(popup = ~Precinct) %>%
   addProviderTiles("CartoDB.Positron")
 
 
