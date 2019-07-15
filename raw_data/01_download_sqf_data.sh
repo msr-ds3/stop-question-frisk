@@ -37,3 +37,30 @@ do
     rm $file
 
 done
+
+# loop over year {from 2015 to 2016}
+for year in 2015 2016
+do
+    # download the csv file
+    url=https://www1.nyc.gov/assets/nypd/downloads/excel/analysis_and_planning/stop-question-frisk/sqf-${year}.csv
+    curl -O $url
+
+    # define local file names
+    file=`basename $url`
+    name=sqf_${year}.csv
+    mv $file $name
+done
+
+# loop over year {from 2017 to 2018}
+for year in 2017 2018
+do
+    # download the xls file
+    url=https://www1.nyc.gov/assets/nypd/downloads/excel/analysis_and_planning/stop-question-frisk/sqf-${year}.xlsx
+    curl -O $url
+
+    # define local file names
+    file=`basename $url`
+    name=sqf_${year}.xlsx
+    mv $file $name
+done
+
