@@ -52,25 +52,6 @@ census %>%
   coord_sf(crs = 26915) + 
   scale_fill_viridis_c()
 
-racevars <- c(White = "P005003", 
-              Black = "P005004", 
-              Asian = "P005006", 
-              Hispanic = "P004003")
-
-harris <- get_decennial(geography = "tract", variables = racevars, 
-                        state = "TX", county = "Harris County", geometry = TRUE,
-                        summary_var = "P001001") 
-
-
-harris %>%
-  mutate(pct = 100 * (value / summary_value)) %>%
-  ggplot(aes(fill = pct)) +
-  facet_wrap(~variable) +
-  geom_sf(color = NA) +
-  coord_sf(crs = 26915) + 
-  scale_fill_viridis_c()
-
-
 
 
 #Vectors of arguments to be passed to get decennial census for NYC at block level
