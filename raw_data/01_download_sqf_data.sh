@@ -1,8 +1,7 @@
 #!/bin/bash
 #
 # description:
-#   fetches sfd files from the NYC Stop-Question and Frisk Data site https://www1.nyc.gov/site/nypd/stats/reports-analysis/stopfrisk.page
-#   e.g., https://www1.nyc.gov/assets/nypd/downloads/zip/analysis_and_planning/stop-question-frisk/sqf-2003-csv.zip
+#   fetches sqf files from the NYC Stop-Question and Frisk Data site https://www1.nyc.gov/site/nypd/stats/reports-analysis/stopfrisk.page
 #
 # usage: ./01_download_sqf_data.sh
 #
@@ -16,7 +15,7 @@ DATA_DIR=.
 # change to the data directory
 cd $DATA_DIR
 
-# loop over each year {from 2003 to 2013}
+# loop over each year {from 2003 to 2014}
 for year in 2003 2004 2005 2006 2007 2008 2009 2010 2011 2012 2013 2014
 do
     # download the zip file
@@ -47,7 +46,7 @@ do
 
     # define local file names
     file=`basename $url`
-    name=sqf_${year}.csv
+    name=${file/-/_}
     mv $file $name
 done
 
@@ -60,7 +59,7 @@ do
 
     # define local file names
     file=`basename $url`
-    name=sqf_${year}.xlsx
+    name=${file/-/_}
     mv $file $name
 done
 
