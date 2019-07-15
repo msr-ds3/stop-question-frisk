@@ -52,6 +52,17 @@ data <- data %>% mutate(frac_white = White/Total, frac_black = Black_African_Ame
                         frac_other = Other/Total, frac_mixed = Two_Or_More_Races/Total)
 
 
+df10 <- read.csv("sqf_2010.csv")
+
+
+
+
+
+
+
+
+
+
 census %>%
   ggplot(aes(fill = value)) +
   facet_grid(~variable,) +
@@ -61,7 +72,7 @@ census %>%
 
 
 r <- GET('http://data.beta.nyc//dataset/0ff93d2d-90ba-457c-9f7e-39e47bf2ac5f/resource/35dd04fb-81b3-479b-a074-a27a37888ce7/download/d085e2f8d0b54d4590b1e7d1f35594c1pediacitiesnycneighborhoods.geojson')
-nyc_neighborhoods <- readOGR(content(r,'text'), 'OGRGeoJSON', verbose = F)
+nyc_precincts <- readOGR(content(r,'text'), 'OGRGeoJSON', verbose = F)
 
 leaflet(census) %>%
   addTiles() %>% 
