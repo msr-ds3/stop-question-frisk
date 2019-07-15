@@ -3,19 +3,21 @@ library(dplyr)
 library(tidycensus)
 library(totalcensus)
 library(sf) 
-library(ggplot2)
 library(tmap)
 library(tmaptools)
 library(tigris)
 library(leaflet)
 library(sp)
+library(ggplot2)
 library(ggmap)
-library(maptools)
 library(broom)
 library(httr)
 library(rgdal)
 library(raster)
 library(tibble)
+library(rgeos)
+library(maptools)
+
 #Cencus API key retrieved from ACS website
 census_api_key("5365371ad843ba3249f2e88162f10edcfe529d87", install=TRUE)
 readRenviron("~/.Renviron")
@@ -68,6 +70,7 @@ census <- get_decennial(geography = "block", variables = wob,
                         state = "NY", county = counties,
                         year = 2010, geometry = TRUE, tigris_use_cache = TRUE)
 
+#Plotting the Census data heatmap
 census %>%
   ggplot(aes(fill = value)) +
   facet_grid(~variable,) +
@@ -86,37 +89,47 @@ police_precincts <- readOGR(content(r,'text'), 'OGRGeoJSON', verbose = F)
 glimpse(police_precincts)
 
 #tidying the police precincts
-police_precincts <- tidy(police_precincts)
+police_precinct <- tidy(police_precincts)
 
 
 #Creating points from lat and long from police_precincts
 
-lats<- police_precincts$lat
-lngs<-police_precincts$long
+lats<- police_precinct$lat
+lngs<-police_precinct$long
 points <- data.frame(lats, lngs)
 
-View(points)
-
+#Creating spatial joins with inbuilt functions (make sure to load libraries on top)
 points_spdf <- points
 coordinates(points_spdf) <- ~lngs + lats 
-
 proj4string(points_spdf) <- proj4string(police_precincts)
-
+police_precincts$Precinct <- as.factor(police_precincts$Precinct)
 matches <- over(points_spdf, police_precincts)
 points <- cbind(points, matches)
 points
 
 
+#There are NA Values in precinct, this here will remove them and also count all precinct points
+points_by_precinct<- points %>% filter(!is.na(Precinct))%>% 
+  group_by(Precinct) %>%
+  summarize(num_points=n()) 
+
+
+#Tried to plot the precinct data however this needs follow up (Google API)
+plot_data <- tidy(police_precincts, region="Precinct") %>%
+  left_join(., points_by_precinct, by=c("id"="Precinct")) %>%
+  filter(!is.na(num_points))
+
+
+#Using leaflect to plot the precinct area polygons
+leaflet(police_precincts) %>%
+  addTiles() %>% 
+  addPolygons(popup = ~Precinct) %>%
+  addProviderTiles("CartoDB.Positron")
+
 
 #Creating spatial ggplot of the police_precinct data
 ggplot() + 
   geom_polygon(data=police_precincts, aes(x=long, y=lat, group=group))
-
-#Testing leaflet package
-leaflet(police_precincts) %>%
-  addTiles() %>% 
-  addPolygons(popup = ~neighborhood) %>%
-  addProviderTiles("CartoDB.Positron")
 
 
 leaflet(census) %>%
