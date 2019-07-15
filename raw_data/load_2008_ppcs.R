@@ -1,0 +1,175 @@
+# load 2018 ppcs data
+
+library(readr)
+library(tidyverse)
+
+ppcs_2008 <- read_tsv("32022-0001-Data.tsv")
+
+# create the civilian race column
+# black includes black and black hispanic
+# hispanic includes white hispanic and any other combination
+# other is anything else
+
+#white includes:
+# 1 
+# black includes:
+# 2 and 2 in RACEHISP
+# hispanic includes:
+# HISP = 1
+# other includes:
+# 3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20
+
+ppcs_2008_revised <- ppcs_2008 %>%
+  mutate(RACE = ifelse(RACE == 1, "white", ifelse(RACE == 2, "black", "other")))
+
+
+ppcs_2008_revised <- ppcs_2008 %>% 
+  mutate(civilian_race = case_when(
+    (RACE == 1 & HISP == 2) ~ "white",
+    (RACE == 2 ) ~ "black",
+    (HISP == 1 & RACE != 2) ~ "hispanic",
+    TRUE ~ "other"
+  ))
+#factor it
+ppcs_2008_revised <- ppcs_2008_revised %>% 
+  mutate(civilian_race = as.factor(civilian_race))
+
+#check the race distribution
+summary(ppcs_2008_revised$civilian_race)
+#------------------------------------------
+# Civilian Age
+# just mutate the column
+ppcs_2008_revised <- ppcs_2008_revised %>%
+  mutate( civilian_age = AGE)
+
+#------------------------------------------
+
+#Civilian Gender
+# just mutate the column and factor
+
+ppcs_2008_revised <- ppcs_2008_revised %>%
+  mutate(civilian_gender = SEX) %>%
+  mutate( civilian_gender = as.factor(civilian_gender))
+summary(ppcs_2008_revised$civilian_gender)
+#-------------------------------------------
+
+#Civilian income
+# missing column in 2008, make 1 since it's coded as
+#1. less than 20k or NA
+#2. 20k - 50k
+#3. greater than 50k
+
+ppcs_2008_revised <- ppcs_2008_revised %>%
+  mutate(civilian_income = 1) %>%
+  mutate(civilian_income = as.factor(civilian_income))
+
+#-----------------------------------------------------------------------
+
+#Civilian Employed
+#since civilian employed (according to appendix) is coded as only 1(yes) or 0(otherwise),
+#adjust the column to only include those values
+ppcs_2008_revised <- ppcs_2008_revised %>%
+  mutate(civilian_employed = ifelse(WORK != 1, 0, 1))
+
+#----------------------------------------------------------------------
+#population Size
+# missing column in 2008, make all 1,
+# since coded as
+# 1. no response or pop < 100k
+# 2. 100k - 499,999
+# 3. 500K - 999,999
+# 4. > 1M
+
+ppcs_2008_revised <- ppcs_2008_revised %>%
+  mutate(population_size = 1) %>%
+  mutate(population_size = as.factor(population_size))
+
+#---------------------------------------------------------------------
+#Time of encounter: appendix does not include 0, 8, 9 so will make those NA
+# factor it.
+ppcs_2008_revised <- ppcs_2008_revised %>% 
+  mutate(time_of_encounter = ifelse(!(V4  %in% 1:6), NA, V4)) %>%
+  mutate(time_of_encounter = as.factor(time_of_encounter))
+
+summary(ppcs_2008_revised$time_of_encounter)
+#double check that the right thing happened
+tmp <- data.frame(ppcs_2008_revised$V4, ppcs_2008_revised$time_of_encounter) %>% view
+#-------------------------------------------------------------------------------------
+
+#Officer Race:
+# create 3 separate columns for each dummy variable
+#check if multiple officers (V24B) race has value or
+# if only 1 officer race(v24A) has
+# equally mixed was calculated for both black and white
+
+#officer race black:
+# includes:
+# multiple officers (V24B) black, mostly black, equally mixed
+ppcs_2008_revised <- ppcs_2008_revised %>%
+  mutate(officer_race_black = case_when(
+    (V24B == 2 | V24B == 5 | V24A == 2 ) ~ 1,
+    TRUE ~ 0
+  ))
+
+#officer race white:
+#includes:
+#multiple officers (V24B) white, mostly white, equally mixed
+ppcs_2008_revised <- ppcs_2008_revised %>%
+  mutate(officer_race_white = case_when(
+    (V24B == 1 | V24B == 4 | V24A == 1 ) ~ 1,
+    TRUE ~ 0
+  ))
+
+#officer race other
+#includes:
+#multiple officers (V24B) 
+ppcs_2008_revised <- ppcs_2008_revised %>%
+  mutate(officer_race_other = case_when(
+    (V24B == 3 | V24B == 6 | V24B == 7 | V24A == 3 ) ~ 1,
+    TRUE ~ 0
+  ))
+
+#-------------------------------------------------------------------------------------
+#Type of incident
+
+ppcs_2008_revised <- ppcs_2008_revised %>%
+  mutate(type_of_incident = case_when(
+    (REASON %in% 2:3) ~ 2,
+    (REASON %in% c(1, 4:7)) ~ 3,
+    TRUE ~ NA_real_
+))
+
+#------------------------------------------------------------------------------------
+# Civilian Behavior
+# 1 if any of the columns are 1
+# 0 if all are 0
+ppcs_2008_revised <- ppcs_2008_revised %>%
+  mutate(civilian_behavior = case_when(
+    (V12A == 1 | V12B == 1 | V12C == 1 | V12D == 1 | V11 == 1 | V12E == 1) ~ 1,
+    TRUE ~ 0
+))
+
+
+#------------------------------------------------------
+
+#Alternative outcome
+# searched 1 if yes and 0 otherwise
+ppcs_2008_revised <- ppcs_2008_revised %>% 
+  mutate(civilian_searched = ifelse(SEARCH == 1, 1, 0 ))
+
+#arrested
+ppcs_2008_revised <- ppcs_2008_revised %>% 
+  mutate(civilian_arrested = ifelse(V9 == 1, 1, 0 ))
+
+#found
+ppcs_2008_revised <- ppcs_2008_revised %>%
+  mutate(civilian_guilty_of_illegal = ifelse(FOUND == 1, 1, 0 ))
+
+#----------------------------------------------------------
+#Cleaned! Correct columns selected!
+# Add year column 
+ppcs_2008_cleaned <- ppcs_2008_revised %>%
+  select(civilian_race, civilian_age, civilian_gender, civilian_income, civilian_employed, population_size, time_of_encounter, officer_race_black, officer_race_white, officer_race_other, type_of_incident, civilian_behavior, civilian_searched, civilian_arrested, civilian_guilty_of_illegal) %>%
+  mutate(year = 2008)
+
+save(ppcs_2008_cleaned, file = "ppcs_2008.RData")
