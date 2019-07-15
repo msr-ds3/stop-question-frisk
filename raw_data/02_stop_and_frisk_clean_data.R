@@ -87,7 +87,7 @@ data_03_13 <- rbind(data_03_10, data_11_13)
 #bind the rows of all the data from 2003 - 2013 including 2006
 sf_data1 <- rbind(df6, data_03_13)
 
-#bind the ro
+
 
 
 
