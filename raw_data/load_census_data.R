@@ -35,7 +35,7 @@ census <- get_decennial(geography = "block", variables = vars, state = "NY",
 
 #summarize census data
 totals <- census %>% group_by(variable) %>% summarize(total = sum(value)) %>% select(total)
-totals_by_race <- data.frame(vars, label, totals)
+totals_by_race <- data.frame(label, totals)
 
 #spread census data by race
 data <- spread(census, variable, value)
@@ -51,8 +51,6 @@ data <- data %>% mutate(frac_white = White/Total, frac_black = Black_African_Ame
                         frac_islander = Native_Hawaiian_Pacific_Islander/Total,
                         frac_other = Other/Total, frac_mixed = Two_Or_More_Races/Total)
 
-
-df10 <- read.csv("sqf_2010.csv")
 
 leaflet(census) %>%
   addTiles() %>%
