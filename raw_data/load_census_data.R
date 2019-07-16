@@ -1,12 +1,12 @@
 library(tidyverse)
-# library(tidycensus)
+library(tidycensus)
 # library(totalcensus)
 # library(sf)
 # library(tmap)
 # library(tmaptools)
 library(tigris)
 library(leaflet)
-# library(sp)
+library(sp)
 # library(ggmap)
 # library(maptools)
 # library(broom)
@@ -32,12 +32,12 @@ label = c("Total", "White alone", "Black or African American alone",
           "Some Other Race alone", "Two or More Races")
 
 #load census data
-census <- get_decennial(geography = "block", variables = vars, state = "NY", 
+census <- get_decennial(geography = "tract", variables = vars, state = "NY", 
                         county = counties, year = 2010, geometry = TRUE, tigris_use_cache = TRUE)
 
-#summarize census data
-totals <- census %>% group_by(variable) %>% summarize(total = sum(value)) %>% select(total)
-totals_by_race <- data.frame(label, totals)
+# #summarize census data
+# totals <- census %>% group_by(variable) %>% summarize(total = sum(value)) %>% select(total)
+# totals_by_race <- data.frame(label, totals)
 
 #spread census data by race
 data <- data.frame(spread(census, variable, value))
@@ -49,16 +49,17 @@ colnames(data) = c("GEOID", "Block Name", "Geometry", "Total",
                    "White_other", "Black_other", "White_Hispanic_Latino",
                    "Black_Hispanic_Latino")
 
-counties = c("Richmond", "Kings", "New York", "Queens", "Bronx")
-
-nyc <- blocks(state = "NY", county = counties, year = 2010)
+nyc <- tracts(state = "NY", county = counties, year = 2010)
 
 joint <- geo_join(nyc, data, "GEOID10", "GEOID")
 
+pal <- colorQuantile("Greens", NULL, n = 6)
+
+popup <- paste0("White: ", as.character(joint$White_other))
+
 leaflet() %>%
   addTiles() %>%
-  addPolygons(data = joint, color = joint$Black_other, popup = joint$Black_Hispanic_Latino) %>%
-  addProviderTiles("CartoDB.Positron")
+  addPolygons(data = joint)
 
 
 #Getting and reading police precincts JSON file
