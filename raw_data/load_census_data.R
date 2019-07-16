@@ -19,35 +19,39 @@ census_api_key('5365371ad843ba3249f2e88162f10edcfe529d87', install = TRUE)
 readRenviron("~/.Renviron")
 
 #variables to load from census data
-vars = c("P003001", "P003004", "P003005", "P003006", "P003007", "P003008",
+vars = c("P003004", "P003005", "P003006", "P003007", "P003008",
          "P005003", "P005004", "P005011", "P005012")
 
 #counties to load from census data
 counties = c("Richmond", "Kings", "New York", "Queens", "Bronx")
 
 #variable names
-label = c("Total", "White alone", "Black or African American alone",
+label = c("White alone", "Black or African American alone",
           "American Indian and Alaska Native alone", "Asian alone",
           "Native Hawaiian and Other Pacific Islander alone",
           "Some Other Race alone", "Two or More Races")
 
 #load census data
 census <- get_decennial(geography = "tract", variables = vars, state = "NY", 
-                        county = counties, year = 2010, geometry = TRUE, tigris_use_cache = TRUE)
+                        county = counties, year = 2010, tigris_use_cache = TRUE)
 
-# #summarize census data
-# totals <- census %>% group_by(variable) %>% summarize(total = sum(value)) %>% select(total)
-# totals_by_race <- data.frame(label, totals)
+census_plus <- census %>%
+  group_by(GEOID) %>%
+  filter(value == max(value)) %>%
+  mutate(majority_race = variable) %>%
+  select(GEOID, majority_race)
+
+majorities <- left_join(data.frame(census), data.frame(census_plus), by = c("GEOID", "GEOID"))
 
 #spread census data by race
-data <- data.frame(spread(census, variable, value))
+data <- data.frame(spread(majorities, variable, value))
 
 #rename columns for clarity
-colnames(data) = c("GEOID", "Block Name", "Geometry", "Total", 
+colnames(data) = c("GEOID", "Block Name", "Majority Race",
                    "American_Indian_Alaska_Native", 
                    "Asian", "Native_Hawaiian_Pacific_Islander", "Other", "Two_Or_More_Races",
                    "White_other", "Black_other", "White_Hispanic_Latino",
-                   "Black_Hispanic_Latino")
+                   "Black_Hispanic_Latino", "Majority_Race")
 
 nyc <- tracts(state = "NY", county = counties, year = 2010)
 
@@ -60,7 +64,7 @@ mypal <- colorNumeric(
   domain = df$White_other
 )
 
-mypopup <- paste0("GEOID: ", df$GEOID, "<br>", "White other: ", round(df$White_other,0))
+mypopup <- paste0("GEOID: ", df$GEOID, "<br>", "White other: ", df$White_other)
 
 mymap <- leaflet() %>%
   addProviderTiles("CartoDB.Positron") %>%
