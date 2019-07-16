@@ -1,6 +1,7 @@
 
 library(tidyverse)
 library(naniar)
+library(scales)
 
 
 #set directory to source file location
@@ -119,7 +120,7 @@ sf_1718 <- sf_2017_2018
 sf_data2 <- sf_data2 %>%
   mutate(suspect_height = paste(ht_feet,".",ht_inch,sep = ""))
 
-#create a new dataset with the 17/18 data
+#create a new dataset with the 03-16 data
 sf_data3 <- sf_data2 %>% mutate(year = as.character(year), perobs = as.character(perobs),
                                 weight = as.character(weight), xcoord = as.character(xcoord),
                                 ycoord = as.character(ycoord))
@@ -206,5 +207,6 @@ stop_and_frisk <- bind_rows(sf_data3, sf_1718)
 
 
 
+#save the dataset
 
-
+save(stop_and_frisk, file = "sqf_03_18.RData")
