@@ -1,0 +1,404 @@
+---
+title: '20190715'
+author: "Adnan Hoq"
+date: "7/15/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load-libraries}
+library(tidyverse)
+library(naniar)
+```
+
+## LOADING 2003-2018 STOP, QUESTION, AND FRISK DATA
+
+```{r loading-all-the data-sets}
+
+df3 <- read.csv("sqf_2003.csv") 
+
+df4 <- read.csv("sqf_2004.csv") 
+
+df5 <- read.csv("sqf_2005.csv") 
+
+df6 <- read.csv("sqf_2006.csv")
+
+df7 <- read.csv("sqf_2007.csv") 
+
+df8 <- read.csv("sqf_2008.csv") 
+
+df9 <- read.csv("sqf_2009.csv") 
+
+df10 <- read.csv("sqf_2010.csv") 
+
+
+df11 <- read.csv("sqf_2011.csv") 
+
+df12 <- read.csv("sqf_2012.csv") 
+
+df13 <- read.csv("sqf_2013.csv") 
+
+df14 <- read.csv("sqf_2014.csv") 
+
+df15 <- read.csv("sqf_2015.csv") 
+
+df16 <- read.csv("sqf_2016.csv") 
+
+df17 <- readxl::read_xlsx ("sqf_2017.xlsx")
+
+df18<- readxl::read_xlsx ("sqf_2018.xlsx")
+```
+
+##Set the Column Names For 2013-18 to Lowercase
+
+```{r lower-case-column-names}
+colnames(df13) <- tolower(colnames(df13))
+colnames(df14) <- tolower(colnames(df14))
+colnames(df15) <- tolower(colnames(df15))
+colnames(df16) <- tolower(colnames(df16))
+colnames(df17) <- tolower(colnames(df17))
+colnames(df18) <- tolower(colnames(df18))
+```
+
+##Renaming and Dropping Columns
+
+```{r rename-drop-untidy-method}
+colnames(df6)[colnames(df6)=="strname"] <- "stname"
+colnames(df6)[colnames(df6)=="strintr"] <- "stinter"
+colnames(df6)[colnames(df6)=="rescod"] <- "rescode"
+colnames(df6)[colnames(df6)=="premtyp"] <- "premtype"
+colnames(df6)[colnames(df6)=="prenam"] <- "premname"
+colnames(df6)[colnames(df6)=="dettyp_c"] <- "dettypcm"
+colnames(df6)[colnames(df6)=="adrnum"] <- "addrnum"
+colnames(df6)[colnames(df6)=="adrpct"] <- "addrpct"
+colnames(df6)[colnames(df6)=="details_"] <- "detailcm"
+colnames(df16)[colnames(df16)=="ï..year"] <- "year"
+colnames(df18)[colnames(df18)=="stop frisk time"] <- "stop_frisk_time"
+
+df6$detail1_ <- NULL
+
+```
+
+```{r rename-drop-tidy-method}
+df6 <- df6 %>%
+  rename("stname" = "strname", "stinter" = "strintr", "rescode" = "rescod", "premtype" = "premtyp",
+         "premname" = "prenam", "dettypcm" = "dettyp_c", "addrnum" = "adrnum", "addrpct" = "adrpct",
+         "detailcm" = "details_") %>% mutate(forceuse = NA, linecm = NA)
+
+df6$detail1_ <- NULL
+
+df16 <- df16 %>%
+  rename("year" = "ï..year")
+
+df18 <- df18 %>%
+  rename("stop_frisk_time" = "stop frisk time")
+
+```
+
+
+##Cleaning and Binding Data Frames
+
+```{r clean-bind-untidy-method}
+
+
+sf_data1 <- rbind(df3,df4,df5,df6,df7,df8,df9,df10,df11,df12,df13)
+sf_data2 <- rbind(sf_data1, df14, df15, df16)
+sf_2017_2018 <- rbind(df17, df18)
+
+
+
+
+
+
+sf_2017_2018[] <- lapply(sf_2017_2018, gsub, pattern="[(null)]", replacement='')
+
+sf_2017_2018 <- sf_2017_2018 %>%
+  mutate(officrid = paste(sf_2017_2018$id_card_identifies_officer_flag,
+                          sf_2017_2018$shield_identifies_officer_flag,
+                          sf_2017_2018$verbal_identifies_officer_flag,sep = ""))
+
+sf_2017_2018$id_card_identifies_officer_flag <- NULL
+sf_2017_2018$shield_identifies_officer_flag <- NULL
+sf_2017_2018$verbal_identifies_officer_flag <- NULL
+
+sf_1718 <- sf_2017_2018
+
+sf_data2 <- sf_data2 %>%
+  mutate(suspect_height = paste(ht_feet,".",ht_inch,sep = ""))
+
+sf_data3 <- sf_data2
+
+sf_data3$ht_feet <- NULL
+sf_data3$ht_inch <- NULL
+```
+
+
+
+```{r clean-bind-tidy-method}
+#bind the rows of all the data from 2003 - 2010
+data_03_10 <- rbind(df3, df4, df5, df7, df8, df9, df10) %>%
+  mutate(forceuse = NA, wepfound = NA)
+
+#bind the rows of all the data from 2011 - 2013
+data_11_13 <- rbind(df11, df12, df13) %>%
+  mutate(wepfound = NA)
+
+#bind the rows of all the data from 2003 - 2013 except 2006
+data_03_13 <- rbind(data_03_10, data_11_13)
+
+#bind the rows of all the data from 2003 - 2013 including 2006
+sf_data1 <- rbind(df6, data_03_13)
+
+#bind the rows of all the data from 2014 - 2016 
+data_14_16 <- rbind(df14, df15, df16) %>%
+  mutate(wepfound = NA)
+
+#bind the rows of all the data from 2003 - 2016
+sf_data2 <- rbind(sf_data1, data_14_16)
+
+#bind the rows of all the data from 2017 - 2018
+sf_2017_2018 <- rbind(df17, df18)
+
+#replacing "(null)" values with '' in 17/18 data
+sf_2017_2018[] <- lapply(sf_2017_2018, gsub, pattern="[(null)]", replacement='')
+
+
+#paste the id_card_identifies values together to create "officrid" column (the same column name as the rest of the data) 
+sf_2017_2018 <- sf_2017_2018 %>%
+  mutate(officrid = paste(sf_2017_2018$id_card_identifies_officer_flag,
+                          sf_2017_2018$shield_identifies_officer_flag,
+                          sf_2017_2018$verbal_identifies_officer_flag,sep = ""))
+
+
+#create a new dataset with the 17/18 data
+sf_1718 <- sf_2017_2018
+
+#create a new column called "suspect_height" by collapsing "ht_feet" and "ht_inch" columns
+sf_data2 <- sf_data2 %>%
+  mutate(suspect_height = paste(ht_feet,".",ht_inch,sep = ""))
+
+#create a new dataset with the 03-16 data
+sf_data3 <- sf_data2 %>% mutate(year = as.character(year), perobs = as.character(perobs),
+                                weight = as.character(weight), xcoord = as.character(xcoord), ycoord = as.character(ycoord))
+```
+
+##Renaming Columns and Cleaning Data to Create One Single Dataframe with All the Data
+
+```{r single-dataframe-untidy-method}
+colnames(sf_data3)[colnames(sf_data3)=="datestop"] <- "stop_frisk_date"
+colnames(sf_data3)[colnames(sf_data3)=="timestop"] <- "stop_frisk_time"
+colnames(sf_data3)[colnames(sf_data3)=="inout"] <- "location_in_out_code"
+colnames(sf_data3)[colnames(sf_data3)=="perobs"] <- "observed_duration_minutes"
+colnames(sf_data3)[colnames(sf_data3)=="perstop"] <- "stop_duration_minutes"
+colnames(sf_data3)[colnames(sf_data3)=="year"] <- "year2"
+colnames(sf_data3)[colnames(sf_data3)=="crimsusp"] <- "suspected_crime_description"
+colnames(sf_data3)[colnames(sf_data3)=="explnstp"] <- "officer_explained_stop_flag"
+colnames(sf_data3)[colnames(sf_data3)=="othpers"] <- "other_person_stopped_flag"
+colnames(sf_data3)[colnames(sf_data3)=="arstmade"] <- "suspect_arrested_flag"
+colnames(sf_data3)[colnames(sf_data3)=="arstoffn"] <- "suspect_arrest_offense"
+colnames(sf_data3)[colnames(sf_data3)=="sumissue"] <- "summons_issued_flag"
+colnames(sf_data3)[colnames(sf_data3)=="sumoffen"] <- "summons_offense_description"
+colnames(sf_data3)[colnames(sf_data3)=="offunif"] <- "officer_in_uniform_flag"
+colnames(sf_data3)[colnames(sf_data3)=="frisked"] <- "frisked_flag"
+colnames(sf_data3)[colnames(sf_data3)=="searched"] <- "searched_flag"
+colnames(sf_data3)[colnames(sf_data3)=="contrabn"] <- "other_contraband_flag"
+colnames(sf_data3)[colnames(sf_data3)=="knifcuti"] <- "knife_cutter_flag"
+colnames(sf_data3)[colnames(sf_data3)=="othrweap"] <- "other_weapon_flag"
+colnames(sf_data3)[colnames(sf_data3)=="sex"] <- "suspect_sex"
+colnames(sf_data3)[colnames(sf_data3)=="race"] <- "suspect_race_description"
+colnames(sf_data3)[colnames(sf_data3)=="age"] <- "suspect_reported_age"
+colnames(sf_data3)[colnames(sf_data3)=="weight"] <- "suspect_weight"
+colnames(sf_data3)[colnames(sf_data3)=="haircolr"] <- "suspect_hair_color"
+colnames(sf_data3)[colnames(sf_data3)=="eyecolor"] <- "suspect_eye_color"
+colnames(sf_data3)[colnames(sf_data3)=="othfeatr"] <- "suspect_other_description"
+colnames(sf_data3)[colnames(sf_data3)=="pf_hcuff"] <- "physical_force_handcuff_suspect_flag"
+colnames(sf_data3)[colnames(sf_data3)=="pf_pepsp"] <- "physical_force_oc_spray_used_flag"
+colnames(sf_data3)[colnames(sf_data3)=="pf_other"] <- "physical_force_other_flag"
+colnames(sf_data3)[colnames(sf_data3)=="sb_hdobj"] <- "search_basis_hard_object_flag"
+colnames(sf_data3)[colnames(sf_data3)=="sb_outln"] <- "search_basis_outline_flag"
+colnames(sf_data3)[colnames(sf_data3)=="sb_admis"] <- "search_basis_admission_flag"
+colnames(sf_data3)[colnames(sf_data3)=="sb_other"] <- "search_basis_other_flag"
+colnames(sf_data3)[colnames(sf_data3)=="build"] <- "suspect_body_build_type"
+colnames(sf_data3)[colnames(sf_data3)=="stname"] <- "stop_location_street_name"
+colnames(sf_data3)[colnames(sf_data3)=="zip"] <- "stop_location_zip_code"
+colnames(sf_data3)[colnames(sf_data3)=="sector"] <- "stop_location_sector_code"
+colnames(sf_data3)[colnames(sf_data3)=="aptnum"] <- "stop_location_apartment"
+colnames(sf_data3)[colnames(sf_data3)=="xcoord"] <- "stop_location_x"
+colnames(sf_data3)[colnames(sf_data3)=="ycoord"] <- "stop_location_y"
+colnames(sf_data3)[colnames(sf_data3)=="recstat"] <- "record_status_code"
+colnames(sf_data3)[colnames(sf_data3)=="trhsloc"] <- "jurisdiction_code"
+colnames(sf_data3)[colnames(sf_data3)=="rf_vcrim"] <- "backround_circumstances_violent_crime_flag"
+colnames(sf_data3)[colnames(sf_data3)=="rf_othsw"] <- "backround_circumstances_suspect_known_to_carry_weapon_flag"
+colnames(sf_data3)[colnames(sf_data3)=="ac_proxm"] <- "suspects_actions_proximity_to_scene_flag"
+colnames(sf_data3)[colnames(sf_data3)=="cs_lkout"] <- "suspects_actions_lookout_flag"
+colnames(sf_data3)[colnames(sf_data3)=="cs_descr"] <- "suspects_actions_description_flag"
+colnames(sf_data3)[colnames(sf_data3)=="cs_casng"] <- "suspects_actions_casing_flag"
+colnames(sf_data3)[colnames(sf_data3)=="cs_drgtr"] <- "suspects_actions_drug_transactions_flag"
+colnames(sf_data3)[colnames(sf_data3)=="cs_other"] <- "suspects_actions_other_flag"
+colnames(sf_data3)[colnames(sf_data3)=="rf_knowl"] <- "suspects_actions_identify_crime_pattern_flag"
+colnames(sf_data3)[colnames(sf_data3)=="premname"] <- "stop_location_premises_name"
+colnames(sf_1718)[colnames(sf_1718)=="suspects_actions_decription_flag"] <- "suspects_actions_description_flag"
+
+
+sf_data3 <- sf_data3 %>%
+  mutate(stop_frisk_id = NA, month2 = NA, day2 = NA, stop_was_initiated = NA,
+         issuing_officer_rank = NA, issuing_officer_command_code = NA, supervising_action_corresponding_activity_log_entry_reviewed = NA,
+         jurisdiction_description = NA, officer_not_explained_stop_flag = NA, weapon_found_flag = NA,
+         physical_force_cew_flag = NA, physical_force_restraint_used_flag = NA,
+         physical_force_verbal_instruction_flag = NA, physical_force_weapon_impact_flag = NA,
+         suspects_actions_concealed_possession_weapon_flag = NA, search_basis_consent_flag = NA,
+         search_basis_incidental_to_arrest_flag = NA, demeanor_code = NA, demeanor_of_person_stopped = NA,
+         stop_location_precinct = NA, stop_location_full_address = NA, stop_location_patrol_boro_name = NA,
+         physical_force_draw_point_firearm_flag = NA, firearm_flag = NA, officer_not_explained_stop_description = NA,
+         supervising_officer_rank = NA, supervising_officer_command_code = NA, stop_location_boro_name = NA)
+
+
+sf_1718 <- sf_1718 %>%
+  mutate(pct = NA, ser_num = NA, typeofid = NA, compyear = NA, comppct = NA, adtlrept = NA, pistol = NA,
+         riflshot = NA, asltweap = NA, machgun = NA, pf_hands = NA, pf_wall = NA, pf_grnd = NA, pf_drwep = NA,
+         pf_ptwep = NA, pf_baton = NA, radio = NA, ac_rept = NA, ac_inves = NA, rf_attir = NA, cs_objcs = NA,
+         ac_evasv = NA, rf_vcact = NA, cs_cloth = NA, ac_assoc = NA, cs_furtv = NA, rf_rfcmp = NA, ac_cgdir = NA,
+         rf_verbl = NA, cs_vcrim = NA, cs_bulge = NA, ac_incid = NA, ac_time = NA, ac_stsnd = NA, ac_other = NA,
+         repcmd = NA, revcmd = NA, rf_furt = NA, rf_bulg = NA, offverb = NA, offshld = NA, dob = NA, addrtyp = NA,
+         rescode = NA, premtype = NA, addrnum = NA, stinter = NA, crossst = NA, city = NA, state = NA, addrpct = NA,
+         beat = NA, post = NA, dettypcm = NA, linecm = NA, detailcm = NA,forceuse = NA, wepfound = NA)
+
+
+
+
+sf_1718$suspect_sex <- lapply(sf_1718$suspect_sex, gsub, pattern="MALE",
+                              replacement= "M")
+sf_1718$suspect_sex <- lapply(sf_1718$suspect_sex, gsub, pattern="FEMALE",
+                              replacement= "F")
+sf_1718$suspect_sex <- lapply(sf_1718$suspect_sex, gsub, pattern= "",
+                              replacement= NA)
+sf_1718$suspect_sex <- lapply(sf_1718$suspect_sex, gsub, pattern= "19",
+                              replacement= NA)
+sf_1718$suspect_sex <- lapply(sf_1718$suspect_sex, gsub, pattern= "39",
+                              replacement= NA)
+sf_1718$suspect_sex <- lapply(sf_1718$suspect_sex, gsub, pattern= "23",
+                              replacement= NA)
+sf_1718$suspect_sex <- lapply(sf_1718$suspect_sex, gsub, pattern= "24",
+                              replacement= NA)
+
+sf_1718$suspect_race_description <- lapply(sf_1718$suspect_race_description,
+                                           gsub, pattern= "ASIAN/PAC.ISL",
+                                           replacement= "A")
+sf_1718$suspect_race_description <- lapply(sf_1718$suspect_race_description,
+                                           gsub, pattern= "ASIAN / PACIFIC ISLANDER",
+                                           replacement= "A")
+sf_1718$suspect_race_description <- lapply(sf_1718$suspect_race_description,
+                                           gsub, pattern= "AMER IND",
+                                           replacement= "I")
+sf_1718$suspect_race_description <- lapply(sf_1718$suspect_race_description,
+                                           gsub, pattern= "AMERICAN INDIAN/ALASKAN NATIVE",
+                                           replacement= "I")
+sf_1718$suspect_race_description <- lapply(sf_1718$suspect_race_description,
+                                           gsub, pattern= "BLACK HISPANIC",
+                                           replacement= "P")
+sf_1718$suspect_race_description <- lapply(sf_1718$suspect_race_description,
+                                           gsub, pattern= "WHITE HISPANIC",
+                                           replacement= "Q")
+sf_1718$suspect_race_description <- lapply(sf_1718$suspect_race_description,
+                                           gsub, pattern= "WHITE",
+                                           replacement= "W")
+sf_1718$suspect_race_description <- lapply(sf_1718$suspect_race_description,
+                                           gsub, pattern= "BLACK",
+                                           replacement= "B")
+sf_1718$suspect_race_description <- lapply(sf_1718$suspect_race_description,
+                                           gsub, pattern= "",
+                                           replacement= "X")
+sf_1718$suspect_race_description <- lapply(sf_1718$suspect_race_description,
+                                           gsub, pattern= "MALE",
+                                           replacement= "Z")
+
+
+
+stop_and_frisk <- rbind(sf_data3, sf_1718)
+
+```
+
+
+```{r single-dataframe-tidy-method}
+#renaming all the common columns in 17/18 and 03-16 datasets
+sf_data3 <- sf_data3 %>%
+  rename(stop_frisk_date = datestop,
+       stop_frisk_time = timestop,
+       location_in_out_code = inout,
+       observed_duration_minutes = perobs,
+       stop_duration_minutes = perstop,
+       year2 = year,
+       suspected_crime_description = crimsusp,
+       officer_explained_stop_flag = explnstp,
+       other_person_stopped_flag = othpers,
+       suspect_arrested_flag = arstmade,
+       suspect_arrest_offense = arstoffn,
+       summons_issued_flag = sumissue,
+       summons_offense_description = sumoffen,
+       officer_in_uniform_flag = offunif,
+       frisked_flag = frisked,
+       searched_flag = searched,
+       other_contraband_flag = contrabn,
+       knife_cutter_flag = knifcuti,
+       other_weapon_flag = othrweap,
+       suspect_sex = sex,
+       suspect_race_description = race,
+       suspect_reported_age = age,
+       suspect_weight = weight,
+       suspect_hair_color = haircolr,
+       suspect_eye_color = eyecolor,
+       suspect_other_description = othfeatr,
+       physical_force_handcuff_suspect_flag = pf_hcuff,
+       physical_force_oc_spray_used_flag = pf_pepsp,
+       physical_force_other_flag = pf_other,
+       search_basis_hard_object_flag = sb_hdobj,
+       search_basis_outline_flag = sb_outln,
+       search_basis_admission_flag = sb_admis,
+       search_basis_other_flag = sb_other,
+       suspect_body_build_type = build,
+       stop_location_street_name = stname,
+       stop_location_zip_code = zip,
+       stop_location_sector_code = sector,
+       stop_location_apartment = aptnum,
+       stop_location_x = xcoord,
+       stop_location_y = ycoord,
+       record_status_code = recstat,
+       jurisdiction_code = trhsloc,
+       backround_circumstances_violent_crime_flag = rf_vcrim,
+       backround_circumstances_suspect_known_to_carry_weapon_flag = rf_othsw,
+       suspects_actions_proximity_to_scene_flag = ac_proxm,
+       suspects_actions_lookout_flag = cs_lkout,
+       suspects_actions_decription_flag = cs_descr,
+       suspects_actions_casing_flag = cs_casng,
+       suspects_actions_drug_transactions_flag = cs_drgtr,
+       suspects_actions_other_flag = cs_other,
+       suspects_actions_identify_crime_pattern_flag = rf_knowl,
+       stop_location_premises_name = premname)
+
+
+#recode the factor values of "susepect_sex" and "suspect_race_description" for the 17/18 data
+
+sf_1718 <- sf_1718 %>%
+  replace_with_na(replace = list(suspect_sex = c("","19","23","24","39"),
+                                 suspect_race_description = c("","MALE"))) %>%
+  mutate(suspect_sex = recode_factor(suspect_sex,
+                                     "MALE" = "M", "FEMALE" = "F")) %>%
+  mutate(suspect_race_description = recode_factor(suspect_race_description,
+                                                  "ASIAN/PAC.ISL" = "A",
+                                                  "ASIAN / PACIFIC ISLANDER" = "A",
+                                                  "AMER IND" = "I",
+                                                  "AMERICAN INDIAN/ALASKAN NATIVE" = "I",
+                                                  "BLACK HISPANIC" = "P",
+                                                  "WHITE HISPANIC" = "Q",
+                                                  "BLACK" = "B",
+                                                  "WHITE" = "W"))
+
+
+
+#bind all the data from 2003-2018 together
+stop_and_frisk <- bind_rows(sf_data3, sf_1718)
+```
+
