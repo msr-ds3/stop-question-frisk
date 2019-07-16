@@ -1,24 +1,25 @@
 library(tidyverse)
-library(tidycensus)
-library(totalcensus)
-library(sf)
-library(tmap)
-library(tmaptools)
-library(tigris)
-library(leaflet)
-library(sp)
-library(ggmap)
-library(maptools)
-library(broom)
-library(httr)
-library(rgdal)
+# library(tidycensus)
+# library(totalcensus)
+# library(sf)
+# library(tmap)
+# library(tmaptools)
+# library(tigris)
+# library(leaflet)
+# library(sp)
+# library(ggmap)
+# library(maptools)
+# library(broom)
+# library(httr)
+# library(rgdal)
 
 
 census_api_key('5365371ad843ba3249f2e88162f10edcfe529d87', install = TRUE)
 readRenviron("~/.Renviron")
 
 #variables to load from census data
-vars = c("P003001", "P003002", "P003003", "P003004", "P003005", "P003006", "P003007", "P003008")
+vars = c("P003001", "P003004", "P003005", "P003006", "P003007", "P003008",
+         "P005003", "P005004", "P005011", "P005012")
 
 #counties to load from census data
 counties = c("Richmond", "Kings", "New York", "Queens", "Bronx")
@@ -38,18 +39,14 @@ totals <- census %>% group_by(variable) %>% summarize(total = sum(value)) %>% se
 totals_by_race <- data.frame(label, totals)
 
 #spread census data by race
-data <- spread(census, variable, value)
+data <- data.frame(spread(census, variable, value))
 
 #rename columns for clarity
-colnames(data) = c("GEOID", "Block Name", "Geometry", "Total", "White", "Black_African_American", 
+colnames(data) = c("GEOID", "Block Name", "Geometry", "Total", 
                    "American_Indian_Alaska_Native", 
-                   "Asian", "Native_Hawaiian_Pacific_Islander", "Other", "Two_Or_More_Races")
-
-#convert counts to fractions of total
-data <- data %>% mutate(frac_white = White/Total, frac_black = Black_African_American/Total,
-                        frac_alaskan = American_Indian_Alaska_Native/Total, frac_asian = Asian/Total, 
-                        frac_islander = Native_Hawaiian_Pacific_Islander/Total,
-                        frac_other = Other/Total, frac_mixed = Two_Or_More_Races/Total)
+                   "Asian", "Native_Hawaiian_Pacific_Islander", "Other", "Two_Or_More_Races",
+                   "White_other", "Black_other", "White_Hispanic_Latino",
+                   "Black_Hispanic_Latino")
 
 
 leaflet(census) %>%
