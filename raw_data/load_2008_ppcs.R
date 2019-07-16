@@ -19,10 +19,6 @@ ppcs_2008 <- read_tsv("32022-0001-Data.tsv")
 # other includes:
 # 3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20
 
-ppcs_2008_revised <- ppcs_2008 %>%
-  mutate(RACE = ifelse(RACE == 1, "white", ifelse(RACE == 2, "black", "other")))
-
-
 ppcs_2008_revised <- ppcs_2008 %>% 
   mutate(civilian_race = case_when(
     (RACE == 1 & HISP == 2) ~ "white",
@@ -109,7 +105,8 @@ ppcs_2008_revised <- ppcs_2008_revised %>%
   mutate(officer_race_black = case_when(
     (V24B == 2 | V24B == 5 | V24A == 2 ) ~ 1,
     TRUE ~ 0
-  ))
+  )) %>%
+  mutate(officer_race_black = as.factor(officer_race_black))
 
 #officer race white:
 #includes:
@@ -118,7 +115,8 @@ ppcs_2008_revised <- ppcs_2008_revised %>%
   mutate(officer_race_white = case_when(
     (V24B == 1 | V24B == 4 | V24A == 1 ) ~ 1,
     TRUE ~ 0
-  ))
+  )) %>%
+  mutate(officer_race_white = as.factor(officer_race_white))
 
 #officer race other
 #includes:
@@ -127,16 +125,16 @@ ppcs_2008_revised <- ppcs_2008_revised %>%
   mutate(officer_race_other = case_when(
     (V24B == 3 | V24B == 6 | V24B == 7 | V24A == 3 ) ~ 1,
     TRUE ~ 0
-  ))
-
+  )) %>%
+  mutate(officer_race_other = as.factor(officer_race_other))
 #-------------------------------------------------------------------------------------
 #Type of incident
-
+#Since every observation is a stop there should be no NA's
 ppcs_2008_revised <- ppcs_2008_revised %>%
   mutate(type_of_incident = case_when(
     (REASON %in% 2:3) ~ 2,
-    (REASON %in% c(1, 4:7)) ~ 3,
-    TRUE ~ NA_real_
+    #(REASON %in% c(1, 4:7)) ~ 3,
+    TRUE ~ 3
 ))
 
 #------------------------------------------------------------------------------------
