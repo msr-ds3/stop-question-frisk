@@ -61,7 +61,7 @@ joint <- geo_join(nyc, data, "GEOID10", "GEOID")
 df <- joint
 
 mypal <- colorFactor(
-  palette = "YlGnBu",
+  palette = "Spectral",
   domain = df$majority_race
 )
 
