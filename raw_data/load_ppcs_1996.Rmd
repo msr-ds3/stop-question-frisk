@@ -196,6 +196,11 @@ ppcs_1996_cleaned <- ppcs_1996 %>%
 
 View(ppcs_1996_cleaned)
 ```
+#Add year column
+```{r}
+ppcs_1996_cleaned <- ppcs_1996_cleaned %>%
+  mutate(year = 1996)
+```
 
 #Save Data
 ```{r}
