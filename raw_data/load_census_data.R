@@ -49,13 +49,6 @@ colnames(data) = c("GEOID", "Block Name", "Geometry", "Total",
                    "Black_Hispanic_Latino")
 
 
-#convert counts to fractions of total
-data <- data %>% mutate(frac_white = White/Total, frac_black = Black_African_American/Total,
-                        frac_alaskan = American_Indian_Alaska_Native/Total, frac_asian = Asian/Total, 
-                        frac_islander = Native_Hawaiian_Pacific_Islander/Total,
-                        frac_other = Other/Total, frac_mixed = Two_Or_More_Races/Total)
-
-
 leaflet(census) %>%
   addTiles() %>%
   addPolygons(popup = ~geometry) %>%
