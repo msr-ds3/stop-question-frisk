@@ -4,8 +4,8 @@ library(tidyverse)
 # library(sf)
 # library(tmap)
 # library(tmaptools)
-# library(tigris)
-# library(leaflet)
+library(tigris)
+library(leaflet)
 # library(sp)
 # library(ggmap)
 # library(maptools)
@@ -13,6 +13,7 @@ library(tidyverse)
 # library(httr)
 # library(rgdal)
 
+load("sqf_03_18.RData")
 
 census_api_key('5365371ad843ba3249f2e88162f10edcfe529d87', install = TRUE)
 readRenviron("~/.Renviron")
@@ -48,10 +49,15 @@ colnames(data) = c("GEOID", "Block Name", "Geometry", "Total",
                    "White_other", "Black_other", "White_Hispanic_Latino",
                    "Black_Hispanic_Latino")
 
+counties = c("Richmond", "Kings", "New York", "Queens", "Bronx")
 
-leaflet(census) %>%
+nyc <- blocks(state = "NY", county = counties, year = 2010)
+
+joint <- geo_join(nyc, data, "GEOID10", "GEOID")
+
+leaflet() %>%
   addTiles() %>%
-  addPolygons(popup = ~geometry) %>%
+  addPolygons(data = joint, color = joint$Black_other, popup = joint$Black_Hispanic_Latino) %>%
   addProviderTiles("CartoDB.Positron")
 
 
