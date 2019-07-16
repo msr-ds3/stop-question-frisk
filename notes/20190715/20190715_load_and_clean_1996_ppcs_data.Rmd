@@ -66,12 +66,18 @@ ppcs_1996 <- ppcs_1996 %>%
 ```
 
 #civilian employed
+not found so coded as 0
 ```{r civilian-employed}
-
+ppcs_1996 <- ppcs_1996 %>%
+  mutate(civilian_employed = 0)
 ```
 #Population size
+not found
+coded as 1 since it may be considered as no response
 ```{r pop-size}
-
+ppcs_1996 <- ppcs_1996 %>%
+  mutate(population_size = 1) %>%
+  mutate(population_size = as.factor(population_size))
 ```
 #Time of Encounter
 ```{r time-of-encounter}
@@ -151,7 +157,8 @@ ppcs_1996 <- ppcs_1996 %>%
 ppcs_1996 <- ppcs_1996 %>%
   gather(key = "behavior", value = "behavior_occurence", YOU_DO_ASSAULT_OR_ATTACK_THE_OFFICER, YOU_DO_THREATEN_THE_OFFICER, YOU_DO_ARGUE_WITH_THE_OFFICER, YOU_DO_INTERFERE_WITH_THE_OFFICER,
 YOU_DO_BLOCK_OFFICER_S_EXIT_ENTRANCE, YOU_DO_ATTEMPT_TO_ESCAPE_HIDE_EVADE, YOU_DO_RESIST_BEING_HANDCUFFED, YOU_DO_RESIST_PLACED_IN_POL_VEHICLE ) %>%
-  mutate(civilian_behavior = ifelse(behavior_occurence == 'Once' | behavior_occurence == 'More than once', 1, 0))
+  mutate(civilian_behavior = ifelse(behavior_occurence == 'Once' | behavior_occurence == 'More than once', 1, 0)) %>%
+  spread(behavior, behavior_occurence)
 
 #interesting that everything is 0
 #maybe civilians don't want to admit
@@ -180,5 +187,18 @@ ppcs_1996 <- ppcs_1996 %>%
     (OTHER_POSSESSION_OF_DRUGS == 'Yes' | OTHER_POSSESSION_OF_FIREARM_WEAPON == 'Yes') ~ 1,
     TRUE ~ 0
   ))
+```
+
+##Cleaned Data Frame
+```{r}
+ppcs_1996_cleaned <- ppcs_1996 %>%
+  select(civilian_race, civilian_age, civilian_gender, civilian_income, civilian_employed, population_size, time_of_encounter, officer_race_black, officer_race_white, officer_race_other, type_of_incident, civilian_behavior, civilian_searched, civilian_arrested, civilian_guilty_of_illegal)
+
+View(ppcs_1996_cleaned)
+```
+
+#Save Data
+```{r}
+save(ppcs_1996_cleaned, file='ppcs_1996.RData')
 ```
 
