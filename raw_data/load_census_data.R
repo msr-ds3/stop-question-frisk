@@ -35,6 +35,14 @@ label = c("White alone", "Black or African American alone",
 census <- get_decennial(geography = "tract", variables = vars, state = "NY", 
                         county = counties, year = 2010, tigris_use_cache = TRUE)
 
+census <- mutate(census, variable = as.factor(variable))
+
+census$variable <- recode(census$variable, P003004 = "American_Indian_Alaska_Native",
+        P003005 = "Asian", P003006 = "Native_Hawaiian_Pacific_Islander",
+        P003007 = "Other", P003008 = "Two_Or_More_Races",
+        P005003 = "White_other", P005004 = "Black_other",
+        P005011 = "White_Hispanic_Latino", P005012 = "Black_Hispanic_Latino")
+
 census_plus <- census %>%
   group_by(GEOID) %>%
   filter(value == max(value)) %>%
@@ -46,42 +54,35 @@ majorities <- left_join(data.frame(census), data.frame(census_plus), by = c("GEO
 #spread census data by race
 data <- data.frame(spread(majorities, variable, value))
 
-#rename columns for clarity
-colnames(data) = c("GEOID", "Block Name", "Majority_Race",
-                   "American_Indian_Alaska_Native", 
-                   "Asian", "Native_Hawaiian_Pacific_Islander", "Other", "Two_Or_More_Races",
-                   "White_other", "Black_other", "White_Hispanic_Latino",
-                   "Black_Hispanic_Latino")
-
 nyc <- tracts(state = "NY", county = counties, year = 2010)
 
 joint <- geo_join(nyc, data, "GEOID10", "GEOID")
 
 df <- joint
 
-mypal <- colorNumeric(
+mypal <- colorFactor(
   palette = "YlGnBu",
-  domain = df$White_other
+  domain = df$majority_race
 )
 
-mypopup <- paste0("GEOID: ", df$GEOID, "<br>", "White other: ", df$White_other)
+mypopup <- paste0("GEOID: ", df$GEOID, "<br>", "Majority race: ", df$majority_race)
 
 mymap <- leaflet() %>%
   addProviderTiles("CartoDB.Positron") %>%
   addPolygons(data = df, 
-              fillColor = ~mypal(White_other), 
-              color = "#b2aeae", # you need to use hex colors
+              fillColor = ~mypal(df$majority_race), 
+              color = "#b2aeae",
               fillOpacity = 0.7, 
               weight = 1, 
               smoothFactor = 0.2,
               popup = mypopup) %>%
   addLegend(pal = mypal, 
-            values = df$White_other, 
+            values = df$majority_race, 
             position = "bottomright", 
-            title = "White other",
-            labFormat = labelFormat(prefix = "Total"))
+            title = "Majority Race",
+            labFormat = labelFormat(prefix = ""))
 
-
+mymap
 #Getting and reading police precincts JSON file
 r <- GET('http://services5.arcgis.com/GfwWNkhOj9bNBqoJ/arcgis/rest/services/nypp/FeatureServer/0/query?where=1=1&outFields=*&outSR=4326&f=geojson')
 police_precincts <- readOGR(content(r,'text'), 'OGRGeoJSON', verbose = F)
