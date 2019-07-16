@@ -47,11 +47,11 @@ majorities <- left_join(data.frame(census), data.frame(census_plus), by = c("GEO
 data <- data.frame(spread(majorities, variable, value))
 
 #rename columns for clarity
-colnames(data) = c("GEOID", "Block Name", "Majority Race",
+colnames(data) = c("GEOID", "Block Name", "Majority_Race",
                    "American_Indian_Alaska_Native", 
                    "Asian", "Native_Hawaiian_Pacific_Islander", "Other", "Two_Or_More_Races",
                    "White_other", "Black_other", "White_Hispanic_Latino",
-                   "Black_Hispanic_Latino", "Majority_Race")
+                   "Black_Hispanic_Latino")
 
 nyc <- tracts(state = "NY", county = counties, year = 2010)
 
