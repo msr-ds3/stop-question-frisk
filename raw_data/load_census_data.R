@@ -1,17 +1,17 @@
 library(tidyverse)
 library(tidycensus)
-# library(totalcensus)
-# library(sf)
-# library(tmap)
-# library(tmaptools)
+library(totalcensus)
+library(sf)
+library(tmap)
+library(tmaptools)
 library(tigris)
 library(leaflet)
 library(sp)
-# library(ggmap)
-# library(maptools)
-# library(broom)
-# library(httr)
-# library(rgdal)
+library(ggmap)
+library(maptools)
+library(broom)
+library(httr)
+library(rgdal)
 
 load("sqf_03_18.RData")
 
@@ -53,13 +53,29 @@ nyc <- tracts(state = "NY", county = counties, year = 2010)
 
 joint <- geo_join(nyc, data, "GEOID10", "GEOID")
 
-pal <- colorQuantile("Greens", NULL, n = 6)
+df <- joint
 
-popup <- paste0("White: ", as.character(joint$White_other))
+mypal <- colorNumeric(
+  palette = "YlGnBu",
+  domain = df$White_other
+)
 
-leaflet() %>%
-  addTiles() %>%
-  addPolygons(data = joint)
+mypopup <- paste0("GEOID: ", df$GEOID, "<br>", "White other: ", round(df$White_other,0))
+
+mymap <- leaflet() %>%
+  addProviderTiles("CartoDB.Positron") %>%
+  addPolygons(data = df, 
+              fillColor = ~mypal(White_other), 
+              color = "#b2aeae", # you need to use hex colors
+              fillOpacity = 0.7, 
+              weight = 1, 
+              smoothFactor = 0.2,
+              popup = mypopup) %>%
+  addLegend(pal = mypal, 
+            values = df$White_other, 
+            position = "bottomright", 
+            title = "White other",
+            labFormat = labelFormat(prefix = "Total"))
 
 
 #Getting and reading police precincts JSON file
