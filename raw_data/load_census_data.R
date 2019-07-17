@@ -77,7 +77,7 @@ joint <- geo_join(police_precincts, precinct_majority_races, "Precinct", "precin
 
 df <- joint
 
-mypopup <- paste0("Precinct: ", police_precincts@data$Precinct, "<br>", 
+mypopup <- paste0("Precinct: ", df$Precinct, "<br>", 
                   "Majority Race: ", df$majority_race)
 
 # Using leaflet to plot the precinct area polygons - working for non-tidy version
@@ -111,3 +111,5 @@ mymap <- leaflet() %>%
 
 mymap
 
+## NOTES:
+# precint 121 used to be part of 122 (before 2013) - this is different in diff parts of the data...
