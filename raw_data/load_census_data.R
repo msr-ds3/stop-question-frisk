@@ -13,7 +13,7 @@ library(broom)
 library(httr)
 library(rgdal)
 
-load("sqf_03_18.RData")
+load("sqf_03_13.RData")
 
 census_api_key('5365371ad843ba3249f2e88162f10edcfe529d87', install = TRUE)
 readRenviron("~/.Renviron")
@@ -25,34 +25,51 @@ vars = c("P003004", "P003005", "P003006", "P003007", "P003008",
 #counties to load from census data
 counties = c("Richmond", "Kings", "New York", "Queens", "Bronx")
 
-#variable names
-label = c("White alone", "Black or African American alone",
-          "American Indian and Alaska Native alone", "Asian alone",
-          "Native Hawaiian and Other Pacific Islander alone",
-          "Some Other Race alone", "Two or More Races")
-
 #load census data
-census <- get_decennial(geography = "tract", variables = vars, state = "NY", 
+census <- get_decennial(geography = "block", variables = vars, state = "NY", 
                         county = counties, year = 2010, tigris_use_cache = TRUE)
 
-census <- mutate(census, variable = as.factor(variable))
+options(digits = 15)
 
-census$variable <- recode(census$variable, P003004 = "American_Indian_Alaska_Native",
-        P003005 = "Asian", P003006 = "Native_Hawaiian_Pacific_Islander",
+census2 <- mutate(census, variable = as.factor(variable)) %>%
+  mutate(geoid10 = as.numeric(GEOID)) %>% select(-GEOID)
+
+census2$variable <- recode(census2$variable, P003004 = "American_Indian_and_Alaska_Native",
+        P003005 = "Asian", P003006 = "Native_Hawaiian_and_Pacific_Islander",
         P003007 = "Other", P003008 = "Two_Or_More_Races",
-        P005003 = "White_other", P005004 = "Black_other",
-        P005011 = "White_Hispanic_Latino", P005012 = "Black_Hispanic_Latino")
+        P005003 = "White_other", P005004 = "Black_or_African_American_other",
+        P005011 = "White_Hispanic_Latino", P005012 = "Black_or_African_American_Hispanic_Latino")
 
-census_plus <- census %>%
-  group_by(GEOID) %>%
-  filter(value == max(value)) %>%
+precinct_block_key <- read_csv("precinct_blocks_key.csv")
+
+precinct_populations <- left_join(census2, precinct_block_key)
+
+precinct_race <- precinct_populations %>% ungroup() %>%
+  group_by(precinct, variable) %>%
+  summarize(total = sum(value))
+
+precinct_majority_races <- precinct_race %>%
+  group_by(precinct) %>%
+  filter(!(is.na(precinct))) %>%
+  filter(total == max(total)) %>%
   mutate(majority_race = variable) %>%
-  select(GEOID, majority_race)
+  select(precinct, majority_race) %>% ungroup()
 
-majorities <- left_join(data.frame(census), data.frame(census_plus), by = c("GEOID", "GEOID"))
+precinct_shapes <- read_csv("NYC_Police_Precinct_Shapes_4326.csv")
 
-#spread census data by race
-data <- data.frame(spread(majorities, variable, value))
+#Try getting precinct shapes this way instead?
+r <- GET('http://services5.arcgis.com/GfwWNkhOj9bNBqoJ/arcgis/rest/services/nypp/FeatureServer/0/query?where=1=1&outFields=*&outSR=4326&f=geojson')
+police_precincts <- readOGR(content(r,'text'), 'OGRGeoJSON', verbose = F)
+
+precinct_shapes_races <- left_join(precinct_majority_races, precinct_shapes, by = c("precinct" = "Precinct"))
+
+#Using leaflet to plot the precinct area polygons - not working
+leaflet(precinct_shapes_races) %>%
+  addTiles() %>% 
+  addPolygons(popup = ~majority_race) %>%
+  addProviderTiles("CartoDB.Positron")
+
+
 
 nyc <- tracts(state = "NY", county = counties, year = 2010)
 
@@ -83,18 +100,4 @@ mymap <- leaflet() %>%
             labFormat = labelFormat(prefix = ""))
 
 mymap
-#Getting and reading police precincts JSON file
-r <- GET('http://services5.arcgis.com/GfwWNkhOj9bNBqoJ/arcgis/rest/services/nypp/FeatureServer/0/query?where=1=1&outFields=*&outSR=4326&f=geojson')
-police_precincts <- readOGR(content(r,'text'), 'OGRGeoJSON', verbose = F)
-
-#tidying the police precincts
-police_precinct <- tidy(police_precincts)
-
-#Using leaflet to plot the precinct area polygons
-leaflet(police_precincts) %>%
-  addTiles() %>% 
-  addPolygons(popup = ~Precinct) %>%
-  addProviderTiles("CartoDB.Positron")
-
-
 
