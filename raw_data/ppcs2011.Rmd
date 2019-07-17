@@ -22,11 +22,11 @@ ppcs_2011 <- ppcs_2011 %>% filter(V336 == "(1) Yes")
 
 ```{r}
 #RACE
-ppcs_2011 <- ppcs_2011 %>% 
+ppcs_2011 <- ppcs_2011 %>%
   mutate(civilian_race =  case_when(RACE == '(01) White Only' ~ 'white',
-                                    RACE == '(02) Black Only' ~ 'black',
-                                    HISP == '(1) Respondent is Hispanic' ~ 'hispanic',
-                                    TRUE ~ 'other')) 
+                                    (RACE == '(02) Black Only' & HISP == '(1) Respondent is Hispanic') ~ 'black',
+                                    (HISP == '(1) Respondent is Hispanic' & RACE != '(02) Black Only')~ 'hispanic',
+                                    TRUE ~ 'other'))
 
 ```
 
