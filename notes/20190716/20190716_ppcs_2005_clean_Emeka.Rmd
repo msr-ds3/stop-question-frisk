@@ -8,6 +8,11 @@ library(tidyverse)
 # loading in the dataset
 ppcs2005 <- read_tsv("20020-0001-Data.tsv")
 ```
+```{r filter incidents}
+ppcs2005 <- ppcs2005 %>%
+  filter(v10 == 1)
+```
+
 
 ```{r civilian_race column}
 # white and not hispanic
