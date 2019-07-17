@@ -26,9 +26,6 @@ ppcs_2008_revised <- ppcs_2008 %>%
     (HISP == 1 & RACE != 2) ~ "hispanic",
     TRUE ~ "other"
   ))
-#factor it
-ppcs_2008_revised <- ppcs_2008_revised %>% 
-  mutate(civilian_race = as.factor(civilian_race))
 
 #check the race distribution
 summary(ppcs_2008_revised$civilian_race)
@@ -44,9 +41,8 @@ ppcs_2008_revised <- ppcs_2008_revised %>%
 # just mutate the column and factor
 
 ppcs_2008_revised <- ppcs_2008_revised %>%
-  mutate(civilian_gender = SEX) %>%
-  mutate( civilian_gender = as.factor(civilian_gender))
-summary(ppcs_2008_revised$civilian_gender)
+  mutate(civilian_gender = SEX)
+
 #-------------------------------------------
 
 #Civilian income
@@ -56,8 +52,7 @@ summary(ppcs_2008_revised$civilian_gender)
 #3. greater than 50k
 
 ppcs_2008_revised <- ppcs_2008_revised %>%
-  mutate(civilian_income = 1) %>%
-  mutate(civilian_income = as.factor(civilian_income))
+  mutate(civilian_income = 1)
 
 #-----------------------------------------------------------------------
 
@@ -77,15 +72,13 @@ ppcs_2008_revised <- ppcs_2008_revised %>%
 # 4. > 1M
 
 ppcs_2008_revised <- ppcs_2008_revised %>%
-  mutate(population_size = 1) %>%
-  mutate(population_size = as.factor(population_size))
+  mutate(population_size = 1)
 
 #---------------------------------------------------------------------
 #Time of encounter: appendix does not include 0, 8, 9 so will make those NA
 # factor it.
 ppcs_2008_revised <- ppcs_2008_revised %>% 
-  mutate(time_of_encounter = ifelse(!(V4  %in% 1:6), NA, V4)) %>%
-  mutate(time_of_encounter = as.factor(time_of_encounter))
+  mutate(time_of_encounter = ifelse(!(V4  %in% 1:6), NA, V4))
 
 summary(ppcs_2008_revised$time_of_encounter)
 #double check that the right thing happened
@@ -102,31 +95,28 @@ tmp <- data.frame(ppcs_2008_revised$V4, ppcs_2008_revised$time_of_encounter) %>%
 # includes:
 # multiple officers (V24B) black, mostly black, equally mixed
 ppcs_2008_revised <- ppcs_2008_revised %>%
-  mutate(officer_race_black = case_when(
+  mutate(off_black = case_when(
     (V24B == 2 | V24B == 5 | V24A == 2 ) ~ 1,
     TRUE ~ 0
-  )) %>%
-  mutate(officer_race_black = as.factor(officer_race_black))
+  ))
 
 #officer race white:
 #includes:
 #multiple officers (V24B) white, mostly white, equally mixed
 ppcs_2008_revised <- ppcs_2008_revised %>%
-  mutate(officer_race_white = case_when(
+  mutate(off_white = case_when(
     (V24B == 1 | V24B == 4 | V24A == 1 ) ~ 1,
     TRUE ~ 0
-  )) %>%
-  mutate(officer_race_white = as.factor(officer_race_white))
+  ))
 
 #officer race other
 #includes:
 #multiple officers (V24B) 
 ppcs_2008_revised <- ppcs_2008_revised %>%
-  mutate(officer_race_other = case_when(
+  mutate(off_other = case_when(
     (V24B == 3 | V24B == 6 | V24B == 7 | V24A == 3 ) ~ 1,
     TRUE ~ 0
-  )) %>%
-  mutate(officer_race_other = as.factor(officer_race_other))
+  ))
 #-------------------------------------------------------------------------------------
 #Type of incident
 #Since every observation is a stop there should be no NA's
@@ -167,7 +157,7 @@ ppcs_2008_revised <- ppcs_2008_revised %>%
 #Cleaned! Correct columns selected!
 # Add year column 
 ppcs_2008_cleaned <- ppcs_2008_revised %>%
-  select(civilian_race, civilian_age, civilian_gender, civilian_income, civilian_employed, population_size, time_of_encounter, officer_race_black, officer_race_white, officer_race_other, type_of_incident, civilian_behavior, civilian_searched, civilian_arrested, civilian_guilty_of_illegal) %>%
+  select(civilian_race, civilian_age, civilian_gender, civilian_income, civilian_employed, population_size, time_of_encounter, off_black, off_white, off_other, type_of_incident, civilian_behavior, civilian_searched, civilian_arrested, civilian_guilty_of_illegal) %>%
   mutate(year = 2008)
 
 save(ppcs_2008_cleaned, file = "ppcs_2008.RData")
