@@ -48,12 +48,27 @@ precinct_race <- precint_populations %>% ungroup() %>%
   group_by(precinct, variable) %>%
   summarize(total = sum(value))
 
-precint_majority_races <- precinct_race %>%
+precinct_majority_races <- precinct_race %>%
   group_by(precinct) %>%
   filter(!(is.na(precinct))) %>%
   filter(total == max(total)) %>%
   mutate(majority_race = variable) %>%
-  select(precinct, majority_race)
+  select(precinct, majority_race) %>% ungroup()
+
+precinct_shapes <- read_csv("NYC_Police_Precinct_Shapes_4326.csv")
+
+#Try getting precinct shapes this way instead?
+r <- GET('http://services5.arcgis.com/GfwWNkhOj9bNBqoJ/arcgis/rest/services/nypp/FeatureServer/0/query?where=1=1&outFields=*&outSR=4326&f=geojson')
+police_precincts <- readOGR(content(r,'text'), 'OGRGeoJSON', verbose = F)
+
+precinct_shapes_races <- left_join(precinct_majority_races, precinct_shapes, by = c("precinct" = "Precinct"))
+
+#Using leaflet to plot the precinct area polygons - not working
+leaflet(precinct_shapes_races) %>%
+  addTiles() %>% 
+  addPolygons(popup = ~majority_race) %>%
+  addProviderTiles("CartoDB.Positron")
+
 
 
 nyc <- tracts(state = "NY", county = counties, year = 2010)
@@ -85,18 +100,4 @@ mymap <- leaflet() %>%
             labFormat = labelFormat(prefix = ""))
 
 mymap
-#Getting and reading police precincts JSON file
-r <- GET('http://services5.arcgis.com/GfwWNkhOj9bNBqoJ/arcgis/rest/services/nypp/FeatureServer/0/query?where=1=1&outFields=*&outSR=4326&f=geojson')
-police_precincts <- readOGR(content(r,'text'), 'OGRGeoJSON', verbose = F)
-
-#tidying the police precincts
-police_precinct <- tidy(police_precincts)
-
-#Using leaflet to plot the precinct area polygons
-leaflet(police_precincts) %>%
-  addTiles() %>% 
-  addPolygons(popup = ~Precinct) %>%
-  addProviderTiles("CartoDB.Positron")
-
-
 
