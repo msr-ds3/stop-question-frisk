@@ -19,7 +19,7 @@ ppcs_1999 <- ppcs_1999 %>%
   mutate(civilian_race = case_when(
     (RESPONDENT_S_RACE == "White" & RESPONDENT_S_HISPANIC_ORIGIN == "No") ~ "white",
     (RESPONDENT_S_RACE == "Black" ) ~ "black",
-    (RESPONDENT_S_HISPANIC_ORIGIN == "Hispanic" & RESPONDENT_S_RACE != "Black") ~ "hispanic",
+    (RESPONDENT_S_HISPANIC_ORIGIN == "Yes" & RESPONDENT_S_RACE != "Black") ~ "hispanic",
     TRUE ~ "other"
   ))
 
