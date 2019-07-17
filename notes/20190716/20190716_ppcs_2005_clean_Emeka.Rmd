@@ -20,12 +20,13 @@ ppcs2005 <- ppcs2005 %>%
     (v5 == 2) ~ "black", # black and black-hispanic
     (v6 == 1 & v5 != 2) ~ "hispanic", # hispanic
     TRUE ~ "other" # other
-  )) %>%
-  mutate(civilian_race = factor(civilian_race, 
-                                levels = c("black",
-                                "hispanic",
-                                "other",
-                                "white")))
+  ))
+  # )) %>%
+  # mutate(civilian_race = factor(civilian_race, 
+  #                               levels = c("black",
+  #                               "hispanic",
+  #                               "other",
+  #                               "white")))
 summary(ppcs2005$civilian_race)
 ```
 
@@ -40,11 +41,13 @@ summary(ppcs2005$civilian_age)
 # female
 # NA (not applicable to this dataset)
 ppcs2005 <- ppcs2005 %>%
-  mutate(civilian_gender = v3) %>%
-  mutate(civilian_gender = factor(civilian_gender,
-                                  levels = c(1,2)))
+  mutate(civilian_gender = v3)
+  # ) %>%
+  # mutate(civilian_gender = factor(civilian_gender,
+  #                                 levels = c(1,2)))
 
 summary(ppcs2005$civilian_gender)
+
 ```
 
 ```{r civilian_income}
@@ -52,9 +55,10 @@ summary(ppcs2005$civilian_gender)
 # 2 - 20k - 50k
 # 3 - greater than 50k
 ppcs2005 <- ppcs2005 %>%
-  mutate(civilian_income = income) %>%
-  mutate(civilian_income = factor(civilian_income,
-                                  levels = c(1,2,3)))
+  mutate(civilian_income = income)
+  #        ) %>%
+  # mutate(civilian_income = factor(civilian_income,
+  #                                 levels = c(1,2,3)))
 
 summary(ppcs2005$civilian_income)
 ```
@@ -64,11 +68,11 @@ summary(ppcs2005$civilian_income)
 # 2 - not employed
 ppcs2005 <- ppcs2005 %>%
   mutate(civilian_employed = case_when(
-                              work == 1 ~ 1,
-                              work == 2 ~ 0, 
-                              TRUE ~ NA_real_)) %>%
-  mutate(civilian_employed = factor(civilian_employed,
-                                    levels = c(1,0)))
+                              (work == 1) ~ 1,
+                              TRUE ~ 0))
+  # )) %>%
+  # mutate(civilian_employed = factor(civilian_employed,
+  #                                   levels = c(1,0)))
 summary(ppcs2005$civilian_employed)
 ```
 
@@ -78,9 +82,10 @@ summary(ppcs2005$civilian_employed)
 # 3 - 500k - 999,999
 # 4 - 1 million or more
 ppcs2005 <- ppcs2005 %>%
-  mutate(population_size = place) %>%
-  mutate(population_size = factor(population_size,
-                                  levels = c(1,2,3,4)))
+  mutate(population_size = place)
+  # ) %>%
+  # mutate(population_size = factor(population_size,
+  #                                 levels = c(1,2,3,4)))
 summary(ppcs2005$population_size)
 ```
 
@@ -96,9 +101,10 @@ ppcs2005 <- ppcs2005 %>%
                               v48 == 1 ~ 6,
                               v48 == 2 ~ 3,
                               TRUE ~ NA_real_
-  )) %>%
-  mutate(time_of_encounter = factor(time_of_encounter,
-                                    levels = c(1,2,3,4,5,6)))
+  ))
+  # )) %>%
+  # mutate(time_of_encounter = factor(time_of_encounter,
+  #                                   levels = c(1,2,3,4,5,6)))
 summary(ppcs2005$time_of_encounter)
 ```
 
@@ -121,13 +127,14 @@ ppcs2005 <- ppcs2005 %>%
                                )) %>% 
   mutate(off_other = case_when((v46 == 3 | v47 == 3 | v47 %in% c(6,7)) ~ 1,
                                TRUE ~ 0
-  )) %>%
-  mutate(off_black = factor(off_black,
-                            levels = c(0,1))) %>%
-  mutate(off_white = factor(off_white,
-                            levels = c(0,1))) %>%
-  mutate(off_other = factor(off_other,
-                            levels = c(0,1)))
+  ))
+  # )) %>%
+  # mutate(off_black = factor(off_black,
+  #                           levels = c(0,1))) %>%
+  # mutate(off_white = factor(off_white,
+  #                           levels = c(0,1))) %>%
+  # mutate(off_other = factor(off_other,
+  #                           levels = c(0,1)))
 summary(ppcs2005$off_black)
 summary(ppcs2005$off_white)
 summary(ppcs2005$off_other)
@@ -140,9 +147,10 @@ summary(ppcs2005$off_other)
 ppcs2005 <- ppcs2005 %>%
   mutate(type_of_incident = case_when((reason %in% c(2,3)) ~ 2,
                                       (reason %in% c(1,4:8)) ~ 3
-                                        )) %>%
-  mutate(type_of_incident = factor(type_of_incident,
-                                   levels = c(1,2,3)))
+  ))
+  # )) %>%
+  # mutate(type_of_incident = factor(type_of_incident,
+  #                                  levels = c(1,2,3)))
 summary(ppcs2005$type_of_incident)
 ```
 
@@ -150,9 +158,10 @@ summary(ppcs2005$type_of_incident)
 # 1 - yes if any conditions are met
 # 0 - none of the conditions are met
 ppcs2005 <- ppcs2005 %>%
-  mutate(civilian_behavior = 0) %>%
-  mutate(civilian_behavior = factor(civilian_behavior,
-                                    levels = c(0,1)))
+  mutate(civilian_behavior = 0)
+  # ) %>%
+  # mutate(civilian_behavior = factor(civilian_behavior,
+  #                                   levels = c(0,1)))
 summary(ppcs2005$civilian_behavior)
 ```
 
@@ -172,24 +181,25 @@ ppcs2005 <- ppcs2005 %>%
   mutate(civilian_arrested = case_when((v61 == 1 | v82 == 1) ~ 1,
                                        TRUE ~ 0)) %>%
   mutate(civilian_guilty_of_illegal = case_when((v56 == 1 | v78 == 1) ~ 1,
-                                       TRUE ~ 0)) %>%
-  mutate(civilian_searched = factor(civilian_searched,
-                                    levels = c(0,1))) %>%
-  mutate(civilian_arrested = factor(civilian_arrested,
-                                    levels = c(0,1))) %>%
-  mutate(civilian_guilty_of_illegal = factor(civilian_guilty_of_illegal,
-                                    levels = c(0,1)))
+                                       TRUE ~ 0))
+  # )) %>%
+  # mutate(civilian_searched = factor(civilian_searched,
+  #                                   levels = c(0,1))) %>%
+  # mutate(civilian_arrested = factor(civilian_arrested,
+  #                                   levels = c(0,1))) %>%
+  # mutate(civilian_guilty_of_illegal = factor(civilian_guilty_of_illegal,
+  #                                   levels = c(0,1)))
 
 summary(ppcs2005$civilian_searched)
 summary(ppcs2005$civilian_arrested)
 summary(ppcs2005$civilian_guilty_of_illegal)
-
 ```
 
 ```{r year}
 ppcs2005 <- ppcs2005 %>%
-  mutate(year = 2005) %>%
-  mutate(year = factor(year, levels = c(2005)))
+  mutate(year = 2005)
+  # ) %>%
+  # mutate(year = factor(year, levels = c(2005)))
 summary(ppcs2005$year)
 ```
 
