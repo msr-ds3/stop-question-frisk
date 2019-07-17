@@ -206,7 +206,15 @@ stop_and_frisk <- bind_rows(sf_data3, sf_1718)
 
 
 
+#save the 03-13 data_set
 
-#save the dataset
+save(sf_data1, file = "sqf_03_13.RData")
+
+
+#save the 03-18 dataset
 
 save(stop_and_frisk, file = "sqf_03_18.RData")
+
+
+
+
