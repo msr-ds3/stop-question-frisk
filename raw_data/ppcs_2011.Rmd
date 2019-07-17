@@ -7,11 +7,8 @@ output: html_document
 library(tidyverse)
 library(lubridate)
 library(dplyr)
-install.packages("readxl")
-install.packages("xlsx")
 library(utils)
-library(readxl)
-library(xlsx)
+
 ```
 
 ## R Markdown
@@ -32,7 +29,7 @@ data_2013 <- read.csv("2013.csv", header = TRUE)
 data_2014 <- read.csv("2014.csv", header = TRUE)
 data_2015 <- read.csv("sqf-2015.csv", header = TRUE)
 data_2016 <- read.csv("sqf-2016.csv", header = TRUE)
-data_2017 <- read_excel("sqf-2017.xls")
+#data_2017 <- read_excel("sqf-2017.xls")
 ```
 
 
@@ -232,6 +229,7 @@ ppcs_2011_new <- ppcs_2011 %>%
 ```{r}
 #ALTERNATIVE OUTCOMES
 ppcs_2011_new <- ppcs_2011 %>%
+  
   mutate(civilian_searched = case_when(V183 == '(1) Yes' ~ 1, 
                                        V183 == '(2) No' ~ 0, TRUE ~ NA_real_)) %>%
   mutate(civilian_arrested = case_when(V182 == '(1) Yes' ~ 1, 
@@ -245,13 +243,61 @@ ppcs_2011_new <- ppcs_2011 %>%
 
 ```{r}
 #TYPE OF INCIDENT
-ppcs_2011_new <- ppcs_2011 %>% select(V39, V41, V43, V45, V47, V49, V51, V53, V55, V56, V57, V58,
-                                      V59, V60, V61, V62, V63, V64) %>% View()
-  gather(V39, V41, V43, V45, V47, V49, V51, V53, V55, V56, V57, V58,
-         V59, V60, V61, V62, V63, V64, key = "Incident", value = "label") %>% View()
+#Interpretations of columns V55, V56, V57, V58,V59, V60, V61, V62, V63, V64 are unclear  
+ppcs_2011_new <- ppcs_2011 %>% 
+   mutate(type_of_incident = case_when(V39 == '(1) Yes' ~ 1,
+                                       V39 == '(2) No' ~ 0,
+                                       (V41 == ('(1) Yes')| V166 == ('(1) Yes')) ~ 1,
+                                       (V41 == ('(2) No')| V166 == ('(2) No')) ~ 0,
+                                       V43 == '(1) Yes' ~ 1,
+                                       V43 == '(2) No' ~ 0,
+                                       (V45 == ('(1) Yes')| V170 == ('(1) Yes')) ~ 1,
+                                       (V45 == ('(2) No')| V170 == ('(2) No')) ~ 0,
+                                       V47 == '(1) Yes' ~ 1,
+                                       V47 == '(2) No' ~ 0,
+                                       V49 == '(1) Yes' ~ 1,
+                                       V49 == '(2) No' ~ 0,
+                                       V51 == '(1) Yes' ~ 1,
+                                       V51 == '(2) No' ~ 0,
+                                       V53 == '(1) Yes' ~ 1,
+                                       V53 == '(2) No' ~ 0,
+                                       TRUE ~ NA_real_)) 
+  #gather(V39, V41, V43, V45, V47, V49, V51, V53, key = "Incident", value = "label") %>%
+  #mutate(type_of_incident = ifelse(label == '(1) Yes', 1, NA)) %>% 
+           #spread("Incident", "label")  %>% View()
 ```
 
 
 ```{r}
+#YEAR
+ppcs_2011_new <- ppcs_2011 %>%
+  mutate(year = 2011) %>%
+  mutate(year = factor(year, levels = c(2011)))
+```
+
+
+```{r}
+ppcs_2011_clean <- ppcs_2011_new %>%
+  select(civilian_race,
+         civilian_age,
+         civilian_gender,
+         civilian_income,
+         civilian_employed,
+         population_size,
+         time_of_encounter,
+         off_black,
+         off_white,
+         off_other,
+         type_of_incident,
+         civilian_behavior,
+         civilian_searched,
+         civilian_arrested,
+         civilian_guilty_of_illegal,
+         year
+         )
+
+ 
+
+save(ppcs_2011_clean, file = 'ppcs_2011_clean.Rdata')
 ```
 
