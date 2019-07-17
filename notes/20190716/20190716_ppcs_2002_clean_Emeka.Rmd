@@ -10,6 +10,11 @@ library(tidyverse)
 ppcs2002 <- sas_ascii_reader('04273-0001-Data.txt','04273-0001-Setup.sas')
 ```
 
+```{r filter incidents}
+ppcs2002 <- ppcs2002 %>%
+  filter(FACE_TO_FACE_CONTACT == "Yes")
+```
+
 ```{r civilian_race column}
 # white and not hispanic
 # black and black-hispanic
