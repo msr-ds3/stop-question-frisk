@@ -66,8 +66,10 @@ precinct_majority_races <- precinct_race %>%
   mutate(majority_race = variable) %>%
   select(precinct, majority_race) %>% ungroup()
 
-# read file with police precinct shape data
-# precinct_shapes <- read_csv("NYC_Police_Precinct_Shapes_4326.csv")
+# Precinct 121 was created in 2013, used to be part of 122
+last_precinct <- data.frame(c(121), c("White_other"))
+names(last_precinct) = c("precinct", "majority_race")
+precinct_majority_races <- rbind(precinct_majority_races, last_precinct)
 
 # read a different file with police precinct shape data - maybe this format is easier to work with?
 r <- GET('http://services5.arcgis.com/GfwWNkhOj9bNBqoJ/arcgis/rest/services/nypp/FeatureServer/0/query?where=1=1&outFields=*&outSR=4326&f=geojson')
