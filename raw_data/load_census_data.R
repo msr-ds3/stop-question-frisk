@@ -67,25 +67,21 @@ precinct_majority_races <- precinct_race %>%
   select(precinct, majority_race) %>% ungroup()
 
 # read file with police precinct shape data
-precinct_shapes <- read_csv("NYC_Police_Precinct_Shapes_4326.csv")
+# precinct_shapes <- read_csv("NYC_Police_Precinct_Shapes_4326.csv")
 
 # read a different file with police precinct shape data - maybe this format is easier to work with?
 r <- GET('http://services5.arcgis.com/GfwWNkhOj9bNBqoJ/arcgis/rest/services/nypp/FeatureServer/0/query?where=1=1&outFields=*&outSR=4326&f=geojson')
 police_precincts <- readOGR(content(r,'text'), 'OGRGeoJSON', verbose = F)
 
-# is the tidy version better? not sure.
-police_precinct <- tidy(police_precincts)
+joint <- geo_join(police_precincts, precinct_majority_races, Precinct, precinct)
 
-# try joining race data for each precinct with the shape data - 
-# first option won't join, second won't plot
-precint_shapes_races <- left_join(precinct_majority_races, police_precinct, by = c("precinct" = "Precinct"))
-precinct_shapes_races <- left_join(precinct_majority_races, precinct_shapes, by = c("precinct" = "Precinct"))
+mypopup <- paste0("Precinct: ", police_precincts@data$Precinct)
 
 # Using leaflet to plot the precinct area polygons - working for non-tidy version
 # of first version of precint shape data only
 leaflet(police_precincts) %>%
   addTiles() %>% 
-  addPolygons(popup = ~Precinct) %>%
+  addPolygons(popup = mypopup) %>%
   addProviderTiles("CartoDB.Positron")
 
 
