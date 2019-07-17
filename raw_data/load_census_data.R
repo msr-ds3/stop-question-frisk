@@ -42,18 +42,19 @@ census2$variable <- recode(census2$variable, P003004 = "American_Indian_and_Alas
 
 precinct_block_key <- read_csv("precinct_blocks_key.csv")
 
-precint_populations <- left_join(census2, precinct_block_key)
+precinct_populations <- left_join(census2, precinct_block_key)
 
-census_plus <- census %>%
-  group_by(GEOID) %>%
-  filter(value == max(value)) %>%
+precinct_race <- precint_populations %>% ungroup() %>%
+  group_by(precinct, variable) %>%
+  summarize(total = sum(value))
+
+precint_majority_races <- precinct_race %>%
+  group_by(precinct) %>%
+  filter(!(is.na(precinct))) %>%
+  filter(total == max(total)) %>%
   mutate(majority_race = variable) %>%
-  select(GEOID, majority_race)
+  select(precinct, majority_race)
 
-majorities <- left_join(data.frame(census), data.frame(census_plus), by = c("GEOID", "GEOID"))
-
-#spread census data by race
-data <- data.frame(spread(majorities, variable, value))
 
 nyc <- tracts(state = "NY", county = counties, year = 2010)
 
