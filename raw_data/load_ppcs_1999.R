@@ -122,7 +122,7 @@ ppcs_1999 <- ppcs_1999 %>%
 
 
 ppcs_1999_cleaned <- ppcs_1999 %>%
-  select(civilian_race, civilian_age, civilian_gender, civilian_employed, population_size, time_of_encounter, off_black, off_white, off_other, type_of_incident, civilian_behavior, civilian_searched, civilian_arrested, civilian_guilty_of_illegal)
+  select(civilian_race, civilian_age, civilian_gender, civilian_income, civilian_employed, population_size, time_of_encounter, off_black, off_white, off_other, type_of_incident, civilian_behavior, civilian_searched, civilian_arrested, civilian_guilty_of_illegal)
 View(head(ppcs_1999_cleaned))
 
 ppcs_1999_cleaned <- ppcs_1999_cleaned %>%
