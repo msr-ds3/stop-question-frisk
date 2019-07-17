@@ -1,0 +1,309 @@
+---
+title: "ppcs_2015"
+author: "Naomi Moreira"
+date: "7/15/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(here)
+library(tm)
+library(Matrix)
+library(glmnet)
+library(ROCR)
+library(tidyverse)
+library(data.table)
+library(dplyr )
+library(tidyverse)
+theme_set(theme_bw())
+
+library(prettyR)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+#load("~/GitHub/ICPSR_36653/DS0001/36653-0001-Data.rda")
+ppcs_2015 <- da36653.0001
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+#----------------------------------------------------------------
+#cIVILIAN RACE  - FACTOR
+#----------------------------------------------------------------
+#Factor to numeric for RACE and HISP
+lbls <- sort(levels(ppcs_2015$RACE))
+lbls <- (sub("^\\([0-9]+\\) +(.+$)", "\\1", lbls))
+ppcs_2015$RACE <- as.numeric(sub("^\\(0*([0-9]+)\\).+$", "\\1", ppcs_2015$RACE))
+
+lbl <- sort(levels(ppcs_2015$HISP))
+lbl <- (sub("^\\([0-9]+\\) +(.+$)", "\\1", lbl))
+ppcs_2015$HISP <- as.numeric(sub("^\\(0*([0-9]+)\\).+$", "\\1", ppcs_2015$HISP))
+# Race Variables in 4 categories
+ppcs_2015_data <- ppcs_2015 %>%
+  mutate(civilian_race = case_when(ppcs_2015$RACE == 1 & ppcs_2015$HISP ==2 ~ "White",
+                                     ppcs_2015$RACE == 2 ~ "Black",
+                                     ppcs_2015$RACE == 2 & ppcs_2015$HISP ==1 ~ "Black",
+                                     ppcs_2015$HISP ==1 & ppcs_2015$RACE != 2 ~"Hispanic",
+                                     TRUE ~ "Other"))
+
+
+```
+
+
+```{r pressure, echo=FALSE}
+#----------------------------------------------------------------
+#cIVILIAN AGE 
+#----------------------------------------------------------------
+ppcs_2015_data$civilian_age = ppcs_2015$AGE
+```
+
+
+```{r pressure, echo=FALSE}
+#----------------------------------------------------------------
+#cIVILIAN GENDER - FACTOR
+#----------------------------------------------------------------
+lb <- sort(levels(ppcs_2015$SEX))
+lb <- (sub("^\\([0-9]+\\) +(.+$)", "\\1", lb))
+ppcs_2015$SEX <- as.numeric(sub("^\\(0*([0-9]+)\\).+$", "\\1", ppcs_2015$SEX))
+
+ ppcs_2015_data$civilian_gender <- ppcs_2015$SEX
+
+tapply(ppcs_2015_data$civilian_gender,ppcs_2015_data$civilian_gender,length) # check the male and female dist
+```
+
+
+```{r pressure, echo=FALSE}
+#----------------------------------------------------------------
+#cIVILIAN INCOME - FACTOR
+#----------------------------------------------------------------
+lb_in <- sort(levels(ppcs_2015$INCOME))
+lb_in <- (sub("^\\([0-9]+\\) +(.+$)", "\\1", lb_in))
+ppcs_2015$INCOME<- as.numeric(sub("^\\(0*([0-9]+)\\).+$", "\\1", ppcs_2015$INCOME))
+
+summary(is.na(ppcs_2015$INCOME)) #check for na values
+
+ppcs_2015_data$civilian_income = (case_when(ppcs_2015$INCOME == 1 ~ 1,
+                                       ppcs_2015$INCOME == 2 ~ 2,
+                                       TRUE ~ 3))
+
+tapply(ppcs_2015_data$civilian_income,ppcs_2015_data$civilian_income,length)
+```
+
+
+```{r pressure, echo=FALSE}
+#----------------------------------------------------------------
+#CIVILIAN EMPLOYED
+#----------------------------------------------------------------
+lb_wk <- sort(levels(ppcs_2015$WORK))
+lb_wk <- (sub("^\\([0-9]+\\) +(.+$)", "\\1", lb_wk))
+ppcs_2015$WORK<- as.numeric(sub("^\\(0*([0-9]+)\\).+$", "\\1", ppcs_2015$WORK))
+
+ppcs_2015_data$civilian_employed <-case_when(ppcs_2015$WORK == 1 ~ 1,
+                                                  TRUE ~ 0)
+```
+
+
+```{r pressure, echo=FALSE}
+#----------------------------------------------------------------
+#CIVILIAN SIZE - factor
+#----------------------------------------------------------------
+lb_pl <- sort(levels(ppcs_2015$PLACE))
+lb_pl <- (sub("^\\([0-9]+\\) +(.+$)", "\\1", lb_pl))
+ppcs_2015$PLACE<- as.numeric(sub("^\\(0*([0-9]+)\\).+$", "\\1", ppcs_2015$PLACE))
+
+summary(is.na(ppcs_2015$PLACE))
+
+ppcs_2015_data$civilian_size <-  (case_when(ppcs_2015$PLACE == 1 ~ 1,
+                                                  ppcs_2015$PLACE == 2 ~ 2,
+                                                ppcs_2015$PLACE == 3 ~ 3,
+                                                ppcs_2015$PLACE == 4 ~ 4))
+```
+
+
+```{r pressure, echo=FALSE}
+#----------------------------------------------------------------
+#TIME OF ENCOUNTER - FACTOR
+#----------------------------------------------------------------
+lb_tm <- sort(levels(ppcs_2015$V344))
+lb_tm <- (sub("^\\([0-9]+\\) +(.+$)", "\\1", lb_pl))
+ppcs_2015$V344<- as.numeric(sub("^\\(0*([0-9]+)\\).+$", "\\1", ppcs_2015$V344))
+
+ppcs_2015_data$time_of_encounter <-(case_when(ppcs_2015$V344 == 1 ~ 1,
+                                                          ppcs_2015$V344 == 2 ~ 2,
+                                                          ppcs_2015$V344 == 3 ~ 3,
+                                                          ppcs_2015$V344 == 4 ~ 4,
+                                                          ppcs_2015$V344 == 5 ~ 5,
+                                                          ppcs_2015$V344 == 6 ~ 6,
+                                                          TRUE ~ NA_real_))
+```
+
+```{r pressure, echo=FALSE}
+#----------------------------------------------------------------
+#OFFICER RACE 
+#----------------------------------------------------------------
+ppcs_2015_data$off_black <- as.numeric(case_when( ppcs_2015$V69 =='(1) Black or African American' ~ 1, 
+TRUE ~ 0  
+))
+ppcs_2015_data$off_white <- as.numeric(case_when( ppcs_2015$V68 =='(1) White' ~ 1, 
+TRUE ~ 0  
+))
+ppcs_2015_data$off_hispanic <- as.numeric(case_when( ppcs_2015$V74 =='(01) Yes' ~ 1,
+ppcs_2015$V74 =='(02) No' ~ 0,                                                    
+TRUE ~ 0  
+))
+ppcs_2015_data$off_other <- (case_when(
+  (ppcs_2015$V70 =='(1) American Indian or Alaska Native' |
+  ppcs_2015$V71 =='(1) Asian' |
+  ppcs_2015$V72 =='(1) Native Hawaiian or other Pacific Islander' |
+   ppcs_2015$V73 =="(1) Don't know"
+    ) ~ 0,
+  TRUE ~ 0  
+))
+```
+
+```{r pressure, echo=FALSE}
+#----------------------------------------------------------------
+#TYPE OF INCIDENT 
+#----------------------------------------------------------------
+lb_st <- sort(levels(ppcs_2015$V11))
+lb_st <- (sub("^\\([0-9]+\\) +(.+$)", "\\1", lb_st))
+ppcs_2015$V11<- as.numeric(sub("^\\(0*([0-9]+)\\).+$", "\\1", ppcs_2015$V11))
+
+lb_tf <- sort(levels(ppcs_2015$V13))
+lb_tf  <- (sub("^\\([0-9]+\\) +(.+$)", "\\1", lb_tf ))
+ppcs_2015$V13<- as.numeric(sub("^\\(0*([0-9]+)\\).+$", "\\1", ppcs_2015$V13))
+
+
+ppcs_2015_data$type_of_incident <- (case_when(ppcs_2015$V11 == 1  ~ 1,
+                                                          ppcs_2015$V13 == 1 ~ 2,  
+                                                          ppcs_2015$V11 == 2 | ppcs_2015$V13 == 2 | TRUE ~ 3))
+```
+
+```{r pressure, echo=FALSE}
+#----------------------------------------------------------------
+#Civilian behavior 
+#----------------------------------------------------------------
+# transformind outcomes to Levels: 1 2 8...
+lb_res <- sort(levels(ppcs_2015$V164))
+lb_res <- (sub("^\\([0-9]+\\) +(.+$)", "\\1", lb_res ))
+ppcs_2015$V164 <- as.factor(sub("^\\(0*([0-9]+)\\).+$", "\\1", ppcs_2015$V164))
+
+lb_ga <- sort(levels(ppcs_2015$V166))
+lb_ga <- (sub("^\\([0-9]+\\) +(.+$)", "\\1", lb_ga ))
+ppcs_2015$V166 <- as.factor(sub("^\\(0*([0-9]+)\\).+$", "\\1", ppcs_2015$V166))
+
+lb_hit <- sort(levels(ppcs_2015$V168))
+lb_hit <- (sub("^\\([0-9]+\\) +(.+$)", "\\1", lb_hit ))
+ppcs_2015$V168 <- as.factor(sub("^\\(0*([0-9]+)\\).+$", "\\1", ppcs_2015$V168))
+
+lb_resist <- sort(levels(ppcs_2015$V170))
+lb_resist  <- (sub("^\\([0-9]+\\) +(.+$)", "\\1", lb_resist  ))
+ppcs_2015$V170 <- as.factor(sub("^\\(0*([0-9]+)\\).+$", "\\1", ppcs_2015$V170))
+
+lb_comp <- sort(levels(ppcs_2015$V172))
+lb_comp  <- (sub("^\\([0-9]+\\) +(.+$)", "\\1", lb_comp  ))
+ppcs_2015$V172 <- as.numeric(sub("^\\(0*([0-9]+)\\).+$", "\\1", ppcs_2015$V172))
+
+lb_arg <- sort(levels(ppcs_2015$V174))
+lb_arg  <- (sub("^\\([0-9]+\\) +(.+$)", "\\1", lb_arg  ))
+ppcs_2015$V174 <- as.numeric(sub("^\\(0*([0-9]+)\\).+$", "\\1", ppcs_2015$V174))
+
+lb_thr <- sort(levels(ppcs_2015$V176))
+lb_thr <- (sub("^\\([0-9]+\\) +(.+$)", "\\1", lb_thr))
+ppcs_2015$V176 <- as.numeric(sub("^\\(0*([0-9]+)\\).+$", "\\1", ppcs_2015$V176))
+
+lb_for <- sort(levels(ppcs_2015$V178))
+lb_for <- (sub("^\\([0-9]+\\) +(.+$)", "\\1", lb_for))
+ppcs_2015$V178 <- as.numeric(sub("^\\(0*([0-9]+)\\).+$", "\\1", ppcs_2015$V178))
+
+
+ppcs_2015_data$civilian_behavior <- (case_when(ppcs_2015$V164 == 1 ~ 1,
+                                                        ppcs_2015$V166 == 1 ~ 1,
+                                                        ppcs_2015$V168 == 1 ~ 1,
+                                                        ppcs_2015$V170 == 1 ~ 1,
+                                                        ppcs_2015$V172 == 1 ~ 1,
+                                                        ppcs_2015$V174 == 1 ~ 1,
+                                                        ppcs_2015$V176 == 1 ~ 1,
+                                                        ppcs_2015$V178 == 1 ~ 1,
+                                                    TRUE ~ 0
+                                                    ))
+```
+
+
+
+```{r pressure, echo=FALSE}
+#____________________________________________________________________
+#____________________________________________________________________
+#____________________________________________________________________
+#----------------------------------------------------------------
+#Alternative outcome   
+#----------------------------------------------------------------
+lb_search <- sort(levels(ppcs_2015$V327))
+lb_search <- (sub("^\\([0-9]+\\) +(.+$)", "\\1", lb_search))
+ppcs_2015$V327 <- as.numeric(sub("^\\(0*([0-9]+)\\).+$", "\\1", ppcs_2015$V327))
+
+lb_arrested <- sort(levels(ppcs_2015$V324))
+lb_arrested <- (sub("^\\([0-9]+\\) +(.+$)", "\\1", lb_arrested))
+ppcs_2015$V324 <- as.numeric(sub("^\\(0*([0-9]+)\\).+$", "\\1", ppcs_2015$V324))
+
+lb_guilty <- sort(levels(ppcs_2015$V334))
+lb_guilty <- (sub("^\\([0-9]+\\) +(.+$)", "\\1", lb_guilty))
+ppcs_2015$V334 <- as.numeric(sub("^\\(0*([0-9]+)\\).+$", "\\1", ppcs_2015$V334))
+
+
+
+ppcs_2015_data$civilian_searched<- (case_when(ppcs_2015$V327 == 1 ~1,
+                                              TRUE ~ 0))
+                                    
+ppcs_2015_data$civilian_arrested<- (case_when(ppcs_2015$V324 == 1 ~1,
+                                              TRUE ~ 0))
+                                    
+ppcs_2015_data$civilian_guilty<- (case_when(ppcs_2015$V334 == 1 ~1,
+                                              TRUE ~ 0))                                  
+```
+
+
+```{r pressure, echo=FALSE}
+#----------------------------------------------------------------
+#Year 
+#----------------------------------------------------------------
+ppcs_2015_data$year <- as.integer(2015)
+```
+
+```{r pressure, echo=FALSE}
+#----------------------------------------------------------------
+#Saved file
+#----------------------------------------------------------------
+ppcs_2015_clean <- ppcs_2015_data%>%
+  select(civilian_race,
+         civilian_age,
+         civilian_gender,
+         civilian_income,
+         civilian_employed,
+         civilian_size,
+         time_of_encounter,
+         off_black,
+         off_white,
+         off_hispanic,
+         off_other,
+         type_of_incident,
+         civilian_behavior,
+         civilian_searched,
+         civilian_arrested,
+         civilian_guilty,
+         year
+    
+  )
+
+  save(ppcs_2015_clean, file = "ppcs_2015_clean.RData")
+```
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
