@@ -29,6 +29,9 @@ When you click the **Knit** button a document will be generated that includes bo
 ```{r cars}
 #load("~/GitHub/ICPSR_36653/DS0001/36653-0001-Data.rda")
 ppcs_2015 <- da36653.0001
+
+ppcs_2015 <- filter(ppcs_2015, V11 == ("(01) Yes") |
+                                 V13 == ("(01) Yes"))
 ```
 
 ## Including Plots
@@ -267,7 +270,7 @@ ppcs_2015_data$civilian_searched<- (case_when(ppcs_2015$V327 == 1 ~1,
 ppcs_2015_data$civilian_arrested<- (case_when(ppcs_2015$V324 == 1 ~1,
                                               TRUE ~ 0))
                                     
-ppcs_2015_data$civilian_guilty<- (case_when(ppcs_2015$V334 == 1 ~1,
+ppcs_2015_data$civilian_guilty_of_illegal<- (case_when(ppcs_2015$V334 == 1 ~1,
                                               TRUE ~ 0))                                  
 ```
 
@@ -299,7 +302,7 @@ ppcs_2015_clean <- ppcs_2015_data%>%
          civilian_behavior,
          civilian_searched,
          civilian_arrested,
-         civilian_guilty,
+         civilian_guilty_of_illegal,
          year
     
   )

@@ -6,6 +6,10 @@ library(dplyr)
 ppcs_1999 <- read_ascii_setup('03151-0001-Data.txt','03151-0001-Setup.sas')
 ppcs_1999 <- ppcs_1999[, !duplicated(colnames(ppcs_1999))]
 
+colnames(ppcs_1999)
+
+ppcs_1999 <- ppcs_1999 %>%
+  filter(ANY_POLICE_CONTACT_IN_LAST_12_MONTHS == 'Yes' & FACE_TO_FACE_CONTACT == 'Yes')
 #add row number
 ppcs_1999 <- ppcs_1999 %>%
   mutate(row = row_number())
@@ -64,22 +68,31 @@ ppcs_1999 <- ppcs_1999 %>%
 black <- c('All black', 'Mostly black', 'Black')
 white <- c('All white', 'Mostly white', 'White')
 other <- c('Some other race', 'All of another race', 'Equally Mixed', 'Mostly another race', 'Other', 'Mix of races')
-ppcs_tmp <- ppcs_1999 %>% 
-  select(row, OFFICERS_RACES_VEHICLE_STOP, OFFICER_RACE_VEHICLE_STOP, RACE_OF_OFFICERS_USE_OR_THREATEN_FORCE, RACE_OF_OFFICER_USE_OR_THREATEN_FORCE, RACE_OF_OFFICERS_VEHICLE_STOP, RACE_OF_OFFICERS_OTHER_CONTACT) %>%
-  gather(key = "officer_race_incidents", value = "officer_race" , OFFICERS_RACES_VEHICLE_STOP, OFFICER_RACE_VEHICLE_STOP, RACE_OF_OFFICERS_USE_OR_THREATEN_FORCE, RACE_OF_OFFICER_USE_OR_THREATEN_FORCE, RACE_OF_OFFICERS_VEHICLE_STOP, RACE_OF_OFFICERS_OTHER_CONTACT ) %>%
-  mutate(officer_races = case_when(
-    (officer_race %in% black) ~ 'black',
-    (officer_race %in% white) ~ 'white',
-    (officer_race %in% other) ~ 'other'
-  )) %>% select(row, officer_races)
+# ppcs_tmp <- ppcs_1999 %>% 
+#   select(row, OFFICERS_RACES_VEHICLE_STOP, OFFICER_RACE_VEHICLE_STOP, RACE_OF_OFFICERS_USE_OR_THREATEN_FORCE, RACE_OF_OFFICER_USE_OR_THREATEN_FORCE, RACE_OF_OFFICERS_VEHICLE_STOP, RACE_OF_OFFICERS_OTHER_CONTACT) %>%
+#   gather(key = "officer_race_incidents", value = "officer_race" , OFFICERS_RACES_VEHICLE_STOP, OFFICER_RACE_VEHICLE_STOP, RACE_OF_OFFICERS_USE_OR_THREATEN_FORCE, RACE_OF_OFFICER_USE_OR_THREATEN_FORCE, RACE_OF_OFFICERS_VEHICLE_STOP, RACE_OF_OFFICERS_OTHER_CONTACT ) %>%
+#   mutate(officer_races = case_when(
+#     (officer_race %in% black) ~ 'black',
+#     (officer_race %in% white) ~ 'white',
+#     (officer_race %in% other) ~ 'other'
+#   )) %>% select(row, officer_races)
+# 
+# ppcs_1999 <- left_join(ppcs_1999, ppcs_tmp, by='row')
+# 
+# ppcs_1999 <- ppcs_1999 %>%
+#   mutate(off_black = ifelse(officer_races == 'black', 1, 0)) %>%
+#   mutate(off_white = ifelse(officer_races == 'white', 1, 0)) %>%
+#   mutate(off_other = ifelse(officer_races == 'other', 1, 0)) 
 
-ppcs_1999 <- left_join(ppcs_1999, ppcs_tmp, by='row')
+columns <- cbind(ppcs_1999$OFFICERS_RACES_VEHICLE_STOP, ppcs_1999$OFFICER_RACE_VEHICLE_STOP, ppcs_1999$RACE_OF_OFFICERS_USE_OR_THREATEN_FORCE, ppcs_1999$RACE_OF_OFFICER_USE_OR_THREATEN_FORCE, ppcs_1999$RACE_OF_OFFICERS_VEHICLE_STOP, ppcs_1999$RACE_OF_OFFICERS_OTHER_CONTACT)
+ppcs_1999 <- ppcs_1999 %>%
+  mutate(off_black = apply(columns, 1, function(x){max(x %in% black)}))
 
 ppcs_1999 <- ppcs_1999 %>%
-  mutate(off_black = ifelse(officer_races == 'black', 1, 0)) %>%
-  mutate(off_white = ifelse(officer_races == 'white', 1, 0)) %>%
-  mutate(off_other = ifelse(officer_races == 'other', 1, 0)) 
+  mutate(off_white = apply(columns, 1, function(x){max(x %in% white)}))
 
+ppcs_1999 <- ppcs_1999 %>%
+  mutate(off_other = apply(columns, 1, function(x){max(x %in% other)}))
 #type_of_incident
 traffic_stops <- c('Roadside check drunk driver', 'Seat belt', 'Some other traffic offense', 'Vehicle defect', 'Suspected/charged with drinking & driving', 'Speeding')
 ppcs_1999 <- ppcs_1999 %>%

@@ -7,7 +7,14 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 #CREATED PPCS_2011 DATAFRAME
 ppcs_2011 <- da34276.0001
+#nrow(ppcs_2011)
+```
 
+
+```{r}
+#filter out the face to face contacts 
+ppcs_2011 <- ppcs_2011 %>% filter(V336 == "(1) Yes")
+#nrow(ppcs_2011)
 
 ```
 
