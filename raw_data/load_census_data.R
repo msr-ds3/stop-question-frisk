@@ -73,31 +73,26 @@ precinct_majority_races <- precinct_race %>%
 r <- GET('http://services5.arcgis.com/GfwWNkhOj9bNBqoJ/arcgis/rest/services/nypp/FeatureServer/0/query?where=1=1&outFields=*&outSR=4326&f=geojson')
 police_precincts <- readOGR(content(r,'text'), 'OGRGeoJSON', verbose = F)
 
-joint <- geo_join(police_precincts, precinct_majority_races, Precinct, precinct)
+joint <- geo_join(police_precincts, precinct_majority_races, "Precinct", "precinct")
 
-mypopup <- paste0("Precinct: ", police_precincts@data$Precinct)
+df <- joint
+
+mypopup <- paste0("Precinct: ", police_precincts@data$Precinct, "<br>", 
+                  "Majority Race: ", df$majority_race)
 
 # Using leaflet to plot the precinct area polygons - working for non-tidy version
 # of first version of precint shape data only
-leaflet(police_precincts) %>%
+leaflet(df) %>%
   addTiles() %>% 
   addPolygons(popup = mypopup) %>%
   addProviderTiles("CartoDB.Positron")
 
 
 # IGNORE BELOW THIS LINE - not using this anymore
-nyc <- tracts(state = "NY", county = counties, year = 2010)
-
-joint <- geo_join(nyc, data, "GEOID10", "GEOID")
-
-df <- joint
-
 mypal <- colorFactor(
   palette = "Spectral",
   domain = df$majority_race
 )
-
-mypopup <- paste0("GEOID: ", df$GEOID, "<br>", "Majority race: ", df$majority_race)
 
 mymap <- leaflet() %>%
   addProviderTiles("CartoDB.Positron") %>%
