@@ -44,7 +44,7 @@ precinct_block_key <- read_csv("precinct_blocks_key.csv")
 
 precinct_populations <- left_join(census2, precinct_block_key)
 
-precinct_race <- precint_populations %>% ungroup() %>%
+precinct_race <- precinct_populations %>% ungroup() %>%
   group_by(precinct, variable) %>%
   summarize(total = sum(value))
 
