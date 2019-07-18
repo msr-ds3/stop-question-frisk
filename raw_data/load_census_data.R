@@ -61,7 +61,7 @@ precinct_race <- precinct_populations %>% ungroup() %>%
   group_by(precinct, variable) %>%
   summarize(total = sum(value))
 
-# find the proportion of each precinct that is Black/African American (not Hispanic)
+# find the proportion of each precinct that is Black/African American (Hispanic or not)
 # (filter out N/A's - blocks with no corresponding precint - 
 # this is justified because no people live in these blocks)
 black_proportions <- precinct_race %>%
@@ -151,32 +151,4 @@ leaflet(joint_sqf_prop) %>%
 #               weight = 1, 
 #               smoothFactor = 0.2,
 #               popup = mypopup)
-# 
-# # find the race with the most people in each precinct
-# # (filter out N/A's - blocks with no corresponding precint - 
-# # this is justified because no people live in these blocks)
-# majority_races <- precinct_race %>%
-#   group_by(precinct) %>%
-#   filter(!(is.na(precinct))) %>%
-#   filter(total == max(total)) %>%
-#   mutate(majority_race = variable) %>%
-#   select(precinct, majority_race) %>% ungroup()
-# 
-# # Add precinct 121 to the data, using the value from precinct 122
-# # (Precinct 121 was created in 2013, used to be part of 122)
-# last_precinct <- data.frame(c(121), c("White_other"))
-# names(last_precinct) = c("precinct", "majority_race")
-# majority_races <- rbind(majority_races, last_precinct)
 #
-#joint_maj <- geo_join(police_precincts, majority_races, "Precinct", "precinct")
-# 
-# mypopup <- paste0("Precinct: ", joint_maj$Precinct, "<br>", 
-#                   "Majority Race: ", joint_maj$majority_race)
-# 
-# # Map the majority race of each precinct
-# leaflet(joint_maj) %>%
-#   addTiles() %>% 
-#   addPolygons(popup = mypopup) %>%
-#   addProviderTiles("CartoDB.Positron")
-
-
