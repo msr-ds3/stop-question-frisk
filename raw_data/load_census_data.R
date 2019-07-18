@@ -63,7 +63,7 @@ precinct_race <- precinct_populations %>% ungroup() %>%
 
 # find the proportion of each precinct that is Black/African American (Hispanic or not)
 # (filter out N/A's - blocks with no corresponding precint - 
-# this is justified because no people live in these blocks)
+# this is justified because no people live in these blocks (population 0))
 black_proportions <- precinct_race %>%
   group_by(precinct) %>%
   filter(!(is.na(precinct))) %>%
