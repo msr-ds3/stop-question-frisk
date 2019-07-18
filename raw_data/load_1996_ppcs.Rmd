@@ -22,8 +22,6 @@ library(foreign)
 ppcs_1996 <- read_ascii_setup('06999-0001-Data.txt','06999-0001-Setup.sas')
 ppcs_1996 <- ppcs_1996 %>%
   filter(LAST_12_MONTHS_CONTACT_W_POLICE_OFFICER == 'Yes' & CONTACTS_W_POLICE_OFFICER_IN_PERSON == 'Yes')
-
-df<-data.frame(colnames(ppcs_1996)) %>% view
 ```
 
 #Civilian Race
@@ -78,7 +76,7 @@ not found
 coded as 1 since it may be considered as no response
 ```{r pop-size}
 ppcs_1996 <- ppcs_1996 %>%
-  mutate(population_size = 1)
+  mutate(population_size = NA)
 ```
 #Time of Encounter
 ```{r time-of-encounter}
@@ -150,7 +148,7 @@ ppcs_1996 <- ppcs_1996 %>%
     (REASON_INVOLVED_IN_TRAFFIC_ACCIDENT %in% missing)~2,
     (REASON_WITNESS_TO_TRAFFIC_ACCIDENT %in% missing)~2,
     TRUE ~ 3
-  )) %>% filter(type_of_incident == 2) %>% view
+  ))
 ```
 
 
@@ -216,7 +214,6 @@ ppcs_1996 <- ppcs_1996 %>%
 ppcs_1996_cleaned <- ppcs_1996 %>%
   select(civilian_race, civilian_age, civilian_gender, civilian_income, civilian_employed, population_size, time_of_encounter, off_black, off_white, off_other, type_of_incident, civilian_behavior, civilian_searched, civilian_arrested, civilian_guilty_of_illegal)
 
-View(ppcs_1996_cleaned)
 ```
 #Add year column
 ```{r}
