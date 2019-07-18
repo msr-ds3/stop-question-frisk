@@ -13,6 +13,8 @@ library(broom)
 library(httr)
 library(rgdal)
 
+----------### LOAD AND CREATE/CLEAN DATAFRAMES ###----------
+
 # Load stop and frisk data for 2003-2013
 load("sqf_03_13.RData")
 
@@ -35,11 +37,14 @@ census <- get_decennial(geography = "block", variables = vars, state = "NY",
 options(digits = 15)
 
 # convert GEOIDs to numbers, variables to a factor
-census2 <- mutate(census, variable = as.factor(variable)) %>%
+census <- mutate(census, variable = as.factor(variable)) %>%
   mutate(geoid10 = as.numeric(GEOID)) %>% select(-GEOID)
 
+# reset digits to the default
+options(digits = 7)
+
 # rename variables for clarity
-census2$variable <- recode(census2$variable, P003004 = "American_Indian_and_Alaska_Native",
+census$variable <- recode(census$variable, P003004 = "American_Indian_and_Alaska_Native",
         P003005 = "Asian", P003006 = "Native_Hawaiian_and_Pacific_Islander",
         P003007 = "Other", P003008 = "Two_Or_More_Races",
         P005003 = "White_other", P005004 = "Black_or_African_American_other",
@@ -49,69 +54,101 @@ census2$variable <- recode(census2$variable, P003004 = "American_Indian_and_Alas
 precinct_block_key <- read_csv("precinct_blocks_key.csv")
 
 # add precinct numbers to census data
-precinct_populations <- left_join(census2, precinct_block_key)
+precinct_populations <- left_join(census, precinct_block_key)
 
 # find the population of each race in each precinct
 precinct_race <- precinct_populations %>% ungroup() %>%
   group_by(precinct, variable) %>%
   summarize(total = sum(value))
 
-# find the race with the most people in each precinct
+# find the proportion of each precinct that is Black/African American (Hispanic or not)
 # (filter out N/A's - blocks with no corresponding precint - 
 # this is justified because no people live in these blocks)
-precinct_majority_races <- precinct_race %>%
+black_proportions <- precinct_race %>%
   group_by(precinct) %>%
   filter(!(is.na(precinct))) %>%
-  filter(total == max(total)) %>%
-  mutate(majority_race = variable) %>%
-  select(precinct, majority_race) %>% ungroup()
+  mutate(props = total/sum(total)) %>%
+  filter(variable == "Black_or_African_American_other" |
+           variable == "Black_or_African_American_Hispanic_Latino") %>%
+  summarize(prop = sum(props))
+  select(precinct, prop) %>%
+  ungroup()
 
-# Precinct 121 was created in 2013, used to be part of 122
-last_precinct <- data.frame(c(121), c("White_other"))
-names(last_precinct) = c("precinct", "majority_race")
-precinct_majority_races <- rbind(precinct_majority_races, last_precinct)
+# Add precinct 121 to the data, using the value from precinct 122
+# (Precinct 121 was created in 2013, used to be part of 122)
+last_precinct_prop <- data.frame(c(121), c(0.0229286))
+names(last_precinct_prop) = c("precinct", "prop")
+black_proportions <- rbind(black_proportions, last_precinct_prop)
 
-# read a different file with police precinct shape data - maybe this format is easier to work with?
+# read in police precinct shape data
 r <- GET('http://services5.arcgis.com/GfwWNkhOj9bNBqoJ/arcgis/rest/services/nypp/FeatureServer/0/query?where=1=1&outFields=*&outSR=4326&f=geojson')
 police_precincts <- readOGR(content(r,'text'), 'OGRGeoJSON', verbose = F)
 
-joint <- geo_join(police_precincts, precinct_majority_races, "Precinct", "precinct")
+# Join the precinct shape data with the data about the precincts
+joint_prop <- geo_join(police_precincts, black_proportions, "Precinct", "precinct")
 
-df <- joint
+sqf_race_dist <- sf_data1 %>% 
+  select(addrpct, race)
 
-mypopup <- paste0("Precinct: ", df$Precinct, "<br>", 
-                  "Majority Race: ", df$majority_race)
+sqf_black_prop <- sqf_race_dist %>%
+  mutate(count = 1) %>%
+  group_by(addrpct, race) %>%
+  summarize(total = sum(count)) %>%
+  filter(!(is.na(addrpct))) %>%
+  mutate(props = total/sum(total)) %>%
+  filter(race == "B") %>%
+  select(addrpct, props)
 
-# Using leaflet to plot the precinct area polygons - working for non-tidy version
-# of first version of precint shape data only
-leaflet(df) %>%
-  addTiles() %>% 
-  addPolygons(popup = mypopup) %>%
-  addProviderTiles("CartoDB.Positron")
+joint_sqf_prop <- geo_join(police_precincts, sqf_black_prop, "Precinct", "addrpct")
 
+----------### CREATE MAPS OF RACE DISTRIBUTIONS ###----------
 
-# IGNORE BELOW THIS LINE - not using this anymore
-mypal <- colorFactor(
-  palette = "Spectral",
-  domain = df$majority_race
+# Map the proportion of each precinct that is black
+mypopup <- paste0("Precinct: ", joint_prop$Precinct, "<br>", 
+                   "Population Proportion Black: ", joint_prop$prop)
+
+mypal <- colorNumeric(
+  palette = "YlOrRd",
+  domain = joint_prop$prop
 )
 
-mymap <- leaflet() %>%
+leaflet(joint_prop) %>%
+  addTiles() %>% 
+  addPolygons(fillColor = ~mypal(joint_prop$prop), fillOpacity = 0.7, popup = mypopup) %>%
   addProviderTiles("CartoDB.Positron") %>%
-  addPolygons(data = df, 
-              fillColor = ~mypal(df$majority_race), 
-              color = "#b2aeae",
-              fillOpacity = 0.7, 
-              weight = 1, 
-              smoothFactor = 0.2,
-              popup = mypopup) %>%
   addLegend(pal = mypal, 
-            values = df$majority_race, 
+            values = joint_prop$prop, 
             position = "bottomright", 
-            title = "Majority Race",
-            labFormat = labelFormat(prefix = ""))
+            title = "Population Proportion Black")
 
-mymap
+#Map the proportion of people stopped in each precinct that are black
+mypopup2 <- paste0("Precinct: ", joint_sqf_prop$Precinct, "<br>", 
+                   "SQF Proportion Black: ", joint_sqf_prop$props)
 
-## NOTES:
-# precint 121 used to be part of 122 (before 2013) - this is different in diff parts of the data...
+mypal2 <- colorNumeric(
+  palette = "YlOrRd",
+  domain = joint_sqf_prop$props
+)
+
+leaflet(joint_sqf_prop) %>%
+  addTiles() %>% 
+  addPolygons(fillColor = ~mypal2(joint_sqf_prop$props), fillOpacity = 0.7, popup = mypopup2) %>%
+  addProviderTiles("CartoDB.Positron") %>%
+  addLegend(pal = mypal2, 
+            values = joint_sqf_prop$props, 
+            position = "bottomright", 
+            title = "SQF Proportion Black")
+
+
+
+# # IGNORE BELOW THIS LINE - not using this anymore
+# mymap <- leaflet() %>%
+#   addProviderTiles("CartoDB.Positron") %>%
+#   addPolygons(data = joint_maj, 
+#               fillColor = ~mypal(joint_maj$majority_race), 
+#               color = "#b2aeae",
+#               fillOpacity = 0.7, 
+#               weight = 1, 
+#               smoothFactor = 0.2,
+#               popup = mypopup)
+#
