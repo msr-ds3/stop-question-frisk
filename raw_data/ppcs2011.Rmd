@@ -142,12 +142,21 @@ ppcs_2011 <- ppcs_2011 %>%
 #ALTERNATIVE OUTCOMES
 ppcs_2011 <- ppcs_2011 %>%
   
-  mutate(civilian_searched = case_when(V183 == '(1) Yes' ~ 1, 
-                                       V183 == '(2) No' ~ 0, TRUE ~ NA_real_)) %>%
-  mutate(civilian_arrested = case_when(V182 == '(1) Yes' ~ 1, 
-                                       V182 == '(2) No' ~ 0, TRUE ~ NA_real_)) %>%
-  mutate(civilian_guilty_of_illegal = case_when(V187 == '(1) Yes' ~ 1, 
-                                                V187 == '(2) No' ~ 0, TRUE ~ NA_real_))
+  #V470, V500 also had to do with search but were all NA
+  mutate(civilian_searched = case_when(
+    
+      (V183 == '(1) Yes' | V327 == 	'(1) Yes') ~ 1, 
+      TRUE ~ 0)) %>%
+  
+  #V396 also had to do with arrested but were all NA
+  mutate(civilian_arrested = case_when(
+      (V182 == '(1) Yes' | V324 == '(1) Yes') ~ 1, 
+        TRUE ~ 0)) %>%
+  
+  #V475, V501 also had to do with finding illegal stuff but were all NA
+  mutate(civilian_guilty_of_illegal = case_when(
+      (V187 == '(1) Yes' | V334 == '(1) Yes') ~ 1, 
+        TRUE ~ 0))
 ```
 
 
