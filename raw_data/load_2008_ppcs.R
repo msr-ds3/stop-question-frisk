@@ -74,7 +74,7 @@ ppcs_2008_revised <- ppcs_2008_revised %>%
 # 4. > 1M
 
 ppcs_2008_revised <- ppcs_2008_revised %>%
-  mutate(population_size = 1)
+  mutate(population_size = NA)
 
 #---------------------------------------------------------------------
 #Time of encounter: appendix does not include 0, 8, 9 so will make those NA
