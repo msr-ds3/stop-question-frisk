@@ -68,14 +68,16 @@ black_proportions <- precinct_race %>%
   group_by(precinct) %>%
   filter(!(is.na(precinct))) %>%
   mutate(props = total/sum(total)) %>%
-  filter(variable == "Black_or_African_American_other") %>%
-  select(precinct, props) %>%
+  filter(variable == "Black_or_African_American_other" |
+           variable == "Black_or_African_American_Hispanic_Latino") %>%
+  summarize(prop = sum(props))
+  select(precinct, prop) %>%
   ungroup()
 
 # Add precinct 121 to the data, using the value from precinct 122
 # (Precinct 121 was created in 2013, used to be part of 122)
 last_precinct_prop <- data.frame(c(121), c(0.0229286))
-names(last_precinct_prop) = c("precinct", "props")
+names(last_precinct_prop) = c("precinct", "prop")
 black_proportions <- rbind(black_proportions, last_precinct_prop)
 
 # read in police precinct shape data
@@ -103,19 +105,19 @@ joint_sqf_prop <- geo_join(police_precincts, sqf_black_prop, "Precinct", "addrpc
 
 # Map the proportion of each precinct that is black
 mypopup <- paste0("Precinct: ", joint_prop$Precinct, "<br>", 
-                   "Population Proportion Black: ", joint_prop$props)
+                   "Population Proportion Black: ", joint_prop$prop)
 
 mypal <- colorNumeric(
   palette = "YlOrRd",
-  domain = joint_prop$props
+  domain = joint_prop$prop
 )
 
 leaflet(joint_prop) %>%
   addTiles() %>% 
-  addPolygons(fillColor = ~mypal(joint_prop$props), fillOpacity = 0.7, popup = mypopup) %>%
+  addPolygons(fillColor = ~mypal(joint_prop$prop), fillOpacity = 0.7, popup = mypopup) %>%
   addProviderTiles("CartoDB.Positron") %>%
   addLegend(pal = mypal, 
-            values = joint_prop$props, 
+            values = joint_prop$prop, 
             position = "bottomright", 
             title = "Population Proportion Black")
 
