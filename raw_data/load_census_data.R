@@ -13,7 +13,7 @@ library(broom)
 library(httr)
 library(rgdal)
 
-----------### LOAD AND CREATE/CLEAN DATAFRAMES ###----------
+########## LOAD AND CREATE/CLEAN DATAFRAMES ##########
 
 # Load stop and frisk data for 2003-2013
 load("sqf_03_13.RData")
@@ -70,7 +70,7 @@ black_proportions <- precinct_race %>%
   mutate(props = total/sum(total)) %>%
   filter(variable == "Black_or_African_American_other" |
            variable == "Black_or_African_American_Hispanic_Latino") %>%
-  summarize(prop = sum(props))
+  summarize(prop = sum(props)) %>%
   select(precinct, prop) %>%
   ungroup()
 
@@ -101,9 +101,10 @@ sqf_black_prop <- sqf_race_dist %>%
 
 joint_sqf_prop <- geo_join(police_precincts, sqf_black_prop, "Precinct", "addrpct")
 
-----------### CREATE MAPS OF RACE DISTRIBUTIONS ###----------
+########## CREATE MAPS OF RACE DISTRIBUTIONS ##########
 
 # Map the proportion of each precinct that is black
+
 mypopup <- paste0("Precinct: ", joint_prop$Precinct, "<br>", 
                    "Population Proportion Black: ", joint_prop$prop)
 
