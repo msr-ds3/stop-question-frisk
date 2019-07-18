@@ -6,7 +6,7 @@ library(tidyverse)
 ppcs_2008 <- read_tsv("32022-0001-Data.tsv")
 
 ppcs_2008 <- ppcs_2008 %>% 
-  filter(V55 == 1)
+  filter(V2 == 1)
 # create the civilian race column
 # black includes black and black hispanic
 # hispanic includes white hispanic and any other combination
@@ -54,7 +54,7 @@ ppcs_2008_revised <- ppcs_2008_revised %>%
 #3. greater than 50k
 
 ppcs_2008_revised <- ppcs_2008_revised %>%
-  mutate(civilian_income = 1)
+  mutate(civilian_income = NA)
 
 #-----------------------------------------------------------------------
 
@@ -74,7 +74,7 @@ ppcs_2008_revised <- ppcs_2008_revised %>%
 # 4. > 1M
 
 ppcs_2008_revised <- ppcs_2008_revised %>%
-  mutate(population_size = 1)
+  mutate(population_size = NA)
 
 #---------------------------------------------------------------------
 #Time of encounter: appendix does not include 0, 8, 9 so will make those NA

@@ -114,11 +114,13 @@ mypal <- colorNumeric(
 
 leaflet(joint_prop) %>%
   addTiles() %>% 
-  addPolygons(fillColor = ~mypal(joint_prop$prop), fillOpacity = 0.7, popup = mypopup) %>%
+  addPolygons(fillColor = ~mypal(joint_prop$prop),
+              fillOpacity = 0.7,
+              popup = mypopup) %>%
   addProviderTiles("CartoDB.Positron") %>%
   addLegend(pal = mypal, 
             values = joint_prop$prop, 
-            position = "bottomright", 
+            position = "topleft", 
             title = "Population Proportion Black")
 
 #Map the proportion of people stopped in each precinct that are black
@@ -132,23 +134,12 @@ mypal2 <- colorNumeric(
 
 leaflet(joint_sqf_prop) %>%
   addTiles() %>% 
-  addPolygons(fillColor = ~mypal2(joint_sqf_prop$props), fillOpacity = 0.7, popup = mypopup2) %>%
+  addPolygons(fillColor = ~mypal2(joint_sqf_prop$props),
+              fillOpacity = 0.7,
+              popup = mypopup2) %>%
   addProviderTiles("CartoDB.Positron") %>%
   addLegend(pal = mypal2, 
             values = joint_sqf_prop$props, 
-            position = "bottomright", 
+            position = "topleft", 
             title = "SQF Proportion Black")
 
-
-
-# # IGNORE BELOW THIS LINE - not using this anymore
-# mymap <- leaflet() %>%
-#   addProviderTiles("CartoDB.Positron") %>%
-#   addPolygons(data = joint_maj, 
-#               fillColor = ~mypal(joint_maj$majority_race), 
-#               color = "#b2aeae",
-#               fillOpacity = 0.7, 
-#               weight = 1, 
-#               smoothFactor = 0.2,
-#               popup = mypopup)
-#
