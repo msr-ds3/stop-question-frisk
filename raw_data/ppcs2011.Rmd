@@ -12,7 +12,8 @@ ppcs_2011 <- da34276.0001
 
 ```{r}
 #filter out the face to face contacts 
-ppcs_2011 <- ppcs_2011 %>% filter(V336 == "(1) Yes")
+ppcs_2011 <- ppcs_2011 %>% filter(!is.na(V31)) # better screening condition?
+#ppcs_2011 <- ppcs_2011 %>% filter(V336 == "(1) Yes") 
 #nrow(ppcs_2011)
 
 ```
