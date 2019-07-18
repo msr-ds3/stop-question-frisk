@@ -118,7 +118,7 @@ leaflet(joint_prop) %>%
   addProviderTiles("CartoDB.Positron") %>%
   addLegend(pal = mypal, 
             values = joint_prop$prop, 
-            position = "bottomright", 
+            position = "topleft", 
             title = "Population Proportion Black")
 
 #Map the proportion of people stopped in each precinct that are black
@@ -136,7 +136,7 @@ leaflet(joint_sqf_prop) %>%
   addProviderTiles("CartoDB.Positron") %>%
   addLegend(pal = mypal2, 
             values = joint_sqf_prop$props, 
-            position = "bottomright", 
+            position = "topleft", 
             title = "SQF Proportion Black")
 
 
