@@ -154,23 +154,11 @@ ppcs_2011 <- ppcs_2011 %>%
 #TYPE OF INCIDENT
 #Interpretations of columns V55, V56, V57, V58,V59, V60, V61, V62, V63, V64 are unclear  
 ppcs_2011 <- ppcs_2011 %>% 
-   mutate(type_of_incident = case_when(V39 == '(1) Yes' ~ 1,
-                                       V39 == '(2) No' ~ 0,
-                                       (V41 == ('(1) Yes')| V166 == ('(1) Yes')) ~ 1,
-                                       (V41 == ('(2) No')| V166 == ('(2) No')) ~ 0,
-                                       V43 == '(1) Yes' ~ 1,
-                                       V43 == '(2) No' ~ 0,
-                                       (V45 == ('(1) Yes')| V170 == ('(1) Yes')) ~ 1,
-                                       (V45 == ('(2) No')| V170 == ('(2) No')) ~ 0,
-                                       V47 == '(1) Yes' ~ 1,
-                                       V47 == '(2) No' ~ 0,
-                                       V49 == '(1) Yes' ~ 1,
-                                       V49 == '(2) No' ~ 0,
-                                       V51 == '(1) Yes' ~ 1,
-                                       V51 == '(2) No' ~ 0,
-                                       V53 == '(1) Yes' ~ 1,
-                                       V53 == '(2) No' ~ 0,
-                                       TRUE ~ NA_real_)) 
+   mutate(type_of_incident = case_when(
+                                       (!is.na(V34)) ~ 1,
+                                       (!is.na(V189)) ~ 2,
+                                       (TRUE) ~ 3
+                                       ))
 ```
 
 
