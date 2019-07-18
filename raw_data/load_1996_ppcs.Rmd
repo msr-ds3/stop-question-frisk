@@ -20,6 +20,8 @@ library(foreign)
 #Load Data
 ```{r load-data}
 ppcs_1996 <- read_ascii_setup('06999-0001-Data.txt','06999-0001-Setup.sps')
+ppcs_1996 <- ppcs_1996 %>%
+  filter(LAST_12_MONTHS_CONTACT_W_POLICE_OFFICER == 'Yes' & CONTACTS_W_POLICE_OFFICER_IN_PERSON == 'Yes')
 ```
 
 #Civilian Race
