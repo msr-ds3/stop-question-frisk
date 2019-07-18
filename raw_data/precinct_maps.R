@@ -17,14 +17,34 @@ library(rgeos)
 library(maptools)
 
 
+#Geolocating NYC
+nyc_map <- get_map(location = c(lon = -74.1, lat = 41.1), maptype = "terrain", zoom = 11)
+
+ggmap(nyc_map)
+
+
+
 #Getting and reading police precincts JSON file
 r <- GET('http://services5.arcgis.com/GfwWNkhOj9bNBqoJ/arcgis/rest/services/nypp/FeatureServer/0/query?where=1=1&outFields=*&outSR=4326&f=geojson')
 police_precincts <- readOGR(content(r,'text'), 'OGRGeoJSON', verbose = F)
 
-glimpse(police_precincts)
+summary(police_precincts)
 
 #tidying the police precincts
 police_precincts <- tidy(police_precincts)
+
+
+ggmap(nyc_map) + 
+  geom_polygon(data=police_precincts, aes(x=long, y=lat, group=group), color="blue", fill=NA)
+
+
+
+
+set.seed(42)
+lats <- 40.7544882 + rnorm(10)/100
+lngs <- -73.9879923 + rnorm(10)/200
+points <- data.frame(lat=lats, lng=lngs)
+points
 
 
 #Creating points from lat and long from police_precincts
@@ -55,6 +75,10 @@ plot_data <- tidy(police_precincts, region="Precinct") %>%
   filter(!is.na(num_points))
 
 
+ggmap(nyc_map) + 
+  geom_polygon(data=plot_data, aes(x=long, y=lat, group=group, fill=num_points), alpha=0.75)
+
+
 
 #Using leaflect to plot the precinct area polygons
 leaflet(police_precincts) %>%
@@ -64,7 +88,32 @@ leaflet(police_precincts) %>%
 
 
 #Creating spatial ggplot of the police_precinct data
-ggplot() + 
+ggmap() + 
   geom_polygon(data=police_precincts, aes(x=long, y=lat, group=group))
+
+
+ggmap::register_google(key = "AIzaSyBDkCtkNhKl1YZAZGC-lOPOYNNdTcP3QNA")
+
+nyc_map <- get_map(location = c(lon = -74.00, lat = 40.71), maptype = "terrain", zoom = 11)
+ggmap(nyc_map)
+
+
+police_precincts <- tidy(police_precincts)
+
+black_proportions <- black_proportions %>% mutate(precinct = as.character(precinct))
+
+jp <- police_precincts %>%
+  left_join(black_proportions, by=c("id"="precinct"))
+
+nyc_map <- get_map(location = c(lon = -74.00, lat = 40.71), maptype = "terrain", zoom = 11)
+
+mypal <- colorNumeric(
+  palette = "YlOrRd",
+  domain = jp$props
+)
+
+ggmap(nyc_map) + 
+  geom_polygon(data=jp, aes(x=long, y=lat, group=group, fill = props), color = "")
+
 
 
