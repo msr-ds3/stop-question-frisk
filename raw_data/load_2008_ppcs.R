@@ -6,7 +6,7 @@ library(tidyverse)
 ppcs_2008 <- read_tsv("32022-0001-Data.tsv")
 
 ppcs_2008 <- ppcs_2008 %>% 
-  filter(V55 == 1)
+  filter(V2 == 1)
 # create the civilian race column
 # black includes black and black hispanic
 # hispanic includes white hispanic and any other combination
@@ -54,7 +54,7 @@ ppcs_2008_revised <- ppcs_2008_revised %>%
 #3. greater than 50k
 
 ppcs_2008_revised <- ppcs_2008_revised %>%
-  mutate(civilian_income = 1)
+  mutate(civilian_income = NA)
 
 #-----------------------------------------------------------------------
 
@@ -74,13 +74,19 @@ ppcs_2008_revised <- ppcs_2008_revised %>%
 # 4. > 1M
 
 ppcs_2008_revised <- ppcs_2008_revised %>%
-  mutate(population_size = 1)
+  mutate(population_size = NA)
 
 #---------------------------------------------------------------------
 #Time of encounter: appendix does not include 0, 8, 9 so will make those NA
 # factor it.
+day <- c(1:3)
+night <- c(4:6)
 ppcs_2008_revised <- ppcs_2008_revised %>% 
-  mutate(time_of_encounter = ifelse(!(V4  %in% 1:6), NA, V4))
+  mutate(time_of_encounter = case_when(
+    (V4 %in% day) ~ 3,
+    (V4 %in% night) ~ 6,
+    TRUE ~ NA_real_
+  ))
 
 summary(ppcs_2008_revised$time_of_encounter)
 #double check that the right thing happened
