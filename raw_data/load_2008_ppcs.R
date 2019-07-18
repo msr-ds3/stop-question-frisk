@@ -79,8 +79,14 @@ ppcs_2008_revised <- ppcs_2008_revised %>%
 #---------------------------------------------------------------------
 #Time of encounter: appendix does not include 0, 8, 9 so will make those NA
 # factor it.
+day <- c(1:3)
+night <- c(4:6)
 ppcs_2008_revised <- ppcs_2008_revised %>% 
-  mutate(time_of_encounter = ifelse(!(V4  %in% 1:6), NA, V4))
+  mutate(time_of_encounter = case_when(
+    (V4 %in% day) ~ 3,
+    (V4 %in% night) ~ 6,
+    TRUE ~ NA_real_
+  ))
 
 summary(ppcs_2008_revised$time_of_encounter)
 #double check that the right thing happened
