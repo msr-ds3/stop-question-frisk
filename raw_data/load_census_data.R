@@ -259,3 +259,4 @@ ggmap(nyc_map) +
   geom_polygon(data=jp, aes(x=long, y=lat, group=group, fill = prop)) + 
   scale_fill_gradientn(colors = cp)
 
+
