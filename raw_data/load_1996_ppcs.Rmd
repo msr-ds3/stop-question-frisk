@@ -22,6 +22,7 @@ library(foreign)
 ppcs_1996 <- read_ascii_setup('06999-0001-Data.txt','06999-0001-Setup.sas')
 ppcs_1996 <- ppcs_1996 %>%
   filter(LAST_12_MONTHS_CONTACT_W_POLICE_OFFICER == 'Yes' & CONTACTS_W_POLICE_OFFICER_IN_PERSON == 'Yes')
+
 ```
 
 #Civilian Race
@@ -155,8 +156,8 @@ missing <- c('Not at all', 'missing/ni/ou')
 ppcs_1996 <- ppcs_1996 %>%
   mutate(type_of_incident = case_when(
     (REASON_TRAFFIC_PARKING_VIOLATION %in% missing ) ~2,
-    (REASON_INVOLVED_IN_TRAFFIC_ACCIDENT %in% missing)~2,
-    (REASON_WITNESS_TO_TRAFFIC_ACCIDENT %in% missing)~2,
+    (REASON_INVOLVED_IN_TRAFFIC_ACCIDENT %in% missing)~3,
+    (REASON_WITNESS_TO_TRAFFIC_ACCIDENT %in% missing)~3,
     (REASON_REPORT_A_CRIME %in% missing) ~ 3,
     (REASON_ASK_FOR_ASSISTANCE %in% missing) ~3,
     (REASON_PROBLEM_IN_THE_NEIGHBORHOOD %in% missing)~3,
@@ -241,10 +242,30 @@ ppcs_1996 <- ppcs_1996 %>%
   mutate(excess_force = ifelse(TAKE_ANY_FORMAL_OR_INFORMAL_ACTIONS == 'Yes', 1, 0))
 ```
 
+#force
+```{r}
+
+ppcs_1996 <- ppcs_1996 %>%
+  mutate(force = case_when(
+    (OFFICER_USE_ANY_FORM_OF_PHYSICAL_FORCE == 'Yes')~1,
+    (POLICE_DO_HOLD_YOU_BY_THE_ARM == 'Yes')~1,
+    (POLICE_DO_PUSH_YOU == 'Yes')~1,
+    (POLICE_DO_HIT_OR_PUNCH_YOU == 'Yes')~1,
+    (POLICE_DO_KICK_YOU == 'Yes')~1,
+    (POLICE_DO_USE_A_CHOKEHOLD == 'Yes')~1,
+    (POLICE_DO_USE_SOME_OTHER_FORM_OF_FORCE == 'Yes')~1,
+    (WEAPONS_CHEMICAL_OR_PEPPER_SPRAY == 'Yes')~1,
+    (WEAPONS_FIREARM == 'Yes')~1,
+    (DID_A_POLICE_OFFICER_HANDCUFF_YOU == 'Yes')~1,
+    TRUE ~ 0
+  ))
+```
+
+
 ##Cleaned Data Frame
 ```{r}
 ppcs_1996_cleaned <- ppcs_1996 %>%
-  select(civilian_race, civilian_age, civilian_gender, civilian_income, civilian_employed, population_size, time_of_encounter, off_black, off_white, off_other, off_split, type_of_incident, civilian_behavior, civilian_searched, civilian_arrested, civilian_guilty_of_illegal, civilian_injured, excess_force)
+  select(civilian_race, civilian_age, civilian_gender, civilian_income, civilian_employed, population_size, time_of_encounter, off_black, off_white, off_other, off_split, type_of_incident, civilian_behavior, civilian_searched, civilian_arrested, civilian_guilty_of_illegal, civilian_injured, excess_force, force)
 
 ```
 #Add year column
