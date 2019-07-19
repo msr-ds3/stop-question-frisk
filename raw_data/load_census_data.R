@@ -16,10 +16,11 @@ library(rgdal)
 ########## LOAD AND CREATE/CLEAN DATAFRAMES ##########
 
 # Load stop and frisk data for 2003-2013
+
 load("sqf_03_13.RData")
 
 # Set up census data
-census_api_key('5365371ad843ba3249f2e88162f10edcfe529d87', install = TRUE)
+census_api_key('5365371ad843ba3249f2e88162f10edcfe529d87', install = TRUE, overwrite = TRUE)
 readRenviron("~/.Renviron")
 
 #variables to load from census data
@@ -61,6 +62,9 @@ precinct_race <- precinct_populations %>% ungroup() %>%
   group_by(precinct, variable) %>%
   summarize(total = sum(value))
 
+
+
+
 # find the proportion of each precinct that is Black/African American (Hispanic or not)
 # (filter out N/A's - blocks with no corresponding precint - 
 # this is justified because no people live in these blocks (population 0))
@@ -87,8 +91,11 @@ police_precincts <- readOGR(content(r,'text'), 'OGRGeoJSON', verbose = F)
 # Join the precinct shape data with the data about the precincts
 joint_prop <- geo_join(police_precincts, black_proportions, "Precinct", "precinct")
 
+
 sqf_race_dist <- sf_data1 %>% 
   select(addrpct, race)
+
+sqf_race_dist
 
 sqf_black_prop <- sqf_race_dist %>%
   mutate(count = 1) %>%
@@ -145,4 +152,35 @@ leaflet(joint_sqf_prop) %>%
             values = joint_sqf_prop$props, 
             position = "topleft", 
             title = "SQF Proportion Black")
+
+#Testing out ggmaps 
+police_precincts <- tidy(police_precincts, region = "Precinct")
+
+black_proportions <- black_proportions %>% mutate(precinct = as.character(precinct))
+
+jp <- police_precincts %>%
+  left_join(black_proportions, by=c("id"="precinct"))
+
+nyc_map <- get_map(location = c(lon = -74.00, lat = 40.71), maptype = "terrain", zoom = 11)
+
+mypal <- colorNumeric(
+  palette = "YlOrRd",
+  domain = jp$prop
+)
+
+jp
+colors <- c("red")
+jp %>% View()
+
+?colorFactor()
+
+install.packages("viridis")
+library(viridis)
+
+cp<- c("#ffffcc","#ffeda0", "#fed976","#feb24c","#fd8d3c", "#fc4e2a", "#e31a1c", "#b10026")
+
+
+ggmap(nyc_map) + 
+  geom_polygon(data=jp, aes(x=long, y=lat, group=group, fill = prop)) + 
+  scale_fill_gradientn(colors = cp)
 

@@ -119,22 +119,22 @@ ppcs_2011 <- ppcs_2011 %>%
 
 ppcs_2011 <- ppcs_2011 %>%
   mutate(civilian_behavior = case_when((V399 == '(1) Yes') ~ 1,
-                                       (V399 == '(2) No') ~ 0,
+                                       #(V399 == '(2) No') ~ 0,
                                        (V401 == ('(1) Yes')| V166 == ('(1) Yes')) ~ 1,
-                                       (V401 == ('(2) No')| V166 == ('(2) No')) ~ 0,
+                                       #(V401 == ('(2) No')| V166 == ('(2) No')) ~ 0,
                                        V168 == '(1) Yes' ~ 1,
-                                       V168 == '(2) No' ~ 0,
+                                       #V168 == '(2) No' ~ 0,
                                        (V405 == ('(1) Yes')| V170 == ('(1) Yes')) ~ 1,
-                                       (V405 == ('(2) No')| V170 == ('(2) No')) ~ 0,
+                                       #(V405 == ('(2) No')| V170 == ('(2) No')) ~ 0,
                                        V172 == '(1) Yes' ~ 1,
-                                       V172 == '(2) No' ~ 0,
+                                       #V172 == '(2) No' ~ 0,
                                        V174 == '(1) Yes' ~ 1,
-                                       V174 == '(2) No' ~ 0,
+                                      # V174 == '(2) No' ~ 0,
                                        (V398 == ('(1) Yes')| V176 == ('(1) Yes')) ~ 1,
-                                       (V398 == ('(2) No')| V176 == ('(2) No')) ~ 0,
+                                       #(V398 == ('(2) No')| V176 == ('(2) No')) ~ 0,
                                        (V407 == ('(1) Yes')| V178 == ('(1) Yes')) ~ 1,
-                                       (V407 == ('(2) No')| V178 == ('(2) No')) ~ 0,
-                                       TRUE ~ NA_real_)) 
+                                       #(V407 == ('(2) No')| V178 == ('(2) No')) ~ 0,
+                                       TRUE ~ 0)) 
 ```
 
 
@@ -156,7 +156,17 @@ ppcs_2011 <- ppcs_2011 %>%
   #V475, V501 also had to do with finding illegal stuff but were all NA
   mutate(civilian_guilty_of_illegal = case_when(
       (V187 == '(1) Yes' | V334 == '(1) Yes') ~ 1, 
-        TRUE ~ 0))
+        TRUE ~ 0)) %>%
+  
+  mutate(civilian_injured = case_when(
+      (V180 == '(1) Yes' | V322 == '(1) Yes')~ 1,
+      TRUE ~ 0)) %>%
+  
+  mutate(excess_force = case_when(
+      (V163 == '(1) Yes' | V305 == '(1) Yes' | V378 == '(1) Yes') ~1,
+      TRUE ~ 0))
+
+
 ```
 
 
