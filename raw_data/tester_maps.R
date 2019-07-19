@@ -157,10 +157,15 @@ census %>%
   scale_fill_viridis_c()
 
 
-ggmap::register_google(key = "AIzaSyC43nsgttIA4Kp9LYUHXKU3UfNLdjCK1Eo")
+ggmap::register_google(key = "AIzaSyBDkCtkNhKl1YZAZGC-lOPOYNNdTcP3QNA")
 
-source = "google"
-get_map("New York City", source=source)
+nyc_map <- get_map(location = c(lon = -74.00, lat = 40.71), maptype = "terrain", zoom = 12)
+
+ggmap(nyc_map)
+
+
+
+
 
 ny_acs <- get_acs(geography = "tract", 
               variables = "B19013_001", 
