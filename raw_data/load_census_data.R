@@ -132,7 +132,13 @@ sqf_pepsp_black <- sf_data1 %>%
   filter(race == "B") %>%
   select(addrpct, props)
 
-joint_sqf_pepsp <- geo_join(police_precincts, sqf_pepsp_black, "Precinct", "addrpct")
+precincts <- data.frame(sort(unique(sf_data1$addrpct)))
+colnames(precincts) <- c("addrpct")
+sqf_peps <- left_join(precincts, sqf_pepsp_black)
+sqf_peps$props[is.na(sqf_peps$props)] <- 0
+
+joint_sqf_pepsp <- geo_join(police_precincts, sqf_peps, "Precinct", "addrpct")
+
 
 ########## CREATE MAPS OF RACE DISTRIBUTIONS ##########
 
