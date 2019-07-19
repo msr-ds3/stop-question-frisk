@@ -91,11 +91,8 @@ police_precincts <- readOGR(content(r,'text'), 'OGRGeoJSON', verbose = F)
 # Join the precinct shape data with the data about the precincts
 joint_prop <- geo_join(police_precincts, black_proportions, "Precinct", "precinct")
 
-
 sqf_race_dist <- sf_data1 %>% 
   select(addrpct, race)
-
-sqf_race_dist
 
 sqf_black_prop <- sqf_race_dist %>%
   mutate(count = 1) %>%
@@ -107,6 +104,35 @@ sqf_black_prop <- sqf_race_dist %>%
   select(addrpct, props)
 
 joint_sqf_prop <- geo_join(police_precincts, sqf_black_prop, "Precinct", "addrpct")
+
+
+sqf_wall_black <- sf_data1 %>%
+  select(addrpct, race, pf_wall) %>%
+  filter(pf_wall == "Y") %>%
+  select(addrpct, race) %>%
+  mutate(count = 1) %>%
+  group_by(addrpct, race) %>%
+  summarize(total = sum(count)) %>%
+  filter(!is.na(addrpct)) %>%
+  mutate(props = total/sum(total)) %>%
+  filter(race == "B") %>%
+  select(addrpct, props)
+
+joint_sqf_wall <- geo_join(police_precincts, sqf_wall_black, "Precinct", "addrpct")
+
+sqf_pepsp_black <- sf_data1 %>%
+  select(addrpct, race, pf_pepsp) %>%
+  filter(pf_pepsp == "Y") %>%
+  select(addrpct, race) %>%
+  mutate(count = 1) %>%
+  group_by(addrpct, race) %>%
+  summarize(total = sum(count)) %>%
+  filter(!is.na(addrpct)) %>%
+  mutate(props = total/sum(total)) %>%
+  filter(race == "B") %>%
+  select(addrpct, props)
+
+joint_sqf_pepsp <- geo_join(police_precincts, sqf_pepsp_black, "Precinct", "addrpct")
 
 ########## CREATE MAPS OF RACE DISTRIBUTIONS ##########
 
@@ -153,12 +179,55 @@ leaflet(joint_sqf_prop) %>%
             position = "topleft", 
             title = "SQF Proportion Black")
 
+#Map the proportion of people push to a wall in each precinct that are black
+mypopup3 <- paste0("Precinct: ", joint_sqf_wall$Precinct, "<br>", 
+                   "Pushed to Wall Proportion Black: ", joint_sqf_wall$props)
+
+mypal3 <- colorNumeric(
+  palette = "YlOrRd",
+  domain = joint_sqf_wall$props
+)
+
+leaflet(joint_sqf_wall) %>%
+  addTiles() %>% 
+  addPolygons(fillColor = ~mypal3(joint_sqf_wall$props),
+              fillOpacity = 0.7,
+              weight = 1,
+              popup = mypopup3) %>%
+  addProviderTiles("CartoDB.Positron") %>%
+  addLegend(pal = mypal3, 
+            values = joint_sqf_wall$props, 
+            position = "topleft", 
+            title = "Pushed to Wall Prop Black")
+
+#Map the proportion of people sprayed with pepper spray in each precinct that are black
+mypopup4 <- paste0("Precinct: ", joint_sqf_pepsp$Precinct, "<br>", 
+                   "Pepper Sprayed Proportion Black: ", joint_sqf_pepsp$props)
+
+mypal4 <- colorNumeric(
+  palette = "YlOrRd",
+  domain = joint_sqf_pepsp$props
+)
+
+leaflet(joint_sqf_pepsp) %>%
+  addTiles() %>% 
+  addPolygons(fillColor = ~mypal4(joint_sqf_pepsp$props),
+              fillOpacity = 0.7,
+              weight = 1,
+              popup = mypopup4) %>%
+  addProviderTiles("CartoDB.Positron") %>%
+  addLegend(pal = mypal3, 
+            values = joint_sqf_pepsp$props, 
+            position = "topleft", 
+            title = "Pepper Sprayed Prop Black")
+
+
 #Testing out ggmaps 
-police_precincts <- tidy(police_precincts, region = "Precinct")
+police_precinct <- tidy(police_precincts, region = "Precinct")
 
 black_proportions <- black_proportions %>% mutate(precinct = as.character(precinct))
 
-jp <- police_precincts %>%
+jp <- police_precinct %>%
   left_join(black_proportions, by=c("id"="precinct"))
 
 nyc_map <- get_map(location = c(lon = -74.00, lat = 40.71), maptype = "terrain", zoom = 11)
