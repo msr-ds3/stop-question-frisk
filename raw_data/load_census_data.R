@@ -62,9 +62,6 @@ precinct_race <- precinct_populations %>% ungroup() %>%
   group_by(precinct, variable) %>%
   summarize(total = sum(value))
 
-
-
-
 # find the proportion of each precinct that is Black/African American (Hispanic or not)
 # (filter out N/A's - blocks with no corresponding precint - 
 # this is justified because no people live in these blocks (population 0))
@@ -105,6 +102,54 @@ sqf_black_prop <- sqf_race_dist %>%
 
 joint_sqf_prop <- geo_join(police_precincts, sqf_black_prop, "Precinct", "addrpct")
 
+# Looking at different levels of force:
+
+sqf_pepsp_black <- sf_data1 %>%
+  select(addrpct, race, pf_pepsp) %>%
+  filter(pf_pepsp == "Y") %>%
+  select(addrpct, race) %>%
+  mutate(count = 1) %>%
+  group_by(addrpct, race) %>%
+  summarize(total = sum(count)) %>%
+  filter(!is.na(addrpct)) %>%
+  mutate(props = total/sum(total)) %>%
+  filter(race == "B") %>%
+  select(addrpct, props)
+
+precincts <- data.frame(sort(unique(sf_data1$addrpct)))
+colnames(precincts) <- c("addrpct")
+sqf_peps <- left_join(precincts, sqf_pepsp_black)
+sqf_peps$props[is.na(sqf_peps$props)] <- 0
+
+joint_sqf_pepsp <- geo_join(police_precincts, sqf_peps, "Precinct", "addrpct")
+
+sqf_hands_black <- sf_data1 %>%
+  select(addrpct, race, pf_hands) %>%
+  filter(pf_hands == "Y") %>%
+  select(addrpct, race) %>%
+  mutate(count = 1) %>%
+  group_by(addrpct, race) %>%
+  summarize(total = sum(count)) %>%
+  filter(!is.na(addrpct)) %>%
+  mutate(props = total/sum(total)) %>%
+  filter(race == "B") %>%
+  select(addrpct, props)
+
+joint_sqf_hands <- geo_join(police_precincts, sqf_hands_black, "Precinct", "addrpct")
+
+sqf_cuffs_black <- sf_data1 %>%
+  select(addrpct, race, pf_hcuff) %>%
+  filter(pf_hcuff == "Y") %>%
+  select(addrpct, race) %>%
+  mutate(count = 1) %>%
+  group_by(addrpct, race) %>%
+  summarize(total = sum(count)) %>%
+  filter(!is.na(addrpct)) %>%
+  mutate(props = total/sum(total)) %>%
+  filter(race == "B") %>%
+  select(addrpct, props)
+
+joint_sqf_wall <- geo_join(police_precincts, sqf_cuffs_black, "Precinct", "addrpct")
 
 sqf_wall_black <- sf_data1 %>%
   select(addrpct, race, pf_wall) %>%
@@ -120,19 +165,6 @@ sqf_wall_black <- sf_data1 %>%
 
 joint_sqf_wall <- geo_join(police_precincts, sqf_wall_black, "Precinct", "addrpct")
 
-sqf_pepsp_black <- sf_data1 %>%
-  select(addrpct, race, pf_pepsp) %>%
-  filter(pf_pepsp == "Y") %>%
-  select(addrpct, race) %>%
-  mutate(count = 1) %>%
-  group_by(addrpct, race) %>%
-  summarize(total = sum(count)) %>%
-  filter(!is.na(addrpct)) %>%
-  mutate(props = total/sum(total)) %>%
-  filter(race == "B") %>%
-  select(addrpct, props)
-
-joint_sqf_pepsp <- geo_join(police_precincts, sqf_pepsp_black, "Precinct", "addrpct")
 
 ########## CREATE MAPS OF RACE DISTRIBUTIONS ##########
 
@@ -252,4 +284,5 @@ cp<- c("#ffffcc","#ffeda0", "#fed976","#feb24c","#fd8d3c", "#fc4e2a", "#e31a1c",
 ggmap(nyc_map) + 
   geom_polygon(data=jp, aes(x=long, y=lat, group=group, fill = prop)) + 
   scale_fill_gradientn(colors = cp)
+
 
