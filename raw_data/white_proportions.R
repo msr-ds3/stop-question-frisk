@@ -139,7 +139,7 @@ colnames(precincts) <- c("addrpct")
 sqf_pepsp_white <- left_join(precincts, sqf_pepsp_white)
 sqf_pepsp_white$props[is.na(sqf_pepsp_white$props)] <- 0
 
-joint_sqf_dwep_white <- geo_join(police_precincts, sqf_pepsp_white, "Precinct", "addrpct")
+joint_sqf_pepsp_white <- geo_join(police_precincts, sqf_pepsp_white, "Precinct", "addrpct")
 
 
 #I think this one gives an error
@@ -425,45 +425,45 @@ leaflet(joint_sqf_pwep_white) %>%
             title = "Pointed Weapon Prop White")
 
 #Map the proportion of stopped civilians sprayed with pepper spray in each precinct that are White
-mypopup9 <- paste0("Precinct: ", joint_sqf_pepsp$Precinct, "<br>", 
-                   "Pepper Sprayed Proportion White: ", joint_sqf_pepsp$props)
+mypopup9 <- paste0("Precinct: ", joint_sqf_pepsp_white$Precinct, "<br>", 
+                   "Pepper Sprayed Proportion White: ", joint_sqf_pepsp_white$props)
 
 mypal9 <- colorNumeric(
   palette = "YlOrRd",
-  domain = joint_sqf_pepsp$props
+  domain = joint_sqf_pepsp_white$props
 )
 
-leaflet(joint_sqf_pepsp) %>%
+leaflet(joint_sqf_pepsp_white) %>%
   addTiles() %>% 
-  addPolygons(fillColor = ~mypal9(joint_sqf_pepsp$props),
+  addPolygons(fillColor = ~mypal9(joint_sqf_pepsp_white$props),
               fillOpacity = 0.7,
               weight = 1,
               popup = mypopup9) %>%
   addProviderTiles("CartoDB.Positron") %>%
   addLegend(pal = mypal9, 
-            values = joint_sqf_pepsp$props, 
+            values = joint_sqf_pepsp_white$props, 
             position = "topleft", 
             title = "Pepper Sprayed Prop White")
 
 #Map the proportion of stopped civilians police used a baton on in each precinct that are black
-mypopup10 <- paste0("Precinct: ", joint_sqf_baton$Precinct, "<br>", 
-                    "Baton Proportion Black: ", joint_sqf_baton$props)
+mypopup10 <- paste0("Precinct: ", joint_sqf_baton_white$Precinct, "<br>", 
+                    "Baton Proportion White: ", joint_sqf_baton_white$props)
 
 mypal10 <- colorNumeric(
   palette = "YlOrRd",
-  domain = joint_sqf_baton$props
+  domain = joint_sqf_baton_white$props
 )
 
-leaflet(joint_sqf_baton) %>%
+leaflet(joint_sqf_baton_white) %>%
   addTiles() %>% 
-  addPolygons(fillColor = ~mypal10(joint_sqf_baton$props),
+  addPolygons(fillColor = ~mypal10(joint_sqf_baton_white$props),
               fillOpacity = 0.7,
               weight = 1,
               popup = mypopup10) %>%
   addProviderTiles("CartoDB.Positron") %>%
   addLegend(pal = mypal10, 
-            values = joint_sqf_baton$props, 
+            values = joint_sqf_baton_white$props, 
             position = "topleft", 
-            title = "Baton Prop Black")
+            title = "Baton Prop White")
 
 
