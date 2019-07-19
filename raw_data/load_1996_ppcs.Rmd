@@ -157,25 +157,25 @@ Gathered data and then took all the values where the occurence was Once or More 
 #Turns out since every observation is a contact with a police officer they are all 'other stops' and #there should be no NA's
 ```
 ```{r type-of-incident}
-missing <- c('Not at all', 'missing/ni/ou')
+happened <- c('Once', 'More than once')
 #View(ppcs_1996$REASON_TRAFFIC_PARKING_VIOLATION)
 ppcs_1996 <- ppcs_1996 %>%
   mutate(type_of_incident = case_when(
-    (REASON_TRAFFIC_PARKING_VIOLATION %in% missing ) ~2,
-    (REASON_INVOLVED_IN_TRAFFIC_ACCIDENT %in% missing)~3,
-    (REASON_WITNESS_TO_TRAFFIC_ACCIDENT %in% missing)~3,
-    (REASON_REPORT_A_CRIME %in% missing) ~ 3,
-    (REASON_ASK_FOR_ASSISTANCE %in% missing) ~3,
-    (REASON_PROBLEM_IN_THE_NEIGHBORHOOD %in% missing)~3,
-    (REASON_VICTIM_OF_A_CRIME %in% missing) ~ 3,
-    (REASON_WITNESS_TO_A_CRIME %in% missing) ~3,
-    (REASON_CRIME_THOUGHT_INVOLVED_IN %in% missing) ~ 3,
-    (REASON_WHAT_YOU_WERE_DOING_IN_THE_AREA %in% missing) ~3,
-    (REASON_HAD_WARRANT_FOR_YOUR_ARREST %in% missing) ~3,
-    (REASON_CASUAL_ENCOUNTERS %in% missing) ~ 3,
-    (REASON_COMMUNITY_MEETINGS %in% missing) ~3,
-    (REASON_SOME_OTHER_REASON %in% missing) ~3,
-    (REASON_NO_SPECIFIC_REASON %in% missing) ~3,
+    (REASON_TRAFFIC_PARKING_VIOLATION %in% happened ) ~2,
+    (REASON_INVOLVED_IN_TRAFFIC_ACCIDENT %in% happened)~3,
+    (REASON_WITNESS_TO_TRAFFIC_ACCIDENT %in% happened)~3,
+    (REASON_REPORT_A_CRIME %in% happened) ~ 3,
+    (REASON_ASK_FOR_ASSISTANCE %in% happened) ~3,
+    (REASON_PROBLEM_IN_THE_NEIGHBORHOOD %in% happened)~3,
+    (REASON_VICTIM_OF_A_CRIME %in% happened) ~ 3,
+    (REASON_WITNESS_TO_A_CRIME %in% happened) ~3,
+    (REASON_CRIME_THOUGHT_INVOLVED_IN %in% happened) ~ 3,
+    (REASON_WHAT_YOU_WERE_DOING_IN_THE_AREA %in% happened) ~3,
+    (REASON_HAD_WARRANT_FOR_YOUR_ARREST %in% happened) ~3,
+    (REASON_CASUAL_ENCOUNTERS %in% happened) ~ 3,
+    (REASON_COMMUNITY_MEETINGS %in% happened) ~3,
+    (REASON_SOME_OTHER_REASON %in% happened) ~3,
+    (REASON_NO_SPECIFIC_REASON %in% happened) ~3,
     TRUE ~ NA_real_
   ))
 ```
