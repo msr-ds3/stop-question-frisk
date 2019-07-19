@@ -124,6 +124,7 @@ leaflet(joint_prop) %>%
   addTiles() %>% 
   addPolygons(fillColor = ~mypal(joint_prop$prop),
               fillOpacity = 0.7,
+              weight = 1,
               popup = mypopup) %>%
   addProviderTiles("CartoDB.Positron") %>%
   addLegend(pal = mypal, 
@@ -144,6 +145,7 @@ leaflet(joint_sqf_prop) %>%
   addTiles() %>% 
   addPolygons(fillColor = ~mypal2(joint_sqf_prop$props),
               fillOpacity = 0.7,
+              weight = 1,
               popup = mypopup2) %>%
   addProviderTiles("CartoDB.Positron") %>%
   addLegend(pal = mypal2, 
