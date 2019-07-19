@@ -22,7 +22,6 @@ library(foreign)
 ppcs_1996 <- read_ascii_setup('06999-0001-Data.txt','06999-0001-Setup.sas')
 ppcs_1996 <- ppcs_1996 %>%
   filter(LAST_12_MONTHS_CONTACT_W_POLICE_OFFICER == 'Yes' & CONTACTS_W_POLICE_OFFICER_IN_PERSON == 'Yes')
-colnames(ppcs_1996)
 ```
 
 #Civilian Race
@@ -120,7 +119,16 @@ mostly some other race
 ```{r officer-race-other}
 ppcs_1996 <- ppcs_1996 %>%
   mutate(off_other = case_when(
-    (OFFICERS_WHITE_BLACK_OR_OTHER_RACE == 'All of some other race' | OFFICERS_WHITE_BLACK_OR_OTHER_RACE == 'Mostly some other race' | OFFICERS_WHITE_BLACK_OR_OTHER_RACE == 'Equally mixed' | OFFICER_WHITE_BLACK_OR_OTHER_RACE == 'Other' ) ~ 1,
+    (OFFICERS_WHITE_BLACK_OR_OTHER_RACE == 'All of some other race' | OFFICERS_WHITE_BLACK_OR_OTHER_RACE == 'Mostly some other race' | OFFICER_WHITE_BLACK_OR_OTHER_RACE == 'Other' ) ~ 1,
+    TRUE ~ 0
+  ))
+```
+
+Officer race split
+```{r}
+ppcs_1996 <- ppcs_1996 %>%
+  mutate(off_split = case_when(
+    (OFFICERS_WHITE_BLACK_OR_OTHER_RACE == 'Equally mixed') ~1,
     TRUE ~ 0
   ))
 ```
@@ -142,13 +150,26 @@ Gathered data and then took all the values where the occurence was Once or More 
 #Turns out since every observation is a contact with a police officer they are all 'other stops' and #there should be no NA's
 ```
 ```{r type-of-incident}
-missing <- c(3,9)
+missing <- c('Not at all', 'missing/ni/ou')
+#View(ppcs_1996$REASON_TRAFFIC_PARKING_VIOLATION)
 ppcs_1996 <- ppcs_1996 %>%
   mutate(type_of_incident = case_when(
     (REASON_TRAFFIC_PARKING_VIOLATION %in% missing ) ~2,
     (REASON_INVOLVED_IN_TRAFFIC_ACCIDENT %in% missing)~2,
     (REASON_WITNESS_TO_TRAFFIC_ACCIDENT %in% missing)~2,
-    TRUE ~ 3
+    (REASON_REPORT_A_CRIME %in% missing) ~ 3,
+    (REASON_ASK_FOR_ASSISTANCE %in% missing) ~3,
+    (REASON_PROBLEM_IN_THE_NEIGHBORHOOD %in% missing)~3,
+    (REASON_VICTIM_OF_A_CRIME %in% missing) ~ 3,
+    (REASON_WITNESS_TO_A_CRIME %in% missing) ~3,
+    (REASON_CRIME_THOUGHT_INVOLVED_IN %in% missing) ~ 3,
+    (REASON_WHAT_YOU_WERE_DOING_IN_THE_AREA %in% missing) ~3,
+    (REASON_HAD_WARRANT_FOR_YOUR_ARREST %in% missing) ~3,
+    (REASON_CASUAL_ENCOUNTERS %in% missing) ~ 3,
+    (REASON_COMMUNITY_MEETINGS %in% missing) ~3,
+    (REASON_SOME_OTHER_REASON %in% missing) ~3,
+    (REASON_NO_SPECIFIC_REASON %in% missing) ~3,
+    TRUE ~ NA_real_
   ))
 ```
 
@@ -223,7 +244,7 @@ ppcs_1996 <- ppcs_1996 %>%
 ##Cleaned Data Frame
 ```{r}
 ppcs_1996_cleaned <- ppcs_1996 %>%
-  select(civilian_race, civilian_age, civilian_gender, civilian_income, civilian_employed, population_size, time_of_encounter, off_black, off_white, off_other, type_of_incident, civilian_behavior, civilian_searched, civilian_arrested, civilian_guilty_of_illegal)
+  select(civilian_race, civilian_age, civilian_gender, civilian_income, civilian_employed, population_size, time_of_encounter, off_black, off_white, off_other, off_split, type_of_incident, civilian_behavior, civilian_searched, civilian_arrested, civilian_guilty_of_illegal, civilian_injured, excess_force)
 
 ```
 #Add year column
