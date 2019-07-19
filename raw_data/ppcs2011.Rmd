@@ -243,6 +243,7 @@ ppcs_2011 <- ppcs_2011 %>%
          time_of_encounter,
          off_black,
          off_white,
+         off_hispanic,
          off_other,
          type_of_incident,
          civilian_behavior,
