@@ -122,7 +122,14 @@ ppcs_2008_revised <- ppcs_2008_revised %>%
 #multiple officers (V24B) 
 ppcs_2008_revised <- ppcs_2008_revised %>%
   mutate(off_other = case_when(
-    (V24B == 3 | V24B == 6 | V24B == 7 | V24A == 3 ) ~ 1,
+    (V24B == 3 | V24B == 6 | V24A == 3 ) ~ 1,
+    TRUE ~ 0
+  ))
+
+#officer split
+ppcs_2008_revised <- ppcs_2008_revised %>%
+  mutate(off_split = case_when(
+    (V24B == 7)~ 1,
     TRUE ~ 0
   ))
 #-------------------------------------------------------------------------------------
@@ -131,8 +138,8 @@ ppcs_2008_revised <- ppcs_2008_revised %>%
 ppcs_2008_revised <- ppcs_2008_revised %>%
   mutate(type_of_incident = case_when(
     (REASON %in% 2:3) ~ 2,
-    #(REASON %in% c(1, 4:7)) ~ 3,
-    TRUE ~ 3
+    (REASON %in% c(1, 4:7)) ~ 3,
+    TRUE ~ NA_real_
 ))
 
 #------------------------------------------------------------------------------------
@@ -172,7 +179,7 @@ ppcs_2008_revised <- ppcs_2008_revised %>%
 #Cleaned! Correct columns selected!
 # Add year column 
 ppcs_2008_cleaned <- ppcs_2008_revised %>%
-  select(civilian_race, civilian_age, civilian_gender, civilian_income, civilian_employed, population_size, time_of_encounter, off_black, off_white, off_other, type_of_incident, civilian_behavior, civilian_searched, civilian_arrested, civilian_guilty_of_illegal) %>%
+  select(civilian_race, civilian_age, civilian_gender, civilian_income, civilian_employed, population_size, time_of_encounter, off_black, off_white, off_other, off_split, type_of_incident, civilian_behavior, civilian_searched, civilian_arrested, civilian_guilty_of_illegal, civilian_injured, excess_force) %>%
   mutate(year = 2008)
 
 save(ppcs_2008_cleaned, file = "ppcs_2008.RData")

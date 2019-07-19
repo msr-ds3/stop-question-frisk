@@ -6,7 +6,7 @@ library(dplyr)
 ppcs_1999 <- read_ascii_setup('03151-0001-Data.txt','03151-0001-Setup.sas')
 ppcs_1999 <- ppcs_1999[, !duplicated(colnames(ppcs_1999))]
 
-ppcs_1999 %>%
+ppcs_1999 <- ppcs_1999 %>%
   filter(ANY_POLICE_CONTACT_IN_LAST_12_MONTHS == 'Yes' & FACE_TO_FACE_CONTACT == 'Yes')
 #add row number
 ppcs_1999 <- ppcs_1999 %>%
@@ -65,8 +65,8 @@ ppcs_1999 <- ppcs_1999 %>%
 #officer_race
 black <- c('All black', 'Mostly black', 'Black')
 white <- c('All white', 'Mostly white', 'White')
-other <- c('Some other race', 'All of another race', 'Equally Mixed', 'Mostly another race', 'Other', 'Mix of races')
-
+other <- c('Some other race', 'All of another race','Mostly another race', 'Other')
+split <- c('Equally Mixed','Mix of races')
 
 columns <- cbind(ppcs_1999$OFFICERS_RACES_VEHICLE_STOP, ppcs_1999$OFFICER_RACE_VEHICLE_STOP, ppcs_1999$RACE_OF_OFFICERS_USE_OR_THREATEN_FORCE, ppcs_1999$RACE_OF_OFFICER_USE_OR_THREATEN_FORCE, ppcs_1999$RACE_OF_OFFICERS_VEHICLE_STOP, ppcs_1999$RACE_OF_OFFICERS_OTHER_CONTACT)
 ppcs_1999 <- ppcs_1999 %>%
@@ -77,6 +77,9 @@ ppcs_1999 <- ppcs_1999 %>%
 
 ppcs_1999 <- ppcs_1999 %>%
   mutate(off_other = apply(columns, 1, function(x){max(x %in% other)}))
+
+ppcs_1999 <- ppcs_1999 %>%
+  mutate(off_split = apply(columns, 1, function(x){max(x %in% split)}))
 #type_of_incident
 traffic_stops <- c('Roadside check drunk driver', 'Seat belt', 'Some other traffic offense', 'Vehicle defect', 'Suspected/charged with drinking & driving', 'Speeding')
 ppcs_1999 <- ppcs_1999 %>%
@@ -130,10 +133,10 @@ ppcs_1999 <- ppcs_1999 %>%
   ))
 
 ppcs_1999_cleaned <- ppcs_1999 %>%
-  select(civilian_race, civilian_age, civilian_gender, civilian_income, civilian_employed, population_size, time_of_encounter, off_black, off_white, off_other, type_of_incident, civilian_behavior, civilian_searched, civilian_arrested, civilian_guilty_of_illegal)
+  select(civilian_race, civilian_age, civilian_gender, civilian_income, civilian_employed, population_size, time_of_encounter, off_black, off_white, off_other, off_split, type_of_incident, civilian_behavior, civilian_searched, civilian_arrested, civilian_guilty_of_illegal, civilian_injured, excess_force)
 View(head(ppcs_1999_cleaned))
 
 ppcs_1999_cleaned <- ppcs_1999_cleaned %>%
-  mutate(year = 1999)
+  mutate(year = 1999) %>% view
 
 save(ppcs_1999_cleaned, file = 'ppcs_1999.RData')
