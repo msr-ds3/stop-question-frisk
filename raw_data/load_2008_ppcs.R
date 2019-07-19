@@ -179,7 +179,7 @@ ppcs_2008_revised <- ppcs_2008_revised %>%
 #Cleaned! Correct columns selected!
 # Add year column 
 ppcs_2008_cleaned <- ppcs_2008_revised %>%
-  select(civilian_race, civilian_age, civilian_gender, civilian_income, civilian_employed, population_size, time_of_encounter, off_black, off_white, off_other, type_of_incident, civilian_behavior, civilian_searched, civilian_arrested, civilian_guilty_of_illegal) %>%
+  select(civilian_race, civilian_age, civilian_gender, civilian_income, civilian_employed, population_size, time_of_encounter, off_black, off_white, off_other, off_split, type_of_incident, civilian_behavior, civilian_searched, civilian_arrested, civilian_guilty_of_illegal, civilian_injured, excess_force) %>%
   mutate(year = 2008)
 
 save(ppcs_2008_cleaned, file = "ppcs_2008.RData")
