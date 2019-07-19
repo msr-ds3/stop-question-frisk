@@ -22,6 +22,7 @@ library(foreign)
 ppcs_1996 <- read_ascii_setup('06999-0001-Data.txt','06999-0001-Setup.sas')
 ppcs_1996 <- ppcs_1996 %>%
   filter(LAST_12_MONTHS_CONTACT_W_POLICE_OFFICER == 'Yes' & CONTACTS_W_POLICE_OFFICER_IN_PERSON == 'Yes')
+colnames(ppcs_1996)
 ```
 
 #Civilian Race
@@ -198,7 +199,7 @@ ppcs_1996 <- ppcs_1996 %>%
   mutate(civilian_arrested = case_when(
     (REASON_HAD_WARRANT_FOR_YOUR_ARREST == 'Yes' | HANDCUFF_HAD_WARRANT_FOR_YOUR_ARREST == 'Yes') ~ 1,
     TRUE ~ 0
-  ))
+  )) 
 ```
 Civilian guilty of illegal dugs, alcohol, or weapon
 ```{r}
@@ -207,6 +208,16 @@ ppcs_1996 <- ppcs_1996 %>%
     (OTHER_POSSESSION_OF_DRUGS == 'Yes' | OTHER_POSSESSION_OF_FIREARM_WEAPON == 'Yes') ~ 1,
     TRUE ~ 0
   ))
+```
+##Civilian Injured
+```{r}
+ppcs_1996 <- ppcs_1996 %>%
+  mutate(civilian_injured = ifelse(WERE_YOU_INJURED_AS_A_RESULT_OF_INCIDENT == 'Yes', 1, 0))
+```
+##Excessive force
+```{r}
+ppcs_1996 <- ppcs_1996 %>%
+  mutate(excess_force = ifelse(TAKE_ANY_FORMAL_OR_INFORMAL_ACTIONS == 'Yes', 1, 0))
 ```
 
 ##Cleaned Data Frame
