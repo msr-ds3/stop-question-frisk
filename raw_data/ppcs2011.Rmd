@@ -13,7 +13,6 @@ ppcs_2011 <- da34276.0001
 ```{r}
 #filter out the face to face contacts 
 ppcs_2011 <- ppcs_2011 %>% filter(!is.na(V31)) # better screening condition?
-#ppcs_2011 <- ppcs_2011 %>% filter(V336 == "(1) Yes") 
 #nrow(ppcs_2011)
 
 ```
@@ -102,15 +101,35 @@ ppcs_2011 <- ppcs_2011 %>%
 ```{r}
 #OFFICER RACE 
 ppcs_2011 <- ppcs_2011 %>%
-  mutate(off_black = case_when(V76 == '(1) Black or African American' ~ 1, TRUE ~ 0))%>%
-  mutate(off_white = case_when(V74 == '(1) White' ~ 1, TRUE ~ 0)) %>%
-  mutate(off_hispanic = case_when(V74 == '(1) Yes' ~ 1, 
-                                  V74 == '(2) No' ~ 0, TRUE ~ 0)) %>%
+  mutate(off_black = case_when(((V69 == '(1) Black or African American') | 
+                                  (V76 == '(1) Black or African American') | 
+                                  (V192 == '(1) Black or African American') |
+                                  (V199 == '(1) Black or African American')) ~ 1, 
+                                   TRUE ~ 0)) %>%
+  mutate(off_white = case_when(((V68 == '(1) White') | 
+                                  (V75 == '(1) White') | 
+                                  (V191 == '(1) White') | 
+                                  (V198 == '(1) White'))~ 1, 
+                                   TRUE ~ 0)) %>%
+  mutate(off_hispanic = case_when(((V67 == '(1) Yes') | 
+                                     (V74 == '(1) Yes') |
+                                    (V190 == '(1) Yes') | 
+                                     (V197 == '(1) Yes')) ~ 1,  
+                                    TRUE ~ 0)) %>%
   mutate(off_other = case_when(
-    (V77 == '(1) American Indian or Alaska Native' |  
-    V78 == '(1) Asian' |
-    V79 == 'Native Hawaiian or other Pacific Islander' |
-    V80 == "(1) Don't know") ~ 0, TRUE ~ 0)) 
+    V70 == '(1) American Indian or Alaska Native' | 
+      V77 == '(1) American Indian or Alaska Native' |  
+      V71 == '(1) Asian'|
+    V78 == '(1) Asian' | 
+      V72 == '(1) Native Hawaiian or other Pacific Islander' |
+    V79 == '(1) Native Hawaiian or other Pacific Islander' | 
+      V193 == '(1) American Indian or Alaska Native' | 
+      V200 == '(1) American Indian or Alaska Native' | 
+      V194 == '(1) Asian'| 
+      V201 == '(1) Asian'| 
+      V195 == '(1) Native Hawaiian or other Pacific Islander' | 
+      V202 == '(1) Native Hawaiian or other Pacific Islander' |
+       TRUE ~ 0))
 ```
 
 
@@ -118,22 +137,13 @@ ppcs_2011 <- ppcs_2011 %>%
 #CIVILIAN BEHAVIOR
 
 ppcs_2011 <- ppcs_2011 %>%
-  mutate(civilian_behavior = case_when((V399 == '(1) Yes') ~ 1,
-                                       #(V399 == '(2) No') ~ 0,
-                                       (V401 == ('(1) Yes')| V166 == ('(1) Yes')) ~ 1,
-                                       #(V401 == ('(2) No')| V166 == ('(2) No')) ~ 0,
-                                       V168 == '(1) Yes' ~ 1,
-                                       #V168 == '(2) No' ~ 0,
-                                       (V405 == ('(1) Yes')| V170 == ('(1) Yes')) ~ 1,
-                                       #(V405 == ('(2) No')| V170 == ('(2) No')) ~ 0,
-                                       V172 == '(1) Yes' ~ 1,
-                                       #V172 == '(2) No' ~ 0,
-                                       V174 == '(1) Yes' ~ 1,
-                                      # V174 == '(2) No' ~ 0,
-                                       (V398 == ('(1) Yes')| V176 == ('(1) Yes')) ~ 1,
-                                       #(V398 == ('(2) No')| V176 == ('(2) No')) ~ 0,
-                                       (V407 == ('(1) Yes')| V178 == ('(1) Yes')) ~ 1,
-                                       #(V407 == ('(2) No')| V178 == ('(2) No')) ~ 0,
+  mutate(civilian_behavior = case_when((V164 == '(1) Yes') | (V306 == '(1) Yes')~ 1,
+                                       (V166 == '(1) Yes')| (V308 == '(1) Yes') ~ 1,
+                                       (V170 == '(1) Yes')| (V312 == '(1) Yes') ~ 1,
+                                       (V172 == '(1) Yes')| (V314 == '(1) Yes') ~ 1,
+                                       (V174 == '(1) Yes') | (V316 == '(1) Yes') ~ 1,
+                                       (V176 == '(1) Yes') | (V318 == '(1) Yes') ~ 1,
+                                       (V178 == '(1) Yes')| (V320 == '(1) Yes') ~ 1,
                                        TRUE ~ 0)) 
 ```
 
@@ -177,8 +187,40 @@ ppcs_2011 <- ppcs_2011 %>%
    mutate(type_of_incident = case_when(
                                        (!is.na(V34)) ~ 1,
                                        (!is.na(V189)) ~ 2,
-                                       (TRUE) ~ 3
-                                       ))
+                                       (V39 == "Yes") ~ 3,
+                                       (V43 == "Yes") ~ 3,
+                                       (V45 == "Yes") ~ 3,
+                                       (V47 == "Yes") ~ 3,
+                                       (V7 == "Yes") ~ 3,
+                                       (TRUE) ~ 3))
+```
+
+
+```{r}
+#OFFICER SPLIT
+ppcs_2011 <- ppcs_2011 %>%
+  mutate(off_split = NA)
+
+```
+
+
+```{r}
+#FORCE USE 
+ppcs_2011 <- ppcs_2011 %>% 
+  mutate(force = case_when(
+    ((V148 == '(1) Yes')| 
+    (V289 == '(1) Yes') | 
+    (V152 == '(1) Yes') | 
+    (V293 == '(1) Yes') | 
+    (V158 == '(1) Yes') |
+    (V299 == '(1) Yes') |
+    (V150 == '(1) Yes') |
+    (V291 == '(1) Yes') |
+    (V154 == '(1) Yes') |
+    (V156 == '(1) Yes') |
+    (V295 == '(1) Yes') |
+    (V297 == '(1) Yes')) ~ 1,
+    TRUE ~ 0))
 ```
 
 
@@ -207,6 +249,10 @@ ppcs_2011 <- ppcs_2011 %>%
          civilian_searched,
          civilian_arrested,
          civilian_guilty_of_illegal,
+         civilian_injured,
+         excess_force,
+         force,
+         off_split,
          year
          )
 
