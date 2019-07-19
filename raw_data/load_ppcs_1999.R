@@ -12,6 +12,7 @@ ppcs_1999 <- ppcs_1999 %>%
 ppcs_1999 <- ppcs_1999 %>%
   mutate(row = row_number())
 
+dfc <- data.frame(colnames(ppcs_1999)) %>% view
 #Civilian Race
 ppcs_1999 <- ppcs_1999 %>%
   mutate(civilian_race = case_when(
@@ -132,9 +133,25 @@ ppcs_1999 <- ppcs_1999 %>%
   TRUE ~ NA_real_
   ))
 
+ppcs_1999 <- ppcs_1999 %>%
+  mutate(force = case_when(
+    (FORCE_USED_IN_TRAFFIC_STOP_OR_OTHER_CONT == 'Yes') ~ 1,
+    (FORCE_USED_AND_RESPONDENT_HANDCUFFED == 'Yes') ~1,
+    (PUSHED_OR_GRABBED_WITHOUT_PAIN_VEHICLE == 'Pushed or grabbed without pain') ~1,
+    (PUSHED_OR_GRABBED_WITH_PAIN_VEHICLE_ST == 'Pushed or grabbed with pain')~1,
+    (PUSHED_OR_GRABBED_WITHOUT_PAIN_OTHER_CON == 'Pushed or grabbed without pain')~1,
+    (PUSHED_OR_GRABBED_WITH_PAIN_OTHER_CONTAC == 'Pushed or grabbed with pain')~1,
+    (SPRAYED_WITH_CHEMICAL_PEPPER_SPRAY_VEH ==  'Sprayed with chemical/pepper spray' )~1,
+    (SPRAYED_WITH_CHEMICAL_PEPPER_SPRAY_OTHER == ' Sprayed with chemical/pepper spray')~1,
+    (KICKED_OR_HIT_VEHICLE_STOP == 'Kicked or hit')~1,
+    (KICKED_OR_HIT_OTHER_CONTACT == 'Kicked or hit')~1,
+    (POINTED_GUN_VEHICLE_STOP == 'Pointed gun')~1,
+    (POINTED_GUN_OTHER_CONTACT == 'Pointed gun')~1,
+    TRUE ~ 0
+  ))
+
 ppcs_1999_cleaned <- ppcs_1999 %>%
-  select(civilian_race, civilian_age, civilian_gender, civilian_income, civilian_employed, population_size, time_of_encounter, off_black, off_white, off_other, off_split, type_of_incident, civilian_behavior, civilian_searched, civilian_arrested, civilian_guilty_of_illegal, civilian_injured, excess_force)
-View(head(ppcs_1999_cleaned))
+  select(civilian_race, civilian_age, civilian_gender, civilian_income, civilian_employed, population_size, time_of_encounter, off_black, off_white, off_other, off_split, type_of_incident, civilian_behavior, civilian_searched, civilian_arrested, civilian_guilty_of_illegal, civilian_injured, excess_force, force)
 
 ppcs_1999_cleaned <- ppcs_1999_cleaned %>%
   mutate(year = 1999) %>% view
