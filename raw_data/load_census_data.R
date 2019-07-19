@@ -132,7 +132,7 @@ sqf_cuffs_black <- sf_data1 %>%
   filter(race == "B") %>%
   select(addrpct, props)
 
-joint_sqf_wall <- geo_join(police_precincts, sqf_cuffs_black, "Precinct", "addrpct")
+joint_sqf_cuffs <- geo_join(police_precincts, sqf_cuffs_black, "Precinct", "addrpct")
 
 # Proportion of stopped civilians that police pushed to wall that were black in each precinct
 sqf_wall_black <- sf_data1 %>%
@@ -322,7 +322,7 @@ leaflet(joint_sqf_cuffs) %>%
               popup = mypopup4) %>%
   addProviderTiles("CartoDB.Positron") %>%
   addLegend(pal = mypal4, 
-            values = joint_sqf_wall$props, 
+            values = joint_sqf_cuffs$props, 
             position = "topleft", 
             title = "Handcuffs Prop Black")
 
