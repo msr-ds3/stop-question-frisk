@@ -12,7 +12,6 @@ ppcs_1999 <- ppcs_1999 %>%
 ppcs_1999 <- ppcs_1999 %>%
   mutate(row = row_number())
 
-dfc <- data.frame(colnames(ppcs_1999)) %>% view
 #Civilian Race
 ppcs_1999 <- ppcs_1999 %>%
   mutate(civilian_race = case_when(
@@ -130,7 +129,7 @@ ppcs_1999 <- ppcs_1999 %>%
   mutate(excess_force = case_when(
   (EXCESSIVE_FORCE_USED_OR_THREATENED_VEH == 'Yes') ~ 1,
   (EXCESSIVE_FORCE_USED_OR_THREATENED_OTHER == 'Yes') ~1,
-  TRUE ~ NA_real_
+  TRUE ~ 0
   ))
 
 ppcs_1999 <- ppcs_1999 %>%
