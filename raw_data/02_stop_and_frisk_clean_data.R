@@ -179,7 +179,8 @@ sf_data3 <- sf_data3 %>%
        suspects_actions_drug_transactions_flag = cs_drgtr,
        suspects_actions_other_flag = cs_other,
        suspects_actions_identify_crime_pattern_flag = rf_knowl,
-       stop_location_premises_name = premname)
+       stop_location_premises_name = premname,
+       stop_location_precinct = addrpct)
 
 
 #recode the factor values of "susepect_sex" and "suspect_race_description" for the 17/18 data
