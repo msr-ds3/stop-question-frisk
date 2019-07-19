@@ -122,7 +122,14 @@ ppcs_2008_revised <- ppcs_2008_revised %>%
 #multiple officers (V24B) 
 ppcs_2008_revised <- ppcs_2008_revised %>%
   mutate(off_other = case_when(
-    (V24B == 3 | V24B == 6 | V24B == 7 | V24A == 3 ) ~ 1,
+    (V24B == 3 | V24B == 6 | V24A == 3 ) ~ 1,
+    TRUE ~ 0
+  ))
+
+#officer split
+ppcs_2008_revised <- ppcs_2008_revised %>%
+  mutate(off_split = case_when(
+    (V24B == 7)~ 1,
     TRUE ~ 0
   ))
 #-------------------------------------------------------------------------------------
@@ -131,8 +138,8 @@ ppcs_2008_revised <- ppcs_2008_revised %>%
 ppcs_2008_revised <- ppcs_2008_revised %>%
   mutate(type_of_incident = case_when(
     (REASON %in% 2:3) ~ 2,
-    #(REASON %in% c(1, 4:7)) ~ 3,
-    TRUE ~ 3
+    (REASON %in% c(1, 4:7)) ~ 3,
+    TRUE ~ NA_real_
 ))
 
 #------------------------------------------------------------------------------------
