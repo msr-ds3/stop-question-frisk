@@ -104,6 +104,7 @@ joint_sqf_prop <- geo_join(police_precincts, sqf_black_prop, "Precinct", "addrpc
 
 # Looking at different levels of force:
 
+# Proportion of stopped civilians that police used hands on that were black in each precinct
 sqf_hands_black <- sf_data1 %>%
   select(addrpct, race, pf_hands) %>%
   filter(pf_hands == "Y") %>%
@@ -118,6 +119,7 @@ sqf_hands_black <- sf_data1 %>%
 
 joint_sqf_hands <- geo_join(police_precincts, sqf_hands_black, "Precinct", "addrpct")
 
+# Proportion of stopped civilians that police handcuffed that were black in each precinct
 sqf_cuffs_black <- sf_data1 %>%
   select(addrpct, race, pf_hcuff) %>%
   filter(pf_hcuff == "Y") %>%
@@ -132,6 +134,7 @@ sqf_cuffs_black <- sf_data1 %>%
 
 joint_sqf_wall <- geo_join(police_precincts, sqf_cuffs_black, "Precinct", "addrpct")
 
+# Proportion of stopped civilians that police pushed to wall that were black in each precinct
 sqf_wall_black <- sf_data1 %>%
   select(addrpct, race, pf_wall) %>%
   filter(pf_wall == "Y") %>%
@@ -146,6 +149,7 @@ sqf_wall_black <- sf_data1 %>%
 
 joint_sqf_wall <- geo_join(police_precincts, sqf_wall_black, "Precinct", "addrpct")
 
+# Proportion of stopped civilians that police pushed to ground that were black in each precinct
 sqf_ground_black <- sf_data1 %>%
   select(addrpct, race, pf_grnd) %>%
   filter(pf_grnd == "Y") %>%
@@ -160,6 +164,7 @@ sqf_ground_black <- sf_data1 %>%
 
 joint_sqf_grnd <- geo_join(police_precincts, sqf_ground_black, "Precinct", "addrpct")
 
+# Proportion of stopped civilians that police drew weapon against that were black in each precinct
 sqf_dwep_black <- sf_data1 %>%
   select(addrpct, race, pf_drwep) %>%
   filter(pf_drwep == "Y") %>%
@@ -172,6 +177,7 @@ sqf_dwep_black <- sf_data1 %>%
   filter(race == "B") %>%
   select(addrpct, props)
 
+# Change NA's to 0
 precincts <- data.frame(sort(unique(sf_data1$addrpct)))
 colnames(precincts) <- c("addrpct")
 sqf_dwep <- left_join(precincts, sqf_dwep_black)
@@ -179,6 +185,7 @@ sqf_dwep$props[is.na(sqf_dwep$props)] <- 0
 
 joint_sqf_dwep <- geo_join(police_precincts, sqf_dwep, "Precinct", "addrpct")
 
+# Proportion of stopped civilians that police pointed weapon at that were black in each precinct
 sqf_pwep_black <- sf_data1 %>%
   select(addrpct, race, pf_ptwep) %>%
   filter(pf_ptwep == "Y") %>%
@@ -193,6 +200,7 @@ sqf_pwep_black <- sf_data1 %>%
 
 joint_sqf_pwep <- geo_join(police_precincts, sqf_pwep_black, "Precinct", "addrpct")
 
+# Proportion of stopped civilians that police used pepper spray against that were black in each precinct
 sqf_pepsp_black <- sf_data1 %>%
   select(addrpct, race, pf_pepsp) %>%
   filter(pf_pepsp == "Y") %>%
@@ -205,11 +213,13 @@ sqf_pepsp_black <- sf_data1 %>%
   filter(race == "B") %>%
   select(addrpct, props)
 
+# Change NA's to 0
 sqf_peps <- left_join(precincts, sqf_pepsp_black)
 sqf_peps$props[is.na(sqf_peps$props)] <- 0
 
 joint_sqf_pepsp <- geo_join(police_precincts, sqf_peps, "Precinct", "addrpct")
 
+# Proportion of stopped civilians that police used baton on that were black in each precinct
 sqf_baton_black <- sf_data1 %>%
   select(addrpct, race, pf_baton) %>%
   filter(pf_baton == "Y") %>%
@@ -232,7 +242,6 @@ joint_sqf_baton <- geo_join(police_precincts, sqf_baton, "Precinct", "addrpct")
 ########## CREATE MAPS OF RACE DISTRIBUTIONS ##########
 
 # Map the proportion of each precinct that is black
-
 mypopup <- paste0("Precinct: ", joint_prop$Precinct, "<br>", 
                    "Population Proportion Black: ", joint_prop$prop)
 
@@ -253,7 +262,7 @@ leaflet(joint_prop) %>%
             position = "topleft", 
             title = "Population Proportion Black")
 
-#Map the proportion of people stopped in each precinct that are black
+#Map the proportion of civilians stopped in each precinct that are black
 mypopup2 <- paste0("Precinct: ", joint_sqf_prop$Precinct, "<br>", 
                    "SQF Proportion Black: ", joint_sqf_prop$props)
 
@@ -275,7 +284,7 @@ leaflet(joint_sqf_prop) %>%
             title = "SQF Proportion Black")
 
 #DIFFEREENT LEVELS OF FORCE
-#Map the proportion of people with this level of force in each precinct that are black
+#Map the proportion of stopped civilians hands were used on in each precinct that are black
 mypopup3 <- paste0("Precinct: ", joint_sqf_hands$Precinct, "<br>", 
                    "Hands Proportion Black: ", joint_sqf_hands$props)
 
@@ -296,7 +305,7 @@ leaflet(joint_sqf_hands) %>%
             position = "topleft", 
             title = "Hands Prop Black")
 
-#Map the proportion of people push to a wall in each precinct that are black
+#Map the proportion of stopped civilians handcuffed in each precinct that are black
 mypopup4 <- paste0("Precinct: ", joint_sqf_cuffs$Precinct, "<br>", 
                    "Handcuffs Proportion Black: ", joint_sqf_cuffs$props)
 
@@ -317,7 +326,7 @@ leaflet(joint_sqf_cuffs) %>%
             position = "topleft", 
             title = "Handcuffs Prop Black")
 
-#Map the proportion of people push to a wall in each precinct that are black
+#Map the proportion of stopped civilians pushed to a wall in each precinct that are black
 mypopup5 <- paste0("Precinct: ", joint_sqf_wall$Precinct, "<br>", 
                    "Pushed to Wall Proportion Black: ", joint_sqf_wall$props)
 
@@ -338,7 +347,7 @@ leaflet(joint_sqf_wall) %>%
             position = "topleft", 
             title = "Pushed to Wall Prop Black")
 
-#Map the proportion of people push to a wall in each precinct that are black
+#Map the proportion of stopped civilians pushed to the ground in each precinct that are black
 mypopup6 <- paste0("Precinct: ", joint_sqf_grnd$Precinct, "<br>", 
                    "Pushed to Ground Proportion Black: ", joint_sqf_grnd$props)
 
@@ -359,7 +368,7 @@ leaflet(joint_sqf_grnd) %>%
             position = "topleft", 
             title = "Pushed to Ground Prop Black")
 
-#Map the proportion of people push to a wall in each precinct that are black
+#Map the proportion of stopped civilians police drew a weapon against in each precinct that are black
 mypopup7 <- paste0("Precinct: ", joint_sqf_dwep$Precinct, "<br>", 
                    "Drew Weapon Proportion Black: ", joint_sqf_dwep$props)
 
@@ -380,7 +389,7 @@ leaflet(joint_sqf_dwep) %>%
             position = "topleft", 
             title = "Drew Weapon Prop Black")
 
-#Map the proportion of people push to a wall in each precinct that are black
+#Map the proportion of stopped civilians police pointed a weapon towards in each precinct that are black
 mypopup8 <- paste0("Precinct: ", joint_sqf_pwep$Precinct, "<br>", 
                    "Pointed Weapon Proportion Black: ", joint_sqf_pwep$props)
 
@@ -401,7 +410,7 @@ leaflet(joint_sqf_pwep) %>%
             position = "topleft", 
             title = "Pointed Weapon Prop Black")
 
-#Map the proportion of people sprayed with pepper spray in each precinct that are black
+#Map the proportion of stopped civilians sprayed with pepper spray in each precinct that are black
 mypopup9 <- paste0("Precinct: ", joint_sqf_pepsp$Precinct, "<br>", 
                    "Pepper Sprayed Proportion Black: ", joint_sqf_pepsp$props)
 
@@ -422,7 +431,7 @@ leaflet(joint_sqf_pepsp) %>%
             position = "topleft", 
             title = "Pepper Sprayed Prop Black")
 
-#Map the proportion of people push to a wall in each precinct that are black
+#Map the proportion of stopped civilians police used a baton on in each precinct that are black
 mypopup10 <- paste0("Precinct: ", joint_sqf_baton$Precinct, "<br>", 
                    "Baton Proportion Black: ", joint_sqf_baton$props)
 
@@ -444,35 +453,35 @@ leaflet(joint_sqf_baton) %>%
             title = "Baton Prop Black")
 
 
-#Testing out ggmaps 
-police_precinct <- tidy(police_precincts, region = "Precinct")
-
-black_proportions <- black_proportions %>% mutate(precinct = as.character(precinct))
-
-jp <- police_precinct %>%
-  left_join(black_proportions, by=c("id"="precinct"))
-
-nyc_map <- get_map(location = c(lon = -74.00, lat = 40.71), maptype = "terrain", zoom = 11)
-
-mypal <- colorNumeric(
-  palette = "YlOrRd",
-  domain = jp$prop
-)
-
-jp
-colors <- c("red")
-jp %>% View()
-
-?colorFactor()
-
-install.packages("viridis")
-library(viridis)
-
-cp<- c("#ffffcc","#ffeda0", "#fed976","#feb24c","#fd8d3c", "#fc4e2a", "#e31a1c", "#b10026")
-
-
-ggmap(nyc_map) + 
-  geom_polygon(data=jp, aes(x=long, y=lat, group=group, fill = prop)) + 
-  scale_fill_gradientn(colors = cp)
+# #Testing out ggmaps 
+# police_precinct <- tidy(police_precincts, region = "Precinct")
+# 
+# black_proportions <- black_proportions %>% mutate(precinct = as.character(precinct))
+# 
+# jp <- police_precinct %>%
+#   left_join(black_proportions, by=c("id"="precinct"))
+# 
+# nyc_map <- get_map(location = c(lon = -74.00, lat = 40.71), maptype = "terrain", zoom = 11)
+# 
+# mypal11 <- colorNumeric(
+#   palette = "YlOrRd",
+#   domain = jp$prop
+# )
+# 
+# jp
+# colors <- c("red")
+# jp %>% View()
+# 
+# ?colorFactor()
+# 
+# install.packages("viridis")
+# library(viridis)
+# 
+# cp<- c("#ffffcc","#ffeda0", "#fed976","#feb24c","#fd8d3c", "#fc4e2a", "#e31a1c", "#b10026")
+# 
+# 
+# ggmap(nyc_map) + 
+#   geom_polygon(data=jp, aes(x=long, y=lat, group=group, fill = prop)) + 
+#   scale_fill_gradientn(colors = cp)
 
 
