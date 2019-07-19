@@ -19,7 +19,7 @@ library(foreign)
 
 #Load Data
 ```{r load-data}
-ppcs_1996 <- read_ascii_setup('06999-0001-Data.txt','06999-0001-Setup.sps')
+ppcs_1996 <- read_ascii_setup('06999-0001-Data.txt','06999-0001-Setup.sas')
 ppcs_1996 <- ppcs_1996 %>%
   filter(LAST_12_MONTHS_CONTACT_W_POLICE_OFFICER == 'Yes' & CONTACTS_W_POLICE_OFFICER_IN_PERSON == 'Yes')
 ```
@@ -58,10 +58,10 @@ ppcs_1996 <- ppcs_1996 %>%
 
 #Civilian income
 Not found
-Coded as 1 since 1 is for less than 20k and NA
+Coded as 1 since 1 is for less than 20k
 ```{r civilian-income}
 ppcs_1996 <- ppcs_1996 %>%
-  mutate(civilian_income = 1)
+  mutate(civilian_income = NA)
 
 ```
 
@@ -76,7 +76,7 @@ not found
 coded as 1 since it may be considered as no response
 ```{r pop-size}
 ppcs_1996 <- ppcs_1996 %>%
-  mutate(population_size = 1)
+  mutate(population_size = NA)
 ```
 #Time of Encounter
 ```{r time-of-encounter}
@@ -84,7 +84,7 @@ ppcs_1996 <- ppcs_1996 %>%
   mutate(time_of_encounter = case_when(
     (DAYTIME_OR_NIGHTTIME_WHEN_INCIDENT == "Daytime") ~ 3,
     (DAYTIME_OR_NIGHTTIME_WHEN_INCIDENT == "Nighttime") ~ 6
-)) 
+))
 ```
 #Officer race
 
@@ -141,8 +141,14 @@ Gathered data and then took all the values where the occurence was Once or More 
 #Turns out since every observation is a contact with a police officer they are all 'other stops' and #there should be no NA's
 ```
 ```{r type-of-incident}
+missing <- c(3,9)
 ppcs_1996 <- ppcs_1996 %>%
-  mutate(type_of_incident = 3)
+  mutate(type_of_incident = case_when(
+    (REASON_TRAFFIC_PARKING_VIOLATION %in% missing ) ~2,
+    (REASON_INVOLVED_IN_TRAFFIC_ACCIDENT %in% missing)~2,
+    (REASON_WITNESS_TO_TRAFFIC_ACCIDENT %in% missing)~2,
+    TRUE ~ 3
+  ))
 ```
 
 
@@ -208,7 +214,6 @@ ppcs_1996 <- ppcs_1996 %>%
 ppcs_1996_cleaned <- ppcs_1996 %>%
   select(civilian_race, civilian_age, civilian_gender, civilian_income, civilian_employed, population_size, time_of_encounter, off_black, off_white, off_other, type_of_incident, civilian_behavior, civilian_searched, civilian_arrested, civilian_guilty_of_illegal)
 
-View(ppcs_1996_cleaned)
 ```
 #Add year column
 ```{r}
