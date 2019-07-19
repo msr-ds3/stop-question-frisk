@@ -1,0 +1,19 @@
+---
+title: "7/18/19 Notes - Emeka"
+output: html_notebook
+---
+
+* reclassfied contact screening for the PPCS 2011 data and number of 
+observations went up from 3000 to 7000+ and the proportions of the merged
+datset improved significantly
+
+* fixed 2011 type of incident data (street stop, traffic stop were redefined)
+
+* added a new column for officer split race in 2002 and 2005 PPCS data 
+(need to do the same with 1996, 1999, 2008, and 2011)
+
+*** NEED TO FIX 2011 
+
+
+
+
