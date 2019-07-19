@@ -1,0 +1,606 @@
+---
+title: '20190718'
+author: "Adnan Hoq"
+date: "7/18/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#LOAD LIBRARIES
+
+```{r load-libraries}
+
+library(tidyverse)
+library(naniar)
+library(scales)
+```
+
+##LOAD IN-SAMPLE DATA
+```{r load-in-sample-data}
+panel_data <- load("../../raw_data/sqf_03_13.Rdata")
+
+
+panel_data <- panel_data %>%
+  mutate(wepnfnd = paste(contrabn,asltweap,pistol,riflshot,knifcuti,machgun,othrweap, sep = "")) %>%
+  mutate(wepnfnd = if_else(grepl("Y",wepnfnd), "Y", "N"))  %>%
+  mutate(pf_pp_spray_baton = paste(pf_pepsp, pf_baton,sep = "")) %>%
+  mutate(pf_pp_spray_baton = ifelse(grepl("Y",pf_pp_spray_baton), "Y", "N")) %>%
+  mutate(race = recode_factor(race,"P" = "B","Q" = "H")) %>%
+  filter(race == "B" | race == "H" | race == "W") %>%
+  mutate(timestop = as.numeric(timestop)) %>%
+  mutate(daytime = ifelse(600<=timestop & timestop<=1700,"Y","N")) %>%
+  mutate(verbal_id = if_else(grepl("V", typeofid), "Y", "N"),
+         photo_id = if_else(grepl("P", typeofid), "Y", "N"),
+         refused_id = if_else(grepl("R", typeofid), "Y", "N"),
+         other_id = if_else(grepl("O", typeofid), "Y", "N"))
+
+```
+
+##IN-SAMPLE PANEL B
+```{r in-sample-panel-b}
+#Panel B
+
+new_panelB_data_1 <- panel_data %>%
+  select(race, inout,daytime,ac_incid, ac_time, offunif, othpers,verbal_id,photo_id,
+         refused_id, other_id) %>%
+  gather(variable,value,inout,daytime,ac_incid, ac_time, offunif, othpers,verbal_id,photo_id,
+         refused_id, other_id) %>%
+  group_by(race,variable) %>%
+  na.omit() %>%
+  summarise(count_y = n(), total = nrow(panel_data))%>%
+  mutate(year = "in_sample")
+
+new_panelB_data_2 <- panel_data %>%
+  select(race,inout,daytime,ac_incid, ac_time, offunif, othpers,verbal_id,photo_id,
+         refused_id, other_id) %>%
+  gather(variable,value, inout,daytime,ac_incid, ac_time, offunif, othpers,verbal_id,photo_id,
+         refused_id, other_id) %>%
+  filter(value == "Y" | value == "I") %>%
+  group_by(race,variable,value) %>%
+  summarise(count_x = n(), total = nrow(panel_data))%>%
+  mutate(year = "in_sample")
+
+
+
+new_panelB_data_2$count_y <- new_panelB_data_1$count_y
+
+new_panelB_data_2 <- new_panelB_data_2 %>%
+  mutate(prop = count_x/count_y)
+
+new_panelB_data_2 %>%
+  ggplot(aes(x= fct_reorder(variable, prop),y=prop,color=race, group = race)) +
+  geom_point()+
+  geom_line()+
+  labs(group="Race",y="Proportion",x="Encounter Statistics",
+       title=paste("Proportions of Encounter Characteristics by Race"))+
+  theme_bw() +
+  theme(axis.title.x = element_text(face = "bold", color = "#0d693e"),
+        axis.title.y = element_text(face = "bold", color = "#0d693e"),
+        axis.text.x = element_text(face = "bold"),
+        axis.text.y = element_text(face = "bold"),
+        plot.title = element_text(hjust = 0.5,size=20, color = "#374687",face = "bold"),
+        legend.title = element_text(color = "#0d693e", face = "bold" ))+
+  scale_color_manual(values=c("#893eb5", "#E69F00", "#56B4E9"), 
+                     name="Race",
+                     breaks=c( "B", "H","W"),
+                     labels=c( "Black", "Hispanic","White")) +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  scale_x_discrete(labels = c("inout" = "Indoors", "daytime" = "Daytime", "ac_incid" = "High-crime \n Area",
+                              "ac_time" = "High-crime Time", "offunif" = "Police in Uniform",
+                              "othpers" = "Stopped With \n Others", "photo_id" = "Photo ID",
+                              "verbal_id" = "Verbal ID", "refused_id" = "Refused ID",
+                              "other_id" = "Other ID"))
+
+```
+
+
+
+##IN-SAMPLE PANEL C
+```{r in-sample-panel-c}
+#panel C
+new_panelC_data_1 <- panel_data %>%
+  select(race, cs_bulge, cs_cloth, cs_casng, cs_lkout, cs_descr, cs_drgtr, cs_furtv,cs_vcrim,
+         cs_objcs, cs_other,wepnfnd) %>%
+  gather(variable,value,cs_bulge, cs_cloth, cs_casng, cs_lkout, cs_descr, cs_drgtr, cs_furtv,cs_vcrim,
+         cs_objcs, cs_other,wepnfnd) %>%
+  group_by(race,variable) %>%
+  summarise(count_y = n(), total = nrow(panel_data))
+
+new_panelC_data_2 <- panel_data %>%
+  select(race, cs_bulge, cs_cloth, cs_casng, cs_lkout, cs_descr, cs_drgtr, cs_furtv,cs_vcrim,
+         cs_objcs, cs_other,wepnfnd) %>%
+  gather(variable,value,cs_bulge, cs_cloth, cs_casng, cs_lkout, cs_descr, cs_drgtr, cs_furtv,cs_vcrim,
+         cs_objcs, cs_other,wepnfnd) %>%
+  filter(value == "Y") %>%
+  group_by(race,variable,value) %>%
+  summarise(count_x = n(), total = nrow(panel_data))
+  
+
+new_panelC_data_2$count_y <- new_panelC_data_1$count_y
+
+new_panelC_data_2 <- new_panelC_data_2 %>%
+  mutate(prop = count_x/count_y)
+
+new_panelC_data_2 %>%
+  ggplot(aes(x= fct_reorder(variable, prop),y=prop,color=race, group = race)) +
+  geom_point()+
+  geom_line()+
+  labs(group="Race",y="Proportion",x="Civilian Behavior",
+       title=paste("Proportions of Civilian Behavior by Race"))+
+  theme_bw() +
+  theme(axis.title.x = element_text(face = "bold", color = "#0d693e"),
+        axis.title.y = element_text(face = "bold", color = "#0d693e"),
+        axis.text.x = element_text(face = "bold"),
+        axis.text.y = element_text(face = "bold"),
+        plot.title = element_text(hjust = 0.5,size=20, color = "#374687",face = "bold"),
+        legend.title = element_text(color = "#0d693e", face = "bold" ))+
+  scale_color_manual(values=c("#893eb5", "#E69F00", "#56B4E9"), 
+                     name="Race",
+                     breaks=c( "B", "H","W"),
+                     labels=c( "Black", "Hispanic","White")) +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  scale_x_discrete(labels = c("cs_objcs"="Carrying \nSuspicious\n Objects", "cs_descr"="Fit \nRelevant\n Description",
+                              "cs_casng"="Preparing for\n Crime", "cs_lkout"="Lookout for\n Crime",
+                              "cs_cloth"="Dressed in \nCriminal Attire", "cs_drgtr"="Appearance of \nDrug \nTransanction",
+                              "cs_furtv"="Suspicious \nMovements","cs_vcrim"="Engaging in\n Violent \nCrime",
+                              "cs_bulge"="Concealing \nSuspicious\n Object", "cs_other"="Other \nSuspicious\n Behavior",
+                              "wepnfnd"="Contraband or\n Weapon Found"))
+
+
+```
+
+
+##IN-SAMPLE PANEL D
+```{r in-sample-panel-d}
+#Panel D
+new_panelD_data_1 <- panel_data %>%
+  select(race,frisked, searched, arstmade, sumissue) %>%
+  gather(variable,value, frisked, searched, arstmade, sumissue) %>%
+  group_by(race,variable) %>%
+  summarise(count_y = n(), total = nrow(panel_data))
+new_panelD_data_2 <- panel_data %>%
+  select(race,frisked, searched, arstmade, sumissue) %>%
+  gather(variable,value, frisked, searched, arstmade, sumissue) %>%
+  filter(value == "Y") %>%
+  group_by(race,variable,value) %>%
+  summarise(count_x = n(), total = nrow(panel_data))
+
+new_panelD_data_2$count_y <- new_panelD_data_1$count_y
+
+new_panelD_data_2 <- new_panelD_data_2 %>%
+  mutate(prop = count_x/count_y)
+
+new_panelD_data_2 %>%
+  ggplot(aes(x= fct_reorder(variable, prop),y=prop,color=race, group = race)) +
+  geom_point()+
+  geom_line()+
+  labs(group="Race",y="Proportion",x="Alternative Outcomes",
+       title=paste("Proportions of Alternative Outcomes by Race"))+
+  theme_bw() +
+  theme(axis.title.x = element_text(face = "bold", color = "#0d693e"),
+        axis.title.y = element_text(face = "bold", color = "#0d693e"),
+        axis.text.x = element_text(face = "bold"),
+        axis.text.y = element_text(face = "bold"),
+        plot.title = element_text(hjust = 0.5,size=20, color = "#374687",face = "bold"),
+        legend.title = element_text(color = "#0d693e", face = "bold" ))+
+  scale_color_manual(values=c("#893eb5", "#E69F00", "#56B4E9"), 
+                     name="Race",
+                     breaks=c( "B", "H","W"),
+                     labels=c( "Black", "Hispanic","White")) +
+  scale_y_continuous(labels = percent_format(accuracy = 1))+
+  scale_x_discrete(labels = c("frisked" = "Frisked", "searched" = "Searched", "arstmade" = "Arrested",
+                              "sumissue" = "Summoned"))
+```
+
+
+
+##IN-SAMPLE PANEL E
+```{r in-sample-panel-e}
+#Panel E
+new_panelE_data_1 <- panel_data %>%
+  select(race,pf_hands, pf_grnd, pf_wall, pf_drwep, pf_ptwep, pf_hcuff, pf_pp_spray_baton) %>%
+  gather(variable,value, pf_hands, pf_grnd, pf_wall, pf_drwep, pf_ptwep, pf_hcuff, pf_pp_spray_baton) %>%
+  group_by(race,variable) %>%
+  summarise(count_y = n(), total = nrow(panel_data))
+new_panelE_data_2 <- panel_data %>%
+  select(race,pf_hands, pf_grnd, pf_wall, pf_drwep, pf_ptwep, pf_hcuff, pf_pp_spray_baton) %>%
+  gather(variable,value, pf_hands, pf_grnd, pf_wall, pf_drwep, pf_ptwep, pf_hcuff, pf_pp_spray_baton) %>%
+  filter(value == "Y") %>%
+  group_by(race,variable,value) %>%
+  summarise(count_x = n(), total = nrow(panel_data))
+
+new_panelE_data_2$count_y <- new_panelE_data_1$count_y
+
+new_panelE_data_2 <- new_panelE_data_2 %>%
+  mutate(prop = count_x/count_y)
+
+new_panelE_data_2 %>%
+  ggplot(aes(x= fct_reorder(variable, prop),y=prop,color=race, group = race)) +
+  geom_point()+
+  geom_line()+
+  labs(group="Race",y="Proportion",x="Use of Force",
+       title=paste("Proportions of Use of Force by Race"))+
+  theme_bw() +
+  theme(axis.title.x = element_text(face = "bold", color = "#0d693e"),
+        axis.title.y = element_text(face = "bold", color = "#0d693e"),
+        axis.text.x = element_text(face = "bold"),
+        axis.text.y = element_text(face = "bold"),
+        plot.title = element_text(hjust = 0.5,size=20, color = "#374687",face = "bold"),
+        legend.title = element_text(color = "#0d693e", face = "bold" ))+
+  scale_color_manual(values=c("#893eb5", "#E69F00", "#56B4E9"), 
+                     name="Race",
+                     breaks=c( "B", "H","W"),
+                     labels=c( "Black", "Hispanic","White")) +
+  scale_y_continuous(labels = percent_format(accuracy = 1))+
+  scale_x_discrete(labels = c("pf_pp_spray_baton"="Pepper Spray/Baton", "pf_ptwep"="Point Weapon",
+                                "pf_grnd"="Push to Ground", "pf_drwep"="Draw Weapon", "pf_hcuff"="Handcuffs",
+                                "pf_wall"="Push to Wall","pf_hands"="Hands"))
+
+```
+
+
+
+##LOAD OUT OF SAMPLE DATA
+```{r load-out-of-sample-data}
+f14 <- read.csv("../../raw_data/sqf_2014.csv") 
+
+df15 <- read.csv("../../raw_data/sqf_2015.csv") 
+
+df16 <- read.csv("../../raw_data/sqf_2016.csv") 
+
+
+colnames(df14) <- tolower(colnames(df14))
+colnames(df15) <- tolower(colnames(df15))
+colnames(df16) <- tolower(colnames(df16))
+
+
+
+#change the "ï..year" column name to "year"
+df16 <- df16 %>%
+  rename("year" = "ï..year")
+
+
+#bind the rows of all the data from 2014 - 2016 
+data_14_16 <- rbind(df14, df15, df16) %>%
+  mutate(wepfound = NA)
+
+
+os_panel_data <- data_14_16
+
+
+
+
+os_panel_data <- os_panel_data %>%
+  mutate(wepnfnd = paste(contrabn,asltweap,pistol,riflshot,knifcuti,machgun,othrweap, sep = "")) %>%
+  mutate(wepnfnd = if_else(grepl("Y",wepnfnd), "Y", "N"))  %>%
+  mutate(pf_pp_spray_baton = paste(pf_pepsp, pf_baton,sep = "")) %>%
+  mutate(pf_pp_spray_baton = ifelse(grepl("Y",pf_pp_spray_baton), "Y", "N")) %>%
+  mutate(race = recode_factor(race,"P" = "B","Q" = "H")) %>%
+  filter(race == "B" | race == "H" | race == "W") %>%
+  mutate(timestop = as.numeric(timestop)) %>%
+  mutate(daytime = ifelse(600<=timestop & timestop<=1700,"Y","N")) %>%
+  mutate(verbal_id = if_else(grepl("V", typeofid), "Y", "N"),
+         photo_id = if_else(grepl("P", typeofid), "Y", "N"),
+         refused_id = if_else(grepl("R", typeofid), "Y", "N"),
+         other_id = if_else(grepl("O", typeofid), "Y", "N"))
+
+
+```
+
+##INOUT-OF-SAMPLE PANEL B
+```{r out-of-sample-panel-b}
+#Panel B
+
+new_os_panelB_data_1 <- os_panel_data %>%
+  select(race, inout,daytime,ac_incid, ac_time, offunif, othpers,verbal_id,photo_id,
+         refused_id, other_id) %>%
+  gather(variable,value,inout,daytime,ac_incid, ac_time, offunif, othpers,verbal_id,photo_id,
+         refused_id, other_id) %>%
+  group_by(race,variable) %>%
+  na.omit() %>%
+  summarise(count_y = n(), total = nrow(os_panel_data))%>%
+  mutate(year = "in_sample")
+
+new_os_panelB_data_2 <- os_panel_data %>%
+  select(race,inout,daytime,ac_incid, ac_time, offunif, othpers,verbal_id,photo_id,
+         refused_id, other_id) %>%
+  gather(variable,value, inout,daytime,ac_incid, ac_time, offunif, othpers,verbal_id,photo_id,
+         refused_id, other_id) %>%
+  filter(value == "Y" | value == "I") %>%
+  group_by(race,variable,value) %>%
+  summarise(count_x = n(), total = nrow(os_panel_data))%>%
+  mutate(year = "in_sample")
+
+
+
+new_os_panelB_data_2$count_y <- new_os_panelB_data_1$count_y
+
+new_os_panelB_data_2 <- new_os_panelB_data_2 %>%
+  mutate(prop = count_x/count_y)
+
+new_os_panelB_data_2 %>%
+  ggplot(aes(x= fct_reorder(variable, prop),y=prop,color=race, group = race)) +
+  geom_point()+
+  geom_line()+
+  labs(group="Race",y="Proportion",x="Encounter Statistics",
+       title=paste("Proportions of Encounter Characteristics by Race"))+
+  theme_bw() +
+  theme(axis.title.x = element_text(face = "bold", color = "#0d693e"),
+        axis.title.y = element_text(face = "bold", color = "#0d693e"),
+        axis.text.x = element_text(face = "bold"),
+        axis.text.y = element_text(face = "bold"),
+        plot.title = element_text(hjust = 0.5,size=20, color = "#374687",face = "bold"),
+        legend.title = element_text(color = "#0d693e", face = "bold" ))+
+  scale_color_manual(values=c("#893eb5", "#E69F00", "#56B4E9"), 
+                     name="Race",
+                     breaks=c( "B", "H","W"),
+                     labels=c( "Black", "Hispanic","White")) +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  scale_x_discrete(labels = c("inout" = "Indoors", "daytime" = "Daytime", "ac_incid" = "High-crime \n Area",
+                              "ac_time" = "High-crime Time", "offunif" = "Police in Uniform",
+                              "othpers" = "Stopped With \n Others", "photo_id" = "Photo ID",
+                              "verbal_id" = "Verbal ID", "refused_id" = "Refused ID",
+                              "other_id" = "Other ID"))
+```
+
+##INOUT-OF-SAMPLE PANEL C
+```{r out-of-sample-panel-c}
+#panel C
+new_os_panelC_data_1 <- os_panel_data %>%
+  select(race, cs_bulge, cs_cloth, cs_casng, cs_lkout, cs_descr, cs_drgtr, cs_furtv,cs_vcrim,
+         cs_objcs, cs_other,wepnfnd) %>%
+  gather(variable,value,cs_bulge, cs_cloth, cs_casng, cs_lkout, cs_descr, cs_drgtr, cs_furtv,cs_vcrim,
+         cs_objcs, cs_other,wepnfnd) %>%
+  group_by(race,variable) %>%
+  summarise(count_y = n(), total = nrow(os_panel_data))
+
+new_os_panelC_data_2 <- os_panel_data %>%
+  select(race, cs_bulge, cs_cloth, cs_casng, cs_lkout, cs_descr, cs_drgtr, cs_furtv,cs_vcrim,
+         cs_objcs, cs_other,wepnfnd) %>%
+  gather(variable,value,cs_bulge, cs_cloth, cs_casng, cs_lkout, cs_descr, cs_drgtr, cs_furtv,cs_vcrim,
+         cs_objcs, cs_other,wepnfnd) %>%
+  filter(value == "Y") %>%
+  group_by(race,variable,value) %>%
+  summarise(count_x = n(), total = nrow(os_panel_data))
+
+
+new_os_panelC_data_2$count_y <- new_os_panelC_data_1$count_y
+
+new_os_panelC_data_2 <- new_os_panelC_data_2 %>%
+  mutate(prop = count_x/count_y)
+
+new_os_panelC_data_2 %>%
+  ggplot(aes(x= fct_reorder(variable, prop),y=prop,color=race, group = race)) +
+  geom_point()+
+  geom_line()+
+  labs(group="Race",y="Proportion",x="Civilian Behavior",
+       title=paste("Proportions of Civilian Behavior by Race"))+
+  theme_bw() +
+  theme(axis.title.x = element_text(face = "bold", color = "#0d693e"),
+        axis.title.y = element_text(face = "bold", color = "#0d693e"),
+        axis.text.x = element_text(face = "bold"),
+        axis.text.y = element_text(face = "bold"),
+        plot.title = element_text(hjust = 0.5,size=20, color = "#374687",face = "bold"),
+        legend.title = element_text(color = "#0d693e", face = "bold" ))+
+  scale_color_manual(values=c("#893eb5", "#E69F00", "#56B4E9"), 
+                     name="Race",
+                     breaks=c( "B", "H","W"),
+                     labels=c( "Black", "Hispanic","White")) +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  scale_x_discrete(labels = c("cs_objcs"="Carrying \nSuspicious\n Objects", "cs_descr"="Fit \nRelevant\n Description",
+                              "cs_casng"="Preparing for\n Crime", "cs_lkout"="Lookout for\n Crime",
+                              "cs_cloth"="Dressed in \nCriminal Attire", "cs_drgtr"="Appearance of \nDrug \nTransanction",
+                              "cs_furtv"="Suspicious \nMovements","cs_vcrim"="Engaging in\n Violent \nCrime",
+                              "cs_bulge"="Concealing \nSuspicious\n Object", "cs_other"="Other \nSuspicious\n Behavior",
+                              "wepnfnd"="Contraband or\n Weapon Found"))
+
+
+```
+
+##INOUT-OF-SAMPLE PANEL D
+
+```{r out-of-sample-panel-d}
+#Panel D
+new_os_panelD_data_1 <- os_panel_data %>%
+  select(race,frisked, searched, arstmade, sumissue) %>%
+  gather(variable,value, frisked, searched, arstmade, sumissue) %>%
+  group_by(race,variable) %>%
+  summarise(count_y = n(), total = nrow(os_panel_data))
+new_os_panelD_data_2 <- os_panel_data %>%
+  select(race,frisked, searched, arstmade, sumissue) %>%
+  gather(variable,value, frisked, searched, arstmade, sumissue) %>%
+  filter(value == "Y") %>%
+  group_by(race,variable,value) %>%
+  summarise(count_x = n(), total = nrow(os_panel_data))
+
+new_os_panelD_data_2$count_y <- new_os_panelD_data_1$count_y
+
+new_os_panelD_data_2 <- new_os_panelD_data_2 %>%
+  mutate(prop = count_x/count_y)
+
+new_os_panelD_data_2 %>%
+  ggplot(aes(x= fct_reorder(variable, prop),y=prop,color=race, group = race)) +
+  geom_point()+
+  geom_line()+
+  labs(group="Race",y="Proportion",x="Alternative Outcomes",
+       title=paste("Proportions of Alternative Outcomes by Race"))+
+  theme_bw() +
+  theme(axis.title.x = element_text(face = "bold", color = "#0d693e"),
+        axis.title.y = element_text(face = "bold", color = "#0d693e"),
+        axis.text.x = element_text(face = "bold"),
+        axis.text.y = element_text(face = "bold"),
+        plot.title = element_text(hjust = 0.5,size=20, color = "#374687",face = "bold"),
+        legend.title = element_text(color = "#0d693e", face = "bold" ))+
+  scale_color_manual(values=c("#893eb5", "#E69F00", "#56B4E9"), 
+                     name="Race",
+                     breaks=c( "B", "H","W"),
+                     labels=c( "Black", "Hispanic","White")) +
+  scale_y_continuous(labels = percent_format(accuracy = 1))+
+  scale_x_discrete(labels = c("frisked" = "Frisked", "searched" = "Searched", "arstmade" = "Arrested",
+                              "sumissue" = "Summoned"))
+
+
+
+```
+
+##INOUT-OF-SAMPLE PANEL E
+
+```{r out-of-sample-panel-e}
+#Panel E
+
+new_os_panelE_data_1 <- os_panel_data %>%
+  select(race,pf_hands, pf_grnd, pf_wall, pf_drwep, pf_ptwep, pf_hcuff, pf_pp_spray_baton) %>%
+  gather(variable,value, pf_hands, pf_grnd, pf_wall, pf_drwep, pf_ptwep, pf_hcuff, pf_pp_spray_baton) %>%
+  group_by(race,variable) %>%
+  summarise(count_y = n(), total = nrow(os_panel_data))
+new_os_panelE_data_2 <- os_panel_data %>%
+  select(race,pf_hands, pf_grnd, pf_wall, pf_drwep, pf_ptwep, pf_hcuff, pf_pp_spray_baton) %>%
+  gather(variable,value, pf_hands, pf_grnd, pf_wall, pf_drwep, pf_ptwep, pf_hcuff, pf_pp_spray_baton) %>%
+  filter(value == "Y") %>%
+  group_by(race,variable,value) %>%
+  summarise(count_x = n(), total = nrow(os_panel_data))
+
+new_os_panelE_data_2$count_y <- new_os_panelE_data_1$count_y
+
+new_os_panelE_data_2 <- new_os_panelE_data_2 %>%
+  mutate(prop = count_x/count_y)
+
+new_os_panelE_data_2 %>%
+  ggplot(aes(x= fct_reorder(variable, prop),y=prop,color=race, group = race)) +
+  geom_point()+
+  geom_line()+
+  labs(group="Race",y="Proportion",x="Use of Force",
+       title=paste("Proportions of Use of Force by Race"))+
+  theme_bw() +
+  theme(axis.title.x = element_text(face = "bold", color = "#0d693e"),
+        axis.title.y = element_text(face = "bold", color = "#0d693e"),
+        axis.text.x = element_text(face = "bold"),
+        axis.text.y = element_text(face = "bold"),
+        plot.title = element_text(hjust = 0.5,size=20, color = "#374687",face = "bold"),
+        legend.title = element_text(color = "#0d693e", face = "bold" ))+
+  scale_color_manual(values=c("#893eb5", "#E69F00", "#56B4E9"), 
+                     name="Race",
+                     breaks=c( "B", "H","W"),
+                     labels=c( "Black", "Hispanic","White")) +
+  scale_y_continuous(labels = percent_format(accuracy = 1))+
+  scale_x_discrete(labels = c("pf_pp_spray_baton"="Pepper Spray/Baton", "pf_ptwep"="Point Weapon",
+                              "pf_grnd"="Push to Ground", "pf_drwep"="Draw Weapon", "pf_hcuff"="Handcuffs",
+                              "pf_wall"="Push to Wall","pf_hands"="Hands"))
+
+
+```
+
+#CROSS-SAMPLE COMPARISON
+##CROSS-SAMPLE PANEL B
+```{r cross-sample-comparison-panel-b}
+#panelB
+ggplot() +
+  geom_point(data = new_os_panelB_data_2,aes(x= fct_reorder(variable, prop), y= prop, group = race, color ="2014-2016"))+
+  geom_line(data = new_os_panelB_data_2, aes(x= fct_reorder(variable, prop), y= prop, group = race, color ="2014-2016"))+
+  geom_point(data = new_panelB_data_2,aes(x= fct_reorder(variable, prop), y= prop, group = race, color ="2003-2013"))+
+  geom_line(data = new_panelB_data_2,aes(x= fct_reorder(variable, prop), y= prop, group = race, color ="2003-2013"))+
+  labs(group="Race",y="Proportion",x="Encounter Statistics",
+       title=paste("Proportions of Encounter Characteristics by Race"))+
+  theme_bw() +
+  theme(axis.title.x = element_text(face = "bold", color = "#0d693e"),
+        axis.title.y = element_text(face = "bold", color = "#0d693e"),
+        axis.text.x = element_text(face = "bold", angle = 70, hjust = 1),
+        axis.text.y = element_text(face = "bold"),
+        plot.title = element_text(hjust = 0.5,size=20, color = "#374687",face = "bold"),
+        legend.title = element_text(color = "#0d693e", face = "bold" ))+
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  scale_color_manual(name = "Data by\n Year", values = c("#460f99", "#cc601d"))+
+  scale_x_discrete(labels = c("inout" = "Indoors", "daytime" = "Daytime", "ac_incid" = "High-crime \n Area",
+                              "ac_time" = "High-crime Time", "offunif" = "Police in Uniform",
+                              "othpers" = "Stopped With \n Others", "photo_id" = "Photo ID",
+                              "verbal_id" = "Verbal ID", "refused_id" = "Refused ID",
+                              "other_id" = "Other ID")) +
+  facet_wrap(~race)
+```
+
+##CROSS-SAMPLE PANEL C
+```{r cross-sample-comparison-panel-c}
+#panelC
+ggplot() +
+  geom_point(data = new_os_panelC_data_2,aes(x= fct_reorder(variable, prop), y= prop, group = race, color ="2014-2016"))+
+  geom_line(data = new_os_panelC_data_2, aes(x= fct_reorder(variable, prop), y= prop, group = race, color ="2014-2016"))+
+  geom_point(data = new_panelC_data_2,aes(x= fct_reorder(variable, prop), y= prop, group = race, color ="2003-2013"))+
+  geom_line(data = new_panelC_data_2,aes(x= fct_reorder(variable, prop), y= prop, group = race, color ="2003-2013"))+
+  labs(group="Race",y="Proportion",x="Civilian Behavior",
+       title=paste("Proportions of Civilian Behavior by Race"))+
+  theme_bw() +
+  theme(axis.title.x = element_text(face = "bold", color = "#0d693e"),
+        axis.title.y = element_text(face = "bold", color = "#0d693e"),
+        axis.text.x = element_text(face = "bold", hjust = 1, angle = 70),
+        axis.text.y = element_text(face = "bold"),
+        plot.title = element_text(hjust = 0.5,size=20, color = "#374687",face = "bold"),
+        legend.title = element_text(color = "#0d693e", face = "bold" ))+
+  scale_color_manual(name = "Data by\n Year", values = c("#460f99", "#cc601d"))+
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  scale_x_discrete(labels = c("cs_objcs"="Carrying Suspicious Objects", "cs_descr"="Fit Relevant Description",
+                              "cs_casng"="Preparing for Crime", "cs_lkout"="Lookout for Crime",
+                              "cs_cloth"="Dressed in Criminal Attire", "cs_drgtr"="Appearance of Drug Transanction",
+                              "cs_furtv"="Suspicious Movements","cs_vcrim"="Engaging in Violent Crime",
+                              "cs_bulge"="Concealing Suspicious Object", "cs_other"="Other Suspicious Behavior",
+                              "wepnfnd"="Contraband or Weapon Found")) +
+  facet_wrap(~race)
+```
+
+
+##CROSS-SAMPLE PANEL D
+
+```{r cross-sample-comparison-panel-d}
+#panelD
+ggplot() +
+  geom_point(data = new_os_panelD_data_2,aes(x= fct_reorder(variable, prop), y= prop, group = race, color ="2014-2016"))+
+  geom_line(data = new_os_panelD_data_2, aes(x= fct_reorder(variable, prop), y= prop, group = race, color ="2014-2016"))+
+  geom_point(data = new_panelD_data_2,aes(x= fct_reorder(variable, prop), y= prop, group = race, color ="2003-2013"))+
+  geom_line(data = new_panelD_data_2,aes(x= fct_reorder(variable, prop), y= prop, group = race, color ="2003-2013"))+
+  labs(group="Race",y="Proportion",x="Alternative Outcomes",
+       title=paste("Proportions of Alternative Outcomes by Race"))+
+  theme_bw() +
+  theme(axis.title.x = element_text(face = "bold", color = "#0d693e"),
+        axis.title.y = element_text(face = "bold", color = "#0d693e"),
+        axis.text.x = element_text(face = "bold"),
+        axis.text.y = element_text(face = "bold"),
+        plot.title = element_text(hjust = 0.5,size=20, color = "#374687",face = "bold"),
+        legend.title = element_text(color = "#0d693e", face = "bold" ))+
+  scale_color_manual(name = "Data by\n Year", values = c("#460f99", "#cc601d"))+
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  scale_x_discrete(labels = c("frisked" = "Frisked", "searched" = "Searched", "arstmade" = "Arrested",
+                              "sumissue" = "Summoned")) +
+  facet_wrap(~race)
+
+
+```
+
+
+
+##CROSS-SAMPLE PANEL E
+
+```{r cross-sample-comparison-panel-e}
+#panelE
+ggplot() +
+  geom_point(data = new_os_panelE_data_2,aes(x= fct_reorder(variable, prop), y= prop, group = race, color ="2014-2016"))+
+  geom_line(data = new_os_panelE_data_2, aes(x= fct_reorder(variable, prop), y= prop, group = race, color ="2014-2016"))+
+  geom_point(data = new_panelE_data_2,aes(x= fct_reorder(variable, prop), y= prop, group = race, color ="2003-2013"))+
+  geom_line(data = new_panelE_data_2,aes(x= fct_reorder(variable, prop), y= prop, group = race, color ="2003-2013"))+
+  labs(group="Race",y="Proportion",x="Use of Force",
+       title=paste("Proportions of Use of Force by Race"))+
+  theme_bw() +
+  theme(axis.title.x = element_text(face = "bold", color = "#0d693e"),
+        axis.title.y = element_text(face = "bold", color = "#0d693e"),
+        axis.text.x = element_text(face = "bold", hjust = 1, angle = 70),
+        axis.text.y = element_text(face = "bold"),
+        plot.title = element_text(hjust = 0.5,size=20, color = "#374687",face = "bold"),
+        legend.title = element_text(color = "#0d693e", face = "bold" ))+
+  scale_color_manual(name = "Data by\n Year", values = c("#460f99", "#cc601d"))+
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  scale_x_discrete(labels = c("pf_pp_spray_baton"="Pepper Spray/Baton", "pf_ptwep"="Point Weapon",
+                              "pf_grnd"="Push to Ground", "pf_drwep"="Draw Weapon", "pf_hcuff"="Handcuffs",
+                              "pf_wall"="Push to Wall","pf_hands"="Hands")) +
+  facet_wrap(~race)
+```
