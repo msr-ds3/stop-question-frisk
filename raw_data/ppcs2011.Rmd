@@ -156,7 +156,17 @@ ppcs_2011 <- ppcs_2011 %>%
   #V475, V501 also had to do with finding illegal stuff but were all NA
   mutate(civilian_guilty_of_illegal = case_when(
       (V187 == '(1) Yes' | V334 == '(1) Yes') ~ 1, 
-        TRUE ~ 0))
+        TRUE ~ 0)) %>%
+  
+  mutate(civilian_injured = case_when(
+      (V180 == '(1) Yes' | V322 == '(1) Yes')~ 1,
+      TRUE ~ 0)) %>%
+  
+  mutate(excess_force = case_when(
+      (V163 == '(1) Yes' | V305 == '(1) Yes' | V378 == '(1) Yes') ~1,
+      TRUE ~ 0))
+
+
 ```
 
 
