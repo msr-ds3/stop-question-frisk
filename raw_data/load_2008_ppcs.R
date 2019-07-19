@@ -157,10 +157,17 @@ ppcs_2008_revised <- ppcs_2008_revised %>%
 ppcs_2008_revised <- ppcs_2008_revised %>% 
   mutate(civilian_arrested = ifelse(V9 == 1, 1, 0 ))
 
-#found
+#found 
 ppcs_2008_revised <- ppcs_2008_revised %>%
   mutate(civilian_guilty_of_illegal = ifelse(FOUND == 1, 1, 0 ))
 
+#injured
+ppcs_2008_revised <- ppcs_2008_revised %>%
+  mutate(civilian_injured = ifelse(V8 == 1, 1, 0))
+
+#excessive force
+ppcs_2008_revised <- ppcs_2008_revised %>%
+  mutate(excess_force = ifelse(V7 == 1, 1, 0))
 #----------------------------------------------------------
 #Cleaned! Correct columns selected!
 # Add year column 
