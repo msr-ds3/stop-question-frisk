@@ -65,8 +65,8 @@ ppcs_1999 <- ppcs_1999 %>%
 #officer_race
 black <- c('All black', 'Mostly black', 'Black')
 white <- c('All white', 'Mostly white', 'White')
-other <- c('Some other race', 'All of another race', 'Equally Mixed', 'Mostly another race', 'Other', 'Mix of races')
-
+other <- c('Some other race', 'All of another race','Mostly another race', 'Other')
+split <- c('Equally Mixed','Mix of races')
 
 columns <- cbind(ppcs_1999$OFFICERS_RACES_VEHICLE_STOP, ppcs_1999$OFFICER_RACE_VEHICLE_STOP, ppcs_1999$RACE_OF_OFFICERS_USE_OR_THREATEN_FORCE, ppcs_1999$RACE_OF_OFFICER_USE_OR_THREATEN_FORCE, ppcs_1999$RACE_OF_OFFICERS_VEHICLE_STOP, ppcs_1999$RACE_OF_OFFICERS_OTHER_CONTACT)
 ppcs_1999 <- ppcs_1999 %>%
@@ -77,6 +77,9 @@ ppcs_1999 <- ppcs_1999 %>%
 
 ppcs_1999 <- ppcs_1999 %>%
   mutate(off_other = apply(columns, 1, function(x){max(x %in% other)}))
+
+ppcs_1999 <- ppcs_1999 %>%
+  mutate(off_split = apply(columns, 1, function(x){max(x %in% split)}))
 #type_of_incident
 traffic_stops <- c('Roadside check drunk driver', 'Seat belt', 'Some other traffic offense', 'Vehicle defect', 'Suspected/charged with drinking & driving', 'Speeding')
 ppcs_1999 <- ppcs_1999 %>%
