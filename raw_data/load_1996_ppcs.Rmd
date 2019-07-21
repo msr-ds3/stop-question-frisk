@@ -157,7 +157,7 @@ ppcs_1996 <- ppcs_1996 %>%
     (REASON_VICTIM_OF_A_CRIME %in% happened) ~ 3,
     (REASON_WITNESS_TO_A_CRIME %in% happened) ~3,
     (REASON_CRIME_THOUGHT_INVOLVED_IN %in% happened) ~ 3,
-    (REASON_WHAT_YOU_WERE_DOING_IN_THE_AREA %in% happened) ~3,
+    #(REASON_WHAT_YOU_WERE_DOING_IN_THE_AREA %in% happened) ~3,
     (REASON_HAD_WARRANT_FOR_YOUR_ARREST %in% happened) ~3,
     #(REASON_CASUAL_ENCOUNTERS %in% happened) ~ 3,
     #(REASON_COMMUNITY_MEETINGS %in% happened) ~3,
