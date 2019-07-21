@@ -83,15 +83,15 @@ ppcs_2011 <- ppcs_2011 %>%
 ppcs_2011 <- ppcs_2011 %>% 
  mutate(time_of_encounter = case_when(
    (V81 == ('(01) After 6 a.m. - 12 noon')| 
-      V204 == ('(01) After 6 a.m. - 12 noon')) ~1,
+      V204 == ('(01) After 6 a.m. - 12 noon')) ~3,
    (V81 == ('(02) After 12 noon - 6 p.m.')|
-      V204 == ('(02) After 12 noon - 6 p.m.')) ~2, 
+      V204 == ('(02) After 12 noon - 6 p.m.')) ~3, 
     (V81 == ('(01) After 6 a.m. - 12 noon')| 
        V204 == ('(01) After 6 a.m. - 12 noon'))~3,
      (V81 == ('(04) After 6 p.m. - 12 midnight')| 
-        V204 == ('(04) After 6 p.m. - 12    midnight')) ~ 4,
+        V204 == ('(04) After 6 p.m. - 12    midnight')) ~ 6,
       (V81 == ('(05) After 12 midnight - 6 a.m.')| 
-         V204 == ('(05) After 12 midnight - 6 a.m.')) ~ 5,
+         V204 == ('(05) After 12 midnight - 6 a.m.')) ~ 6,
        (V81 == ("(06) Don't know what time of night")| 
           V204 == ("(06) Don't know what time of night")) ~ 6,
         TRUE ~ NA_real_))
