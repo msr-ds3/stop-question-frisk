@@ -46,9 +46,6 @@ merged_ppcs %>%
 ```{r}
 
 merged_ppcs %>%
-  group_by(civilian_race) %>%
-  mutate(count = n()) %>%
-  ungroup() %>%
   group_by(civilian_race, civilian_gender) %>%
   summarize(gender_count = n()) %>%
   ungroup() %>%
@@ -56,31 +53,16 @@ merged_ppcs %>%
   mutate(sum = sum(gender_count)) %>%
   mutate(prop = gender_count/sum)
 
-# ggplot() +
-#   geom_point(aes(x = civilian_race, y = prop)) +
-#   facet_wrap(~ civilian_gender) 
-
-# merged_ppcs %>%
-#   group_by(civilian_race) %>%
-#   mutate(count = n()) %>%
-#   ungroup() %>%
-#   group_by(civilian_race, civilian_gender) %>%
-#   mutate(gender_count = n()) %>% 
-#   mutate(prop = gender_count/count) %>%
-#   ungroup() %>%
-#   ggplot() +
-#   geom_linerange(aes(x = civilian_race, ymax = prop, ymin = 0)) +
-#   facet_wrap(~ civilian_gender) 
 ```
 #average age
-```{r}
+```{r -avg-age-full-sample}
 merged_ppcs %>%
   select(civilian_age) %>% 
   filter(civilian_age != 'missing/ni/ou') %>%
   mutate(civilian_age = as.numeric(civilian_age)) %>%
   summarize(mean = mean(civilian_age))
 ```
-```{r}
+```{r avg-age-per-race}
 merged_ppcs %>%
   filter(civilian_age != 'missing/ni/ou') %>%
   mutate(civilian_age = as.numeric(civilian_age)) %>%
@@ -89,11 +71,18 @@ merged_ppcs %>%
 ```
 
 ##Civilian Employed
-```{r}
+```{r employed-full-sample}
 merged_ppcs %>%
-  group_by(civilian_race) %>%
-  mutate(count = n(), civilian_employed = as.numeric(civilian_employed)) %>%
-  ungroup() %>%
+  group_by(civilian_employed) %>%
+  summarize(count = n()) %>%
+  mutate(prop = count/sum(count))
+
+```
+
+
+```{r employed-per-race}
+merged_ppcs %>%
+  mutate(civilian_employed = as.numeric(civilian_employed)) %>%
   group_by(civilian_race, civilian_employed) %>%
   summarize(employed_count = n()) %>% 
   ungroup() %>%
@@ -106,12 +95,11 @@ merged_ppcs %>%
 #Income
 ```{r income-full-sample}
 merged_ppcs %>%
-  filter(year != 1996 & year != 2008) %>%
   summarise(mean = mean(civilian_income, na.rm = TRUE))
   
   
 ```
-```{r}
+```{r income-outliers}
 #Check for outliers
 merged_ppcs %>%
   group_by(year) %>%
@@ -132,7 +120,7 @@ merged_ppcs %>%
   summarise(mean = mean(civilian_income, na.rm = TRUE))
 ```
 #Population Size
-```{r}
+```{r outlier-popsize}
 #check for outliers
 merged_ppcs %>%
   group_by(year) %>%
@@ -157,23 +145,25 @@ merged_ppcs %>%
 ```
 
 #Incident Type
-We are missing all street stop
-```{r}
+```{r incident-type-full-sample}
+merged_ppcs %>%
+  filter(!is.na(type_of_incident)) %>%
+  group_by(type_of_incident) %>%
+  summarize(count = n()) %>%
+  mutate(prop = count/sum(count))
+```
+
+
+```{r incident-type-by-race}
 merged_ppcs %>%
   filter(is.na(type_of_incident) != TRUE) %>%
   mutate(type_of_incident = as.factor(type_of_incident)) %>%
-  group_by(civilian_race) %>%
-  mutate(count = n()) %>%
-  ungroup() %>%
   group_by(civilian_race, type_of_incident) %>%
   summarise(c = n()) %>%
   ungroup() %>%
   group_by(civilian_race) %>%
   mutate(sum = sum(c)) %>%
-  mutate(prop = c/sum) %>% view
-  ggplot() +
-  geom_point(aes(x = type_of_incident, y = prop, color = type_of_incident)) +
-  facet_wrap(~ civilian_race)
+  mutate(prop = c/sum)
 ```
 
 ```{r}
@@ -219,9 +209,6 @@ merged_ppcs %>%
 ```{r time-of-encounter-by-race}
 merged_ppcs %>%
   filter(is.na(time_of_encounter) != TRUE ) %>%
-  group_by(civilian_race) %>%
-  mutate(count = n()) %>%
-  ungroup() %>%
   group_by(civilian_race, time_of_encounter) %>%
   summarize(enc_count = n()) %>% 
   ungroup() %>%
@@ -244,27 +231,26 @@ merged_ppcs %>%
   geom_point() +
   facet_wrap(~ civilian_behavior)
 ```
-```{r}
+```{r civilian-behavior-by-race}
 merged_ppcs %>%
-  group_by(civilian_race) %>%
-  mutate(count = n()) %>%
-  ungroup() %>%
   group_by(civilian_race, civilian_behavior) %>%
   summarize(beh_count = n()) %>% 
   ungroup() %>%
   group_by(civilian_race) %>%
   mutate(sum = sum(beh_count)) %>%
-  mutate(prop = beh_count/sum)
+  mutate(prop = beh_count/sum) %>%
+  select(civilian_race, civilian_behavior, prop)
 ```
 
-```{r}
+```{r civilian-behavior-full-sample}
 merged_ppcs %>%
   group_by(civilian_behavior) %>%
-  summarise(count = n()) %>% view
+  summarise(count = n()) %>%
+  mutate(prop = count/sum(count))
   
 ```
 #Officer Race
-```{r}
+```{r officer-race-full-sample}
 merged_ppcs %>%
   mutate(off_race = case_when(
     (off_black == 1) ~ 'black',
@@ -277,6 +263,25 @@ merged_ppcs %>%
   group_by(off_race) %>%
   summarise(count = n()) %>%
   mutate(prop = count/sum(count))
+```
+```{r}
+merged_ppcs %>%
+  mutate(off_race = case_when(
+    (off_black == 1) ~ 'black',
+    (off_white == 1) ~ 'white',
+    (off_other == 1) ~ 'other',
+    (off_split == 1) ~ 'split',
+    (off_hispanic == 1)~ 'hispanic'
+  )) %>%
+  filter(is.na(off_race) == FALSE) %>%
+  group_by(civilian_race, off_race) %>%
+  summarise(offrace_count = n()) %>%
+  ungroup() %>%
+  group_by(civilian_race) %>%
+  mutate(sum = sum(offrace_count)) %>%
+  mutate(prop = offrace_count/sum) %>%
+  select(civilian_race, off_race, prop)
+
 ```
 
 ##Alternative outcomes
@@ -295,17 +300,14 @@ merged_ppcs %>%
   facet_wrap(~ civilian_searched)
 ```
 
-```{r alt-outcomes-full-sample}
+```{r searched-full-sample}
 merged_ppcs %>%
   group_by(civilian_searched) %>%
   summarise(count = n()) %>%
   mutate(prop = count/sum(count))
 ```
-```{r}
+```{r searched-by-race}
 merged_ppcs %>%
-  group_by(civilian_race) %>%
-  mutate(count = n()) %>%
-  ungroup() %>%
   group_by(civilian_race, civilian_searched) %>%
   summarise(search_count = n()) %>%
   mutate(prop = search_count/sum(search_count)) %>%
@@ -325,7 +327,7 @@ merged_ppcs %>%
   geom_point() +
   facet_wrap(~ civilian_arrested)
 ```
-```{r}
+```{r arrested-full-sample}
 merged_ppcs %>%
   group_by(civilian_arrested) %>%
   summarise(count = n()) %>%
@@ -333,7 +335,7 @@ merged_ppcs %>%
 ```
 
 
-```{r}
+```{r arrested-by-race}
 merged_ppcs %>%
   group_by(civilian_race) %>%
   mutate(count = n()) %>%
@@ -345,7 +347,7 @@ merged_ppcs %>%
 
 ```
 
-```{r}
+```{r guily-carrying-illegal-check-outliers}
 #check for outliers
 merged_ppcs %>%
   group_by(year) %>%
@@ -358,13 +360,13 @@ merged_ppcs %>%
   geom_point() +
   facet_wrap(~ civilian_guilty_of_illegal)
 ```
-```{r}
+```{r guily-carrying-illegal-full-sample}
 merged_ppcs %>%
   group_by(civilian_guilty_of_illegal) %>%
   summarise(count = n()) %>%
   mutate(prop = count/sum(count))
 ```
-```{r}
+```{r guilty-carrying-illegal-by-race}
 merged_ppcs %>%
   group_by(civilian_race) %>%
   mutate(count = n()) %>%
@@ -373,5 +375,95 @@ merged_ppcs %>%
   summarise(guilt_count = n()) %>%
   mutate(prop = guilt_count/sum(guilt_count)) %>%
   filter(civilian_guilty_of_illegal == 1)
+```
+
+```{r}
+#check for outliers
+merged_ppcs %>%
+  group_by(year) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  group_by(year, civilian_injured) %>%
+  mutate(inj_count = n()) %>% 
+  mutate(prop = inj_count/count) %>% 
+  ggplot(aes(x = year, y = prop)) +
+  geom_point() +
+  facet_wrap(~ civilian_injured)
+```
+```{r injured-full-sample}
+merged_ppcs %>%
+  group_by(civilian_injured) %>%
+  summarise(count = n()) %>%
+  mutate(prop = count/sum(count))
+```
+
+```{r injured-by-race}
+merged_ppcs %>%
+  group_by(civilian_race, civilian_injured) %>%
+  summarise(inj_count = n()) %>%
+  mutate(prop = inj_count/sum(inj_count)) %>%
+  filter(civilian_injured == 1)
+```
+
+```{r}
+#check for outliers
+merged_ppcs %>%
+  group_by(year) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  group_by(year, excess_force) %>%
+  mutate(ex_count = n()) %>% 
+  mutate(prop = ex_count/count) %>% 
+  ggplot(aes(x = year, y = prop)) +
+  geom_point() +
+  facet_wrap(~ excess_force)
+```
+```{r exess-force-full-sample}
+merged_ppcs %>%
+  group_by(excess_force) %>%
+  summarise(count = n()) %>%
+  mutate(prop = count/sum(count))
+```
+
+```{r}
+merged_ppcs %>%
+  group_by(civilian_race, excess_force) %>%
+  summarise(ex_count = n()) %>%
+  mutate(prop = ex_count/sum(ex_count)) %>%
+  filter(excess_force == 1)
+```
+
+#Check use of force
+-check 2011 -seems like there was no use of force
+```{r}
+#check for outliers
+merged_ppcs %>%
+  group_by(year) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  group_by(year, force) %>%
+  mutate(force_count = n()) %>% 
+  mutate(prop = force_count/count) %>% 
+  ggplot(aes(x = year, y = prop)) +
+  geom_point() +
+  facet_wrap(~ force)
+```
+
+```{r force-full-sample}
+merged_ppcs %>%
+  group_by(force) %>%
+  summarise(count = n()) %>%
+  mutate(prop = count/sum(count))
+```
+
+```{r}
+merged_ppcs %>%
+  group_by(force) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  group_by(civilian_race, force) %>%
+  summarise(force_count = n()) %>%
+  mutate(prop = force_count/sum(force_count)) %>%
+  filter(force == 1)
 ```
 
