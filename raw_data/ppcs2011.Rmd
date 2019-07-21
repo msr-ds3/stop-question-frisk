@@ -182,17 +182,29 @@ ppcs_2011 <- ppcs_2011 %>%
 
 ```{r}
 #TYPE OF INCIDENT
-#Interpretations of columns V55, V56, V57, V58,V59, V60, V61, V62, V63, V64 are unclear  
+#Interpretations of columns V55, V56, V57, V58,V59, V60, V61, V62, V63, V64 are unclear
+#view(ppcs_2011$V210)
+#Why V189? that's number of officers
 ppcs_2011 <- ppcs_2011 %>% 
    mutate(type_of_incident = case_when(
-                                       (!is.na(V34)) ~ 1,
-                                       (!is.na(V189)) ~ 2,
-                                       (V39 == "Yes") ~ 3,
-                                       (V43 == "Yes") ~ 3,
-                                       (V45 == "Yes") ~ 3,
-                                       (V47 == "Yes") ~ 3,
-                                       (V7 == "Yes") ~ 3,
-                                       (TRUE) ~ 3))
+                                       (V34 == '(1) Yes' ) ~ 1,
+                                       #(!is.na(V189)) ~ 2,
+                                       (V39 == '(1) Yes') ~ 1,
+                                       (V43 == '(1) Yes') ~ 1,
+                                       (V45 == '(1) Yes') ~ 1,
+                                       (V47 == '(1) Yes') ~ 1,
+                                       (V210 == '(1) Yes') ~ 2,
+                                       (V212 == '(1) Yes')~2,
+                                       (V214 == '(1) Yes')~2,
+                                       (V216 == '(1) Yes')~2,
+                                       (V218 == '(1) Yes')~2,
+                                       (V220 == '(1) Yes')~2,
+                                       (V222 == '(1) Yes')~2,
+                                       (V224 == '(1) Yes')~2,
+                                       (V226 == '(1) Yes')~2,
+                                       (V228 == '(1) Yes')~2,
+                                       (V7 == '(1) Yes') ~ 3,
+                                       TRUE ~ NA_real_))
 ```
 
 
