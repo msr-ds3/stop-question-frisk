@@ -94,15 +94,20 @@ traffic_stops <- c('Roadside check drunk driver', 'Seat belt', 'Some other traff
 #     (REASON_FOR_STOP == 'Out of Universe/Missing') ~ NA_real_,
 #     TRUE ~ 3
 #   ))
-view(ppcs_1999$REASON_FOR_TRAFFIC_STOP)
+# view(ppcs_1999$REASON_FOR_TRAFFIC_STOP)
+# ppcs_1999 <- ppcs_1999 %>%
+#   mutate(type_of_incident = case_when(
+#     (REASON_FOR_STOP == 'Out of Universe/Missing') ~NA_real_,
+#     (REASON_FOR_TRAFFIC_STOP == "Yes" | REASON_FOR_STOP %in% traffic_stops) ~ 2,
+#     
+#     TRUE ~ 3
+#   ))
 ppcs_1999 <- ppcs_1999 %>%
   mutate(type_of_incident = case_when(
-    (REASON_FOR_STOP == 'Out of Universe/Missing') ~NA_real_,
-    (REASON_FOR_TRAFFIC_STOP == "Yes" | REASON_FOR_STOP %in% traffic_stops) ~ 2,
-    
-    TRUE ~ 3
+    (VEHICLE_STOPPED_BY_POLICE == 'Once' | VEHICLE_STOPPED_BY_POLICE == 'More than once') ~ 2,
+    (VEHICLE_STOPPED_BY_POLICE == 'Not at all') ~ 3,
+    TRUE ~ NA_real_
   ))
-
 
 #civilian_behavior
 is_not_missing <- function(x) {
