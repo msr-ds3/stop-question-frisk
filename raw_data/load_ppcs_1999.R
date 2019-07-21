@@ -86,7 +86,7 @@ ppcs_1999 <- ppcs_1999 %>%
 
 #type_of_incident
 traffic_stops <- c('Roadside check drunk driver', 'Seat belt', 'Some other traffic offense', 'Vehicle defect', 'Suspected/charged with drinking & driving', 'Speeding')
-ppcs_1999 %>% group_by(REASON_FOR_STOP) %>% summarise(count =n()) %>% view
+#ppcs_1999 %>% group_by(REASON_FOR_STOP) %>% summarise(count =n()) %>% view
 
 ppcs_1999 <- ppcs_1999 %>%
   mutate(type_of_incident = case_when(
