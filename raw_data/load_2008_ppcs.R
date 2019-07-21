@@ -86,7 +86,8 @@ ppcs_2008_revised <- ppcs_2008_revised %>%
     (V4 %in% day) ~ 3,
     (V4 %in% night) ~ 6,
     TRUE ~ NA_real_
-  ))
+  )) %>%
+  mutate(time_of_encounter = as.factor(time_of_encounter))
 
 summary(ppcs_2008_revised$time_of_encounter)
 #-------------------------------------------------------------------------------------
@@ -136,7 +137,7 @@ ppcs_2008_revised <- ppcs_2008_revised %>%
   mutate(off_hispanic = 0)
 #-------------------------------------------------------------------------------------
 #Type of incident
-#Since every observation is a stop there should be no NA's
+
 ppcs_2008_revised <- ppcs_2008_revised %>%
   mutate(type_of_incident = case_when(
     (REASON %in% 2:3) ~ 2,
