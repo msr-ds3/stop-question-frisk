@@ -182,7 +182,7 @@ ppcs_2008_revised <- ppcs_2008_revised %>%
 
 ppcs_2008_revised <- ppcs_2008_revised %>%
   mutate(force = case_when(
-    (V5 == 1 | V6D == 1 | V6E == 1 | V6F == 1 | V6G == 1 | V6H == 1 | V6I == 1 | V10 == 1) ~1,
+    (V5 == 1 | V6D == 1 | V6E == 1 | V6F == 1 | V6G == 1 | V6H == 1 | V6I == 1 | V10 == 1 | V55 == 1) ~1,
     TRUE ~ 0
   ))
 
