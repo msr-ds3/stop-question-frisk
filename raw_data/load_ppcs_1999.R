@@ -94,11 +94,12 @@ traffic_stops <- c('Roadside check drunk driver', 'Seat belt', 'Some other traff
 #     (REASON_FOR_STOP == 'Out of Universe/Missing') ~ NA_real_,
 #     TRUE ~ 3
 #   ))
-
+view(ppcs_1999$REASON_FOR_TRAFFIC_STOP)
 ppcs_1999 <- ppcs_1999 %>%
   mutate(type_of_incident = case_when(
     (REASON_FOR_STOP == 'Out of Universe/Missing') ~NA_real_,
     (REASON_FOR_TRAFFIC_STOP == "Yes" | REASON_FOR_STOP %in% traffic_stops) ~ 2,
+    
     TRUE ~ 3
   ))
 
@@ -133,7 +134,11 @@ ppcs_1999 <- ppcs_1999 %>%
   mutate(civilian_arrested = ifelse(FORCE_USED_AND_RESPONDENT_ARRESTED == 'Yes', 1, 0))
 
 ppcs_1999 <- ppcs_1999 %>% 
-  mutate(civilian_guilty_of_illegal = ifelse(ITEMS_FOUND_DURING_VEHICLE_PERSONAL_SEAR == 'Evidence found', 1, 0))
+  mutate(civilian_guilty_of_illegal = case_when(
+    (ITEMS_FOUND_DURING_VEHICLE_PERSONAL_SEAR == 'Evidence found')~1,
+    (FOUND_IN_VEHICLE != 'Out of Universe/Missing')~1,
+    TRUE ~0
+    ))
 
 ppcs_1999 <- ppcs_1999 %>%
   mutate(civilian_injured = ifelse(FORCE_USED_AND_RESPONDENT_INJURED == 'Yes', 1, 0))
