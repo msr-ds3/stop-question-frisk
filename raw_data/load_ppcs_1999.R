@@ -80,13 +80,19 @@ ppcs_1999 <- ppcs_1999 %>%
 
 ppcs_1999 <- ppcs_1999 %>%
   mutate(off_split = apply(columns, 1, function(x){max(x %in% split)}))
+
+ppcs_1999 <- ppcs_1999 %>%
+  mutate(off_hispanic = 0)
 #type_of_incident
 traffic_stops <- c('Roadside check drunk driver', 'Seat belt', 'Some other traffic offense', 'Vehicle defect', 'Suspected/charged with drinking & driving', 'Speeding')
+
 ppcs_1999 <- ppcs_1999 %>%
   mutate(type_of_incident = case_when(
     (REASON_FOR_STOP %in% traffic_stops) ~ 2,
+    (REASON_FOR_STOP == 'Out of Universe/Missing') ~ NA_real_,
     TRUE ~ 3
   ))
+
 
 #civilian_behavior
 is_not_missing <- function(x) {
@@ -150,7 +156,7 @@ ppcs_1999 <- ppcs_1999 %>%
   ))
 
 ppcs_1999_cleaned <- ppcs_1999 %>%
-  select(civilian_race, civilian_age, civilian_gender, civilian_income, civilian_employed, population_size, time_of_encounter, off_black, off_white, off_other, off_split, type_of_incident, civilian_behavior, civilian_searched, civilian_arrested, civilian_guilty_of_illegal, civilian_injured, excess_force, force)
+  select(civilian_race, civilian_age, civilian_gender, civilian_income, civilian_employed, population_size, time_of_encounter, off_black, off_white, off_other, off_split, off_hispanic, type_of_incident, civilian_behavior, civilian_searched, civilian_arrested, civilian_guilty_of_illegal, civilian_injured, excess_force, force)
 
 ppcs_1999_cleaned <- ppcs_1999_cleaned %>%
   mutate(year = 1999) %>% view
