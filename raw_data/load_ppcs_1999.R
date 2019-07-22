@@ -6,9 +6,9 @@ library(dplyr)
 ppcs_1999 <- read_ascii_setup('03151-0001-Data.txt','03151-0001-Setup.sas')
 ppcs_1999 <- ppcs_1999[, !duplicated(colnames(ppcs_1999))]
 
-# ppcs_1999 <- ppcs_1999 %>%
-#   filter(ANY_POLICE_CONTACT_IN_LAST_12_MONTHS == 'Yes' & FACE_TO_FACE_CONTACT == 'Yes')
-# 
+ppcs_1999 <- ppcs_1999 %>%
+  filter(ANY_POLICE_CONTACT_IN_LAST_12_MONTHS == 'Yes' & FACE_TO_FACE_CONTACT == 'Yes')
+
 # dfcol <- data.frame(colnames(ppcs_1999)) %>% view
 
 #add row number
