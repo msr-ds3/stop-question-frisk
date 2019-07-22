@@ -15,6 +15,10 @@ library(naniar)
 library(scales)
 ```
 
+```{r load-data}
+load("../../raw_data/sqf_03_13.Rdata")
+```
+
 
 ```{r plot-race}
 
