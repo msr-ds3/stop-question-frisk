@@ -48,3 +48,920 @@ sf_data1 %>%
 
 
 ```
+
+
+```{r plot-avg-race}
+#avg. age
+
+sf_data1 %>%
+  select(race, age) %>%
+  mutate(race = recode_factor(race,"P" = "B","Q" = "H")) %>%
+  filter(10<= age & age<= 90) %>% 
+  group_by(race) %>%
+  summarise(count = n(), total = nrow(sf_data1), avg_age = mean(age, na.rm = T)) %>%
+  ungroup() %>%
+  ggplot() +
+  geom_point(aes(x = reorder(race,count/total, sum),
+                 y = count/total, size = count),
+             color = "#893eb5") +
+  geom_text(aes(x = reorder(race,count/total, sum),
+                y = count/total,label = paste("Avg_age = ", round(avg_age,2))),
+            hjust = 0.2, vjust = -0.9, color ="#095e7d")+
+  labs(size="size",y="Proportion",x="Race",
+       title=paste("Proportion of Suspect by Race"))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 70, hjust = 1, face = "bold"))+
+  theme(axis.text.y = element_text(face = "bold"))+
+  theme(plot.title = element_text(hjust = 0.5,size=20)) +
+  scale_x_discrete(labels = c("X" = "Others", "I" = "AMERICAN  INDIAN", "U" = "UNKNOWN",
+                              "A" = "ASIAN / PACIFIC  ISLANDER", "Z" = "",
+                              "W" ="WHITE", "H" = "HISPANIC", "B" = "BLACK"),
+                   limits = c("I","A", "W", "H", "B")) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  scale_size_continuous(labels = comma)
+
+```
+
+
+```{r plot-daytime}
+#daytime
+sf_data1 %>%
+  select(race, timestop) %>%
+  mutate(race = recode_factor(race,"P" = "B","Q" = "H")) %>%
+  mutate(timestop = as.numeric(timestop)) %>%
+  mutate(daytime = ifelse(200<=timestop & timestop<=1900,"Y","N")) %>%
+  ungroup() %>%
+  group_by(race, daytime) %>%
+  summarise(count =n()) %>%
+  spread(daytime, count) %>%
+  mutate(total = Y+N) %>%
+  ggplot() +
+  geom_point(aes(x = reorder(race,Y/total, sum),
+                 y = Y/total, size = Y),
+             color = "#893eb5") +
+  geom_text(aes(x = reorder(race, Y/total, sum),
+                y = Y/total,label = round(Y/total,2)),
+            hjust = 0.2, vjust = -0.9, color ="#095e7d")+
+  labs(size="size",y="Proportion",x="Race",
+       title=paste("Daytime Stops by Race"))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 70, hjust = 1, face = "bold"))+
+  theme(axis.text.y = element_text(face = "bold"))+
+  theme(plot.title = element_text(hjust = 0.5,size=20)) +
+  scale_x_discrete(labels = c("X" = "Others", "I" = "AMERICAN  INDIAN", "U" = "UNKNOWN",
+                              "A" = "ASIAN / PACIFIC  ISLANDER", "Z" = "",
+                              "W" ="WHITE", "H" = "HISPANIC", "B" = "BLACK")) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0,1,by =.05)) +
+  scale_size_continuous(labels = comma)
+```
+
+```{r plot-photo-id}
+
+###photo id
+
+sf_data1 %>%
+  select(race, typeofid) %>%
+  mutate(race = recode_factor(race,"P" = "B","Q" = "H")) %>%
+  group_by(race, typeofid) %>%
+  summarise(count = n()) %>%
+  spread(typeofid, count) %>%
+  mutate(total = O+P+R+V) %>%
+  ggplot() +
+  geom_point(aes(x = reorder(race,P/total, sum),
+                 y = P/total, size = P),
+             color = "#893eb5") +
+  geom_text(aes(x = reorder(race,P/total, sum),
+                y = P/total,label = round(P/total,2)),
+            hjust = 0.2, vjust = -0.9, color ="#095e7d")+
+  labs(size="size",y="Proportion",x="Race",
+       title=paste("Photo ID Shown by Race"))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 70, hjust = 1, face = "bold"))+
+  theme(axis.text.y = element_text(face = "bold"))+
+  theme(plot.title = element_text(hjust = 0.5,size=20)) +
+  scale_x_discrete(labels = c("X" = "Others", "I" = "AMERICAN  INDIAN", "U" = "UNKNOWN",
+                              "A" = "ASIAN / PACIFIC  ISLANDER", "Z" = "",
+                              "W" ="WHITE", "H" = "HISPANIC", "B" = "BLACK")) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0,1,by =.05)) +
+  scale_size_continuous(labels = comma)
+```
+
+
+```{r plot-verbal-id}
+##Verbal ID
+
+sf_data1 %>%
+  select(race, typeofid) %>%
+  mutate(race = recode_factor(race,"P" = "B","Q" = "H")) %>%
+  group_by(race, typeofid) %>%
+  summarise(count = n()) %>%
+  spread(typeofid, count) %>%
+  mutate(total = O+P+R+V) %>%
+  ggplot() +
+  geom_point(aes(x = reorder(race,V/total, sum),
+                 y = V/total, size = V),
+             color = "#893eb5") +
+  geom_text(aes(x = reorder(race,V/total, sum),
+                y = V/total,label = round(V/total,2)),
+            hjust = 0.2, vjust = -0.9, color ="#095e7d")+
+  labs(size="size",y="Proportion",x="Race",
+       title=paste("Verbal ID Shown by Race"))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 70, hjust = 1, face = "bold"))+
+  theme(axis.text.y = element_text(face = "bold"))+
+  theme(plot.title = element_text(hjust = 0.5,size=20)) +
+  scale_x_discrete(labels = c("X" = "Others", "I" = "AMERICAN  INDIAN", "U" = "UNKNOWN",
+                              "A" = "ASIAN / PACIFIC  ISLANDER", "Z" = "",
+                              "W" ="WHITE", "H" = "HISPANIC", "B" = "BLACK")) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0,1,by =.05)) +
+  scale_size_continuous(labels = comma)
+
+
+```
+
+
+```{r plot-refused-id}
+##Refused ID
+sf_data1 %>%
+  select(race, typeofid) %>%
+  mutate(race = recode_factor(race,"P" = "B","Q" = "H")) %>%
+  group_by(race, typeofid) %>%
+  summarise(count = n()) %>%
+  spread(typeofid, count) %>%
+  mutate(total = O+P+R+V) %>%
+  ggplot() +
+  geom_point(aes(x = reorder(race,R/total, sum),
+                 y = R/total, size = R),
+             color = "#893eb5") +
+  geom_text(aes(x = reorder(race,R/total, sum),
+                y = R/total,label = round(R/total,2)),
+            hjust = 0.2, vjust = -0.9, color ="#095e7d")+
+  labs(size="size",y="Proportion",x="Race",
+       title=paste("Refusal of ID by Race"))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 70, hjust = 1, face = "bold"))+
+  theme(axis.text.y = element_text(face = "bold"))+
+  theme(plot.title = element_text(hjust = 0.5,size=20)) +
+  scale_x_discrete(labels = c("X" = "Others", "I" = "AMERICAN  INDIAN", "U" = "UNKNOWN",
+                              "A" = "ASIAN / PACIFIC  ISLANDER", "Z" = "",
+                              "W" ="WHITE", "H" = "HISPANIC", "B" = "BLACK")) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0,1,by =.05)) +
+  scale_size_continuous(labels = comma)
+
+```
+
+```{r plot-other-ids}
+##Other ID
+sf_data1 %>%
+  select(race, typeofid) %>%
+  mutate(race = recode_factor(race,"P" = "B","Q" = "H")) %>%
+  group_by(race, typeofid) %>%
+  summarise(count = n()) %>%
+  spread(typeofid, count) %>%
+  mutate(total = O+P+R+V) %>%
+  ggplot() +
+  geom_point(aes(x = reorder(race,O/total, sum),
+                 y = O/total, size = O),
+             color = "#893eb5") +
+  geom_text(aes(x = reorder(race,O/total, sum),
+                y = O/total,label = round(O/total,2)),
+            hjust = 0.2, vjust = -0.9, color ="#095e7d")+
+  labs(size="size",y="Proportion",x="Race",
+       title=paste("Other ID Shown by Race"))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 70, hjust = 1, face = "bold"))+
+  theme(axis.text.y = element_text(face = "bold"))+
+  theme(plot.title = element_text(hjust = 0.5,size=20)) +
+  scale_x_discrete(labels = c("X" = "Others", "I" = "AMERICAN  INDIAN", "U" = "UNKNOWN",
+                              "A" = "ASIAN / PACIFIC  ISLANDER", "Z" = "",
+                              "W" ="WHITE", "H" = "HISPANIC", "B" = "BLACK")) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0,1,by =.05)) +
+  scale_size_continuous(labels = comma)
+
+```
+
+
+```{r plot-stopped-with-others}
+###stopped with others
+
+sf_data1 %>%
+  select(race, othpers) %>%
+  mutate(race = recode_factor(race,"P" = "B","Q" = "H")) %>%
+  group_by(race, othpers) %>%
+  summarise(count = n()) %>%
+  spread(othpers, count) %>%
+  mutate(total = Y+N) %>%
+  ggplot() +
+  geom_point(aes(x = reorder(race,Y/total, sum),
+                 y = Y/total, size = Y),
+             color = "#893eb5") +
+  geom_text(aes(x = reorder(race,Y/total, sum),
+                y = Y/total,label = round(Y/total,2)),
+            hjust = 0.2, vjust = -0.9, color ="#095e7d")+
+  labs(size="size",y="Proportion",x="Race",
+       title=paste("Stopped with Others by Race"))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 70, hjust = 1, face = "bold"))+
+  theme(axis.text.y = element_text(face = "bold"))+
+  theme(plot.title = element_text(hjust = 0.5,size=20)) +
+  scale_x_discrete(labels = c("X" = "Others", "I" = "AMERICAN  INDIAN", "U" = "UNKNOWN",
+                              "A" = "ASIAN / PACIFIC  ISLANDER", "Z" = "",
+                              "W" ="WHITE", "H" = "HISPANIC", "B" = "BLACK")) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0,1,by =.05)) +
+  scale_size_continuous(labels = comma)
+
+```
+
+
+```{r plot-carrying-suspicious-objects}
+##carrying suspicious object
+sf_data1 %>%
+  select(race, cs_objcs) %>%
+  mutate(race = recode_factor(race,"P" = "B","Q" = "H")) %>%
+  group_by(race, cs_objcs) %>%
+  summarise(count = n()) %>%
+  spread(cs_objcs, count) %>%
+  mutate(total = Y+N) %>%
+  ggplot() +
+  geom_point(aes(x = reorder(race,Y/total, sum),
+                 y = Y/total, size = Y),
+             color = "#893eb5") +
+  geom_text(aes(x = reorder(race,Y/total, sum),
+                y = Y/total,label = round(Y/total,2)),
+            hjust = 0.2, vjust = -0.9, color ="#095e7d")+
+  labs(size="size",y="Proportion",x="Race",
+       title=paste("Civilian Behavior (Carrying Suspicious Objects) by Race"))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 70, hjust = 1, face = "bold"))+
+  theme(axis.text.y = element_text(face = "bold"))+
+  theme(plot.title = element_text(hjust = 0.5,size=20)) +
+  scale_x_discrete(labels = c("X" = "Others", "I" = "AMERICAN  INDIAN", "U" = "UNKNOWN",
+                              "A" = "ASIAN / PACIFIC  ISLANDER", "Z" = "",
+                              "W" ="WHITE", "H" = "HISPANIC", "B" = "BLACK")) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0,1,by =.05)) +
+  scale_size_continuous(labels = comma)
+```
+
+```{r plot-fit-relevant-description}
+##fit relevant description
+sf_data1 %>%
+  select(race, cs_descr) %>%
+  mutate(race = recode_factor(race,"P" = "B","Q" = "H")) %>%
+  group_by(race, cs_descr) %>%
+  summarise(count = n()) %>%
+  spread(cs_descr, count) %>%
+  mutate(total = Y+N) %>%
+  ggplot() +
+  geom_point(aes(x = reorder(race,Y/total, sum),
+                 y = Y/total, size = Y),
+             color = "#893eb5") +
+  geom_text(aes(x = reorder(race,Y/total, sum),
+                y = Y/total,label = round(Y/total,2)),
+            hjust = 0.2, vjust = -0.9, color ="#095e7d")+
+  labs(size="size",y="Proportion",x="Race",
+       title=paste("Civilian Behavior (Fit Relevant Descriptions) by Race"))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 70, hjust = 1, face = "bold"))+
+  theme(axis.text.y = element_text(face = "bold"))+
+  theme(plot.title = element_text(hjust = 0.5,size=20)) +
+  scale_x_discrete(labels = c("X" = "Others", "I" = "AMERICAN  INDIAN", "U" = "UNKNOWN",
+                              "A" = "ASIAN / PACIFIC  ISLANDER", "Z" = "",
+                              "W" ="WHITE", "H" = "HISPANIC", "B" = "BLACK")) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0,1,by =.05)) +
+  scale_size_continuous(labels = comma)
+```
+
+
+```{r plot-prepping-for-crime}
+##Preparing for Crime
+
+sf_data1 %>%
+  select(race, cs_casng) %>%
+  mutate(race = recode_factor(race,"P" = "B","Q" = "H")) %>%
+  group_by(race, cs_casng) %>%
+  summarise(count = n()) %>%
+  spread(cs_casng, count) %>%
+  mutate(total = Y+N) %>%
+  ggplot() +
+  geom_point(aes(x = reorder(race,Y/total, sum),
+                 y = Y/total, size = Y),
+             color = "#893eb5") +
+  geom_text(aes(x = reorder(race,Y/total, sum),
+                y = Y/total,label = round(Y/total,2)),
+            hjust = 0.2, vjust = -0.9, color ="#095e7d")+
+  labs(size="size",y="Proportion",x="Race",
+       title=paste("Civilian Behavior (Preparing for Crime) by Race"))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 70, hjust = 1, face = "bold"))+
+  theme(axis.text.y = element_text(face = "bold"))+
+  theme(plot.title = element_text(hjust = 0.5,size=20)) +
+  scale_x_discrete(labels = c("X" = "Others", "I" = "AMERICAN  INDIAN", "U" = "UNKNOWN",
+                              "A" = "ASIAN / PACIFIC  ISLANDER", "Z" = "",
+                              "W" ="WHITE", "H" = "HISPANIC", "B" = "BLACK")) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0,1,by =.05)) +
+  scale_size_continuous(labels = comma)
+
+```
+
+```{r plot-lookout-for-crime}
+##Lookout for Crime
+
+sf_data1 %>%
+  select(race, cs_lkout) %>%
+  mutate(race = recode_factor(race,"P" = "B","Q" = "H")) %>%
+  group_by(race, cs_lkout) %>%
+  summarise(count = n()) %>%
+  spread(cs_lkout, count) %>%
+  mutate(total = Y+N) %>%
+  ggplot() +
+  geom_point(aes(x = reorder(race,Y/total, sum),
+                 y = Y/total, size = Y),
+             color = "#893eb5") +
+  geom_text(aes(x = reorder(race,Y/total, sum),
+                y = Y/total,label = round(Y/total,2)),
+            hjust = 0.2, vjust = -0.9, color ="#095e7d")+
+  labs(size="size",y="Proportion",x="Race",
+       title=paste("Civilian Behavior (Lookout for Crime) by Race"))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 70, hjust = 1, face = "bold"))+
+  theme(axis.text.y = element_text(face = "bold"))+
+  theme(plot.title = element_text(hjust = 0.5,size=20)) +
+  scale_x_discrete(labels = c("X" = "Others", "I" = "AMERICAN  INDIAN", "U" = "UNKNOWN",
+                              "A" = "ASIAN / PACIFIC  ISLANDER", "Z" = "",
+                              "W" ="WHITE", "H" = "HISPANIC", "B" = "BLACK")) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0,1,by =.05)) +
+  scale_size_continuous(labels = comma)
+```
+
+```{r plot-criminal-attire}
+##criminal attire
+sf_data1 %>%
+  select(race, cs_cloth) %>%
+  mutate(race = recode_factor(race,"P" = "B","Q" = "H")) %>%
+  group_by(race, cs_cloth) %>%
+  summarise(count = n()) %>%
+  spread(cs_cloth, count) %>%
+  mutate(total = Y+N) %>%
+  ggplot() +
+  geom_point(aes(x = reorder(race,Y/total, sum),
+                 y = Y/total, size = Y),
+             color = "#893eb5") +
+  geom_text(aes(x = reorder(race,Y/total, sum),
+                y = Y/total,label = round(Y/total,2)),
+            hjust = 0.2, vjust = -0.9, color ="#095e7d")+
+  labs(size="size",y="Proportion",x="Race",
+       title=paste("Civilian Behavior (Dressed in Criminal Attire) by Race"))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 70, hjust = 1, face = "bold"))+
+  theme(axis.text.y = element_text(face = "bold"))+
+  theme(plot.title = element_text(hjust = 0.5,size=20)) +
+  scale_x_discrete(labels = c("X" = "Others", "I" = "AMERICAN  INDIAN", "U" = "UNKNOWN",
+                              "A" = "ASIAN / PACIFIC  ISLANDER", "Z" = "",
+                              "W" ="WHITE", "H" = "HISPANIC", "B" = "BLACK")) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0,1,by =.05)) +
+  scale_size_continuous(labels = comma)
+```
+
+
+```{r plot-drug}
+###Appearance of Drug Transaction
+
+sf_data1 %>%
+  select(race, cs_drgtr) %>%
+  mutate(race = recode_factor(race,"P" = "B","Q" = "H")) %>%
+  group_by(race, cs_drgtr) %>%
+  summarise(count = n()) %>%
+  spread(cs_drgtr, count) %>%
+  mutate(total = Y+N) %>%
+  ggplot() +
+  geom_point(aes(x = reorder(race,Y/total, sum),
+                 y = Y/total, size = Y),
+             color = "#893eb5") +
+  geom_text(aes(x = reorder(race,Y/total, sum),
+                y = Y/total,label = round(Y/total,2)),
+            hjust = 0.2, vjust = -0.9, color ="#095e7d")+
+  labs(size="size",y="Proportion",x="Race",
+       title=paste("Civilian Behavior (Appearance of Drug Transaction) by Race"))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 70, hjust = 1, face = "bold"))+
+  theme(axis.text.y = element_text(face = "bold"))+
+  theme(plot.title = element_text(hjust = 0.5,size=20)) +
+  scale_x_discrete(labels = c("X" = "Others", "I" = "AMERICAN  INDIAN", "U" = "UNKNOWN",
+                              "A" = "ASIAN / PACIFIC  ISLANDER", "Z" = "",
+                              "W" ="WHITE", "H" = "HISPANIC", "B" = "BLACK")) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0,1,by =.05)) +
+  scale_size_continuous(labels = comma)
+
+```
+
+
+```{r plot-furtive-movements}
+###Suspicious Movements
+
+sf_data1 %>%
+  select(race, cs_furtv) %>%
+  mutate(race = recode_factor(race,"P" = "B","Q" = "H")) %>%
+  group_by(race, cs_furtv) %>%
+  summarise(count = n()) %>%
+  spread(cs_furtv, count) %>%
+  mutate(total = Y+N) %>%
+  ggplot() +
+  geom_point(aes(x = reorder(race,Y/total, sum),
+                 y = Y/total, size = Y),
+             color = "#893eb5") +
+  geom_text(aes(x = reorder(race,Y/total, sum),
+                y = Y/total,label = round(Y/total,2)),
+            hjust = 0.2, vjust = -0.9, color ="#095e7d")+
+  labs(size="size",y="Proportion",x="Race",
+       title=paste("Civilian Behavior (Suspicious Movements) by Race"))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 70, hjust = 1, face = "bold"))+
+  theme(axis.text.y = element_text(face = "bold"))+
+  theme(plot.title = element_text(hjust = 0.5,size=20)) +
+  scale_x_discrete(labels = c("X" = "Others", "I" = "AMERICAN  INDIAN", "U" = "UNKNOWN",
+                              "A" = "ASIAN / PACIFIC  ISLANDER", "Z" = "",
+                              "W" ="WHITE", "H" = "HISPANIC", "B" = "BLACK")) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0,1,by =.05)) +
+  scale_size_continuous(labels = comma)
+
+```
+
+``` {r plot-engaging-in-violent-crime}
+##Engaging in Violent Crime
+
+sf_data1 %>%
+  select(race, cs_vcrim) %>%
+  mutate(race = recode_factor(race,"P" = "B","Q" = "H")) %>%
+  group_by(race, cs_vcrim) %>%
+  summarise(count = n()) %>%
+  spread(cs_vcrim, count) %>%
+  mutate(total = Y+N) %>%
+  ggplot() +
+  geom_point(aes(x = reorder(race,Y/total, sum),
+                 y = Y/total, size = Y),
+             color = "#893eb5") +
+  geom_text(aes(x = reorder(race,Y/total, sum),
+                y = Y/total,label = round(Y/total,2)),
+            hjust = 0.2, vjust = -0.9, color ="#095e7d")+
+  labs(size="size",y="Proportion",x="Race",
+       title=paste("Civilian Behavior (Engaging in Violent Crime) by Race"))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 70, hjust = 1, face = "bold"))+
+  theme(axis.text.y = element_text(face = "bold"))+
+  theme(plot.title = element_text(hjust = 0.5,size=20)) +
+  scale_x_discrete(labels = c("X" = "Others", "I" = "AMERICAN  INDIAN", "U" = "UNKNOWN",
+                              "A" = "ASIAN / PACIFIC  ISLANDER", "Z" = "",
+                              "W" ="WHITE", "H" = "HISPANIC", "B" = "BLACK")) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0,1,by =.05)) +
+  scale_size_continuous(labels = comma)
+```
+
+```{r plot-concealing-suspicious-object}
+##Concealing Suspicious Objects
+
+sf_data1 %>%
+  select(race, cs_bulge) %>%
+  mutate(race = recode_factor(race,"P" = "B","Q" = "H")) %>%
+  group_by(race, cs_bulge) %>%
+  summarise(count = n()) %>%
+  spread(cs_bulge, count) %>%
+  mutate(total = Y+N) %>%
+  ggplot() +
+  geom_point(aes(x = reorder(race,Y/total, sum),
+                 y = Y/total, size = Y),
+             color = "#893eb5") +
+  geom_text(aes(x = reorder(race,Y/total, sum),
+                y = Y/total,label = round(Y/total,2)),
+            hjust = 0.2, vjust = -0.9, color ="#095e7d")+
+  labs(size="size",y="Proportion",x="Race",
+       title=paste("Civilian Behavior (Concealing Suspicious Object) by Race"))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 70, hjust = 1, face = "bold"))+
+  theme(axis.text.y = element_text(face = "bold"))+
+  theme(plot.title = element_text(hjust = 0.5,size=20)) +
+  scale_x_discrete(labels = c("X" = "Others", "I" = "AMERICAN  INDIAN", "U" = "UNKNOWN",
+                              "A" = "ASIAN / PACIFIC  ISLANDER", "Z" = "",
+                              "W" ="WHITE", "H" = "HISPANIC", "B" = "BLACK")) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0,1,by =.05)) +
+  scale_size_continuous(labels = comma)
+
+```
+
+```{r plot-other-suspicious-behavior}
+###Other Suspicious Behavior
+
+sf_data1 %>%
+  select(race, cs_other) %>%
+  mutate(race = recode_factor(race,"P" = "B","Q" = "H")) %>%
+  group_by(race, cs_other) %>%
+  summarise(count = n()) %>%
+  spread(cs_other, count) %>%
+  mutate(total = Y+N) %>%
+  ggplot() +
+  geom_point(aes(x = reorder(race,Y/total, sum),
+                 y = Y/total, size = Y),
+             color = "#893eb5") +
+  geom_text(aes(x = reorder(race,Y/total, sum),
+                y = Y/total,label = round(Y/total,2)),
+            hjust = 0.2, vjust = -0.9, color ="#095e7d")+
+  labs(size="size",y="Proportion",x="Race",
+       title=paste("Civilian Behavior (Other Suspicious Behavior) by Race"))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 70, hjust = 1, face = "bold"))+
+  theme(axis.text.y = element_text(face = "bold"))+
+  theme(plot.title = element_text(hjust = 0.5,size=20)) +
+  scale_x_discrete(labels = c("X" = "Others", "I" = "AMERICAN  INDIAN", "U" = "UNKNOWN",
+                              "A" = "ASIAN / PACIFIC  ISLANDER", "Z" = "",
+                              "W" ="WHITE", "H" = "HISPANIC", "B" = "BLACK")) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0,1,by =.05)) +
+  scale_size_continuous(labels = comma)
+```
+
+```{r plot-contraband-weapon-found}
+sf_data1 %>%
+  mutate(wepnfnd = paste(contrabn,asltweap,pistol,riflshot,knifcuti,machgun,othrweap, sep = "")) %>%
+  mutate(wepnfnd = if_else(grepl("Y",wepnfnd), "Y", "N"))  %>%
+  select(race, wepnfnd) %>%
+  mutate(race = recode_factor(race,"P" = "B","Q" = "H")) %>%
+  group_by(race, wepnfnd) %>%
+  summarise(count = n()) %>%
+  spread(wepnfnd, count) %>%
+  mutate(total = Y+N) %>%
+  ggplot() +
+  geom_point(aes(x = reorder(race,Y/total, sum),
+                 y = Y/total, size = Y),
+             color = "#893eb5") +
+  geom_text(aes(x = reorder(race,Y/total, sum),
+                y = Y/total,label = round(Y/total,2)),
+            hjust = 0.2, vjust = -0.9, color ="#095e7d")+
+  labs(size="size",y="Proportion",x="Race",
+       title=paste("Civilian Behavior (Contraband or Weapon Found) by Race"))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 70, hjust = 1, face = "bold"))+
+  theme(axis.text.y = element_text(face = "bold"))+
+  theme(plot.title = element_text(hjust = 0.5,size=20)) +
+  scale_x_discrete(labels = c("X" = "Others", "I" = "AMERICAN  INDIAN", "U" = "UNKNOWN",
+                              "A" = "ASIAN / PACIFIC  ISLANDER", "Z" = "",
+                              "W" ="WHITE", "H" = "HISPANIC", "B" = "BLACK")) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0,1,by =.05)) +
+  scale_size_continuous(labels = comma)
+
+```
+
+```{r plot-frisked}
+###Frisked
+
+sf_data1 %>%
+  select(race, frisked) %>%
+  mutate(race = recode_factor(race,"P" = "B","Q" = "H")) %>%
+  group_by(race, frisked) %>%
+  summarise(count = n()) %>%
+  spread(frisked, count) %>%
+  mutate(total = Y+N) %>%
+  ggplot() +
+  geom_point(aes(x = reorder(race,Y/total, sum),
+                 y = Y/total, size = Y),
+             color = "#893eb5") +
+  geom_text(aes(x = reorder(race,Y/total, sum),
+                y = Y/total,label = round(Y/total,2)),
+            hjust = 0.2, vjust = -0.9, color ="#095e7d")+
+  labs(size="size",y="Proportion",x="Race",
+       title=paste("Frisked by Race"))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 70, hjust = 1, face = "bold"))+
+  theme(axis.text.y = element_text(face = "bold"))+
+  theme(plot.title = element_text(hjust = 0.5,size=20)) +
+  scale_x_discrete(labels = c("X" = "Others", "I" = "AMERICAN  INDIAN", "U" = "UNKNOWN",
+                              "A" = "ASIAN / PACIFIC  ISLANDER", "Z" = "",
+                              "W" ="WHITE", "H" = "HISPANIC", "B" = "BLACK")) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0,1,by =.05)) +
+  scale_size_continuous(labels = comma)
+```
+
+
+```{r plot-searched}
+##searched
+
+sf_data1 %>%
+  select(race, searched) %>%
+  mutate(race = recode_factor(race,"P" = "B","Q" = "H")) %>%
+  group_by(race, searched) %>%
+  summarise(count = n()) %>%
+  spread(searched, count) %>%
+  mutate(total = Y+N) %>%
+  ggplot() +
+  geom_point(aes(x = reorder(race,Y/total, sum),
+                 y = Y/total, size = Y),
+             color = "#893eb5") +
+  geom_text(aes(x = reorder(race,Y/total, sum),
+                y = Y/total,label = round(Y/total,2)),
+            hjust = 0.2, vjust = -0.9, color ="#095e7d")+
+  labs(size="size",y="Proportion",x="Race",
+       title=paste("Searched by Race"))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 70, hjust = 1, face = "bold"))+
+  theme(axis.text.y = element_text(face = "bold"))+
+  theme(plot.title = element_text(hjust = 0.5,size=20)) +
+  scale_x_discrete(labels = c("X" = "Others", "I" = "AMERICAN  INDIAN", "U" = "UNKNOWN",
+                              "A" = "ASIAN / PACIFIC  ISLANDER", "Z" = "",
+                              "W" ="WHITE", "H" = "HISPANIC", "B" = "BLACK")) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0,1,by =.05)) +
+  scale_size_continuous(labels = comma)
+
+
+```
+
+```{r plot-arrested}
+##Arrested
+
+sf_data1 %>%
+  select(race, arstmade) %>%
+  mutate(race = recode_factor(race,"P" = "B","Q" = "H")) %>%
+  group_by(race, arstmade) %>%
+  summarise(count = n()) %>%
+  spread(arstmade, count) %>%
+  mutate(total = Y+N) %>%
+  ggplot() +
+  geom_point(aes(x = reorder(race,Y/total, sum),
+                 y = Y/total, size = Y),
+             color = "#893eb5") +
+  geom_text(aes(x = reorder(race,Y/total, sum),
+                y = Y/total,label = round(Y/total,2)),
+            hjust = 0.2, vjust = -0.9, color ="#095e7d")+
+  labs(size="size",y="Proportion",x="Race",
+       title=paste("Arrested by Race"))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 70, hjust = 1, face = "bold"))+
+  theme(axis.text.y = element_text(face = "bold"))+
+  theme(plot.title = element_text(hjust = 0.5,size=20)) +
+  scale_x_discrete(labels = c("X" = "Others", "I" = "AMERICAN  INDIAN", "U" = "UNKNOWN",
+                              "A" = "ASIAN / PACIFIC  ISLANDER", "Z" = "",
+                              "W" ="WHITE", "H" = "HISPANIC", "B" = "BLACK")) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0,1,by =.05)) +
+  scale_size_continuous(labels = comma)
+
+
+```
+
+
+```{r plot-summoned}
+
+##Summoned
+
+sf_data1 %>%
+  select(race, sumissue) %>%
+  mutate(race = recode_factor(race,"P" = "B","Q" = "H")) %>%
+  group_by(race, sumissue) %>%
+  summarise(count = n()) %>%
+  spread(sumissue, count) %>%
+  mutate(total = Y+N) %>%
+  ggplot() +
+  geom_point(aes(x = reorder(race,Y/total, sum),
+                 y = Y/total, size = Y),
+             color = "#893eb5") +
+  geom_text(aes(x = reorder(race,Y/total, sum),
+                y = Y/total,label = round(Y/total,2)),
+            hjust = 0.2, vjust = -0.9, color ="#095e7d")+
+  labs(size="size",y="Proportion",x="Race",
+       title=paste("Summoned by Race"))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 70, hjust = 1, face = "bold"))+
+  theme(axis.text.y = element_text(face = "bold"))+
+  theme(plot.title = element_text(hjust = 0.5,size=20)) +
+  scale_x_discrete(labels = c("X" = "Others", "I" = "AMERICAN  INDIAN", "U" = "UNKNOWN",
+                              "A" = "ASIAN / PACIFIC  ISLANDER", "Z" = "",
+                              "W" ="WHITE", "H" = "HISPANIC", "B" = "BLACK")) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0,1,by =.05)) +
+  scale_size_continuous(labels = comma)
+
+
+```
+
+```{r plot-hands}
+
+###hands
+
+sf_data1 %>%
+  select(race, pf_hands) %>%
+  mutate(race = recode_factor(race,"P" = "B","Q" = "H")) %>%
+  group_by(race, pf_hands) %>%
+  summarise(count = n()) %>%
+  spread(pf_hands, count) %>%
+  mutate(total = Y+N) %>%
+  ggplot() +
+  geom_point(aes(x = reorder(race,Y/total, sum),
+                 y = Y/total, size = Y),
+             color = "#893eb5") +
+  geom_text(aes(x = reorder(race,Y/total, sum),
+                y = Y/total,label = round(Y/total,2)),
+            hjust = 0.2, vjust = -0.9, color ="#095e7d")+
+  labs(size="size",y="Proportion",x="Race",
+       title=paste("Use of Force (Hands) by Race"))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 70, hjust = 1, face = "bold"))+
+  theme(axis.text.y = element_text(face = "bold"))+
+  theme(plot.title = element_text(hjust = 0.5,size=20)) +
+  scale_x_discrete(labels = c("X" = "Others", "I" = "AMERICAN  INDIAN", "U" = "UNKNOWN",
+                              "A" = "ASIAN / PACIFIC  ISLANDER", "Z" = "",
+                              "W" ="WHITE", "H" = "HISPANIC", "B" = "BLACK")) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0,1,by =.05)) +
+  scale_size_continuous(labels = comma)
+
+```
+
+```{r plot-push-to-wall}
+##push to wall
+
+sf_data1 %>%
+  select(race, pf_wall) %>%
+  mutate(race = recode_factor(race,"P" = "B","Q" = "H")) %>%
+  group_by(race, pf_wall) %>%
+  summarise(count = n()) %>%
+  spread(pf_wall, count) %>%
+  mutate(total = Y+N) %>%
+  ggplot() +
+  geom_point(aes(x = reorder(race,Y/total, sum),
+                 y = Y/total, size = Y),
+             color = "#893eb5") +
+  geom_text(aes(x = reorder(race,Y/total, sum),
+                y = Y/total,label = round(Y/total,2)),
+            hjust = 0.2, vjust = -0.9, color ="#095e7d")+
+  labs(size="size",y="Proportion",x="Race",
+       title=paste("Use of Force (Push to Wall) by Race"))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 70, hjust = 1, face = "bold"))+
+  theme(axis.text.y = element_text(face = "bold"))+
+  theme(plot.title = element_text(hjust = 0.5,size=20)) +
+  scale_x_discrete(labels = c("X" = "Others", "I" = "AMERICAN  INDIAN", "U" = "UNKNOWN",
+                              "A" = "ASIAN / PACIFIC  ISLANDER", "Z" = "",
+                              "W" ="WHITE", "H" = "HISPANIC", "B" = "BLACK")) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0,1,by =.05)) +
+  scale_size_continuous(labels = comma)
+
+
+
+```
+
+
+```{r plot-handcuffs}
+##handcuffs
+
+sf_data1 %>%
+  select(race, pf_hcuff) %>%
+  mutate(race = recode_factor(race,"P" = "B","Q" = "H")) %>%
+  group_by(race, pf_hcuff) %>%
+  summarise(count = n()) %>%
+  spread(pf_hcuff, count) %>%
+  mutate(total = Y+N) %>%
+  ggplot() +
+  geom_point(aes(x = reorder(race,Y/total, sum),
+                 y = Y/total, size = Y),
+             color = "#893eb5") +
+  geom_text(aes(x = reorder(race,Y/total, sum),
+                y = Y/total,label = round(Y/total,2)),
+            hjust = 0.2, vjust = -0.9, color ="#095e7d")+
+  labs(size="size",y="Proportion",x="Race",
+       title=paste("Use of Force (Handcuffs) by Race"))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 70, hjust = 1, face = "bold"))+
+  theme(axis.text.y = element_text(face = "bold"))+
+  theme(plot.title = element_text(hjust = 0.5,size=20)) +
+  scale_x_discrete(labels = c("X" = "Others", "I" = "AMERICAN  INDIAN", "U" = "UNKNOWN",
+                              "A" = "ASIAN / PACIFIC  ISLANDER", "Z" = "",
+                              "W" ="WHITE", "H" = "HISPANIC", "B" = "BLACK")) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0,1,by =.05)) +
+  scale_size_continuous(labels = comma)
+
+
+
+```
+
+```{r plot-draw-weapon}
+
+##Draw Weapon
+
+sf_data1 %>%
+  select(race, pf_drwep) %>%
+  mutate(race = recode_factor(race,"P" = "B","Q" = "H")) %>%
+  group_by(race, pf_drwep) %>%
+  summarise(count = n()) %>%
+  spread(pf_drwep, count) %>%
+  mutate(total = Y+N) %>%
+  ggplot() +
+  geom_point(aes(x = reorder(race,Y/total, sum),
+                 y = Y/total, size = Y),
+             color = "#893eb5") +
+  geom_text(aes(x = reorder(race,Y/total, sum),
+                y = Y/total,label = round(Y/total,2)),
+            hjust = 0.2, vjust = -0.9, color ="#095e7d")+
+  labs(size="size",y="Proportion",x="Race",
+       title=paste("Use of Force (Draw Weapon) by Race"))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 70, hjust = 1, face = "bold"))+
+  theme(axis.text.y = element_text(face = "bold"))+
+  theme(plot.title = element_text(hjust = 0.5,size=20)) +
+  scale_x_discrete(labels = c("X" = "Others", "I" = "AMERICAN  INDIAN", "U" = "UNKNOWN",
+                              "A" = "ASIAN / PACIFIC  ISLANDER", "Z" = "",
+                              "W" ="WHITE", "H" = "HISPANIC", "B" = "BLACK")) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0,1,by =.05)) +
+  scale_size_continuous(labels = comma)
+```
+
+
+```{r plot-push-to-ground}
+##Push to Ground
+
+sf_data1 %>%
+  select(race, pf_grnd) %>%
+  mutate(race = recode_factor(race,"P" = "B","Q" = "H")) %>%
+  group_by(race, pf_grnd) %>%
+  summarise(count = n()) %>%
+  spread(pf_grnd, count) %>%
+  mutate(total = Y+N) %>%
+  ggplot() +
+  geom_point(aes(x = reorder(race,Y/total, sum),
+                 y = Y/total, size = Y),
+             color = "#893eb5") +
+  geom_text(aes(x = reorder(race,Y/total, sum),
+                y = Y/total,label = round(Y/total,2)),
+            hjust = 0.2, vjust = -0.9, color ="#095e7d")+
+  labs(size="size",y="Proportion",x="Race",
+       title=paste("Use of Force (Push to Ground) by Race"))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 70, hjust = 1, face = "bold"))+
+  theme(axis.text.y = element_text(face = "bold"))+
+  theme(plot.title = element_text(hjust = 0.5,size=20)) +
+  scale_x_discrete(labels = c("X" = "Others", "I" = "AMERICAN  INDIAN", "U" = "UNKNOWN",
+                              "A" = "ASIAN / PACIFIC  ISLANDER", "Z" = "",
+                              "W" ="WHITE", "H" = "HISPANIC", "B" = "BLACK")) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0,1,by =.05)) +
+  scale_size_continuous(labels = comma)
+```
+
+```{r plot-point-weapon}
+##Point Weapon
+
+sf_data1 %>%
+  select(race, pf_ptwep) %>%
+  mutate(race = recode_factor(race,"P" = "B","Q" = "H")) %>%
+  group_by(race, pf_ptwep) %>%
+  summarise(count = n()) %>%
+  spread(pf_ptwep, count) %>%
+  mutate(total = Y+N) %>%
+  ggplot() +
+  geom_point(aes(x = reorder(race,Y/total, sum),
+                 y = Y/total, size = Y),
+             color = "#893eb5") +
+  geom_text(aes(x = reorder(race,Y/total, sum),
+                y = Y/total,label = round(Y/total,2)),
+            hjust = 0.2, vjust = -0.9, color ="#095e7d")+
+  labs(size="size",y="Proportion",x="Race",
+       title=paste("Use of Force (Point Weapon) by Race"))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 70, hjust = 1, face = "bold"))+
+  theme(axis.text.y = element_text(face = "bold"))+
+  theme(plot.title = element_text(hjust = 0.5,size=20)) +
+  scale_x_discrete(labels = c("X" = "Others", "I" = "AMERICAN  INDIAN", "U" = "UNKNOWN",
+                              "A" = "ASIAN / PACIFIC  ISLANDER", "Z" = "",
+                              "W" ="WHITE", "H" = "HISPANIC", "B" = "BLACK")) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0,1,by =.05)) +
+  scale_size_continuous(labels = comma)
+
+
+```
+
+
+```{r plot-pepperspray-baton}
+
+##Pepper Spray/Baton (panel_data)
+sf_data1 %>%
+  mutate(pf_pp_spray_baton = paste(pf_pepsp, pf_baton,sep = "")) %>%
+  mutate(pf_pp_spray_baton = ifelse(grepl("Y",pf_pp_spray_baton), "Y", "N")) %>%
+  select(race, pf_pp_spray_baton) %>%
+  mutate(race = recode_factor(race,"P" = "B","Q" = "H")) %>%
+  group_by(race, pf_pp_spray_baton) %>%
+  summarise(count = n()) %>%
+  spread(pf_pp_spray_baton, count) %>%
+  mutate(total = Y+N) %>%
+  ggplot() +
+  geom_point(aes(x = reorder(race,Y/total, sum),
+                 y = Y/total, size = Y),
+             color = "#893eb5") +
+  geom_text(aes(x = reorder(race,Y/total, sum),
+                y = Y/total,label = round(Y/total,2)),
+            hjust = 0.2, vjust = -0.9, color ="#095e7d")+
+  labs(size="size",y="Proportion",x="Race",
+       title=paste("Use of Force (Pepper Spray/Baton) by Race"))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 70, hjust = 1, face = "bold"))+
+  theme(axis.text.y = element_text(face = "bold"))+
+  theme(plot.title = element_text(hjust = 0.5,size=20)) +
+  scale_x_discrete(labels = c("X" = "Others", "I" = "AMERICAN  INDIAN", "U" = "UNKNOWN",
+                              "A" = "ASIAN / PACIFIC  ISLANDER", "Z" = "",
+                              "W" ="WHITE", "H" = "HISPANIC", "B" = "BLACK")) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0,1,by =.05)) +
+  scale_size_continuous(labels = comma)
+
+
+```
+
