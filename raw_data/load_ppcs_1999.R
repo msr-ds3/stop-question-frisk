@@ -85,9 +85,10 @@ ppcs_1999 <- ppcs_1999 %>%
   mutate(off_hispanic = 0)
 
 #type_of_incident
-traffic_stops <- c('Roadside check drunk driver', 'Seat belt', 'Some other traffic offense', 'Vehicle defect', 'Suspected/charged with drinking & driving', 'Speeding')
-#ppcs_1999 %>% group_by(REASON_FOR_STOP) %>% summarise(count =n()) %>% view
-
+traffic_stops <- c('Roadside check drunk drivers', 'Seat belt', 'Open container', 'Some other traffic offense', 'Vehicle defect', 'Suspected/charged with drinking & driv', 'Speeding')
+ppcs_1999 %>% select(REASON_FOR_STOP) %>% group_by(REASON_FOR_STOP) %>% summarize(count = n()) %>% view
+happened <- c('Once', 'More than once')
+missing <- c('Not at all', 'Out of Universe/Missing')
 # ppcs_1999 <- ppcs_1999 %>%
 #   mutate(type_of_incident = case_when(
 #     (REASON_FOR_STOP %in% traffic_stops) ~ 2,
@@ -95,19 +96,20 @@ traffic_stops <- c('Roadside check drunk driver', 'Seat belt', 'Some other traff
 #     TRUE ~ 3
 #   ))
 # view(ppcs_1999$REASON_FOR_TRAFFIC_STOP)
+ ppcs_1999 <- ppcs_1999 %>%
+   mutate(type_of_incident = case_when(
+     (REASON_FOR_STOP == 'Out of Universe/Missing') ~NA_real_,
+     (REASON_FOR_TRAFFIC_STOP == "Yes" | REASON_FOR_STOP %in% traffic_stops) ~ 2,
+     (VEHICLE_STOPPED_BY_POLICE == 'Once' | VEHICLE_STOPPED_BY_POLICE == 'More than once')~2,
+     (REASON_FOR_TRAFFIC_STOP %in% missing | VEHICLE_STOPPED_BY_POLICE %in% missing)~ NA_real_,
+     TRUE ~ 3
+   ))
 # ppcs_1999 <- ppcs_1999 %>%
 #   mutate(type_of_incident = case_when(
-#     (REASON_FOR_STOP == 'Out of Universe/Missing') ~NA_real_,
-#     (REASON_FOR_TRAFFIC_STOP == "Yes" | REASON_FOR_STOP %in% traffic_stops) ~ 2,
-#     
-#     TRUE ~ 3
+#     (VEHICLE_STOPPED_BY_POLICE == 'Once' | VEHICLE_STOPPED_BY_POLICE == 'More than once') ~ 2,
+#     (VEHICLE_STOPPED_BY_POLICE == 'Not at all') ~ 3,
+#     TRUE ~ NA_real_
 #   ))
-ppcs_1999 <- ppcs_1999 %>%
-  mutate(type_of_incident = case_when(
-    (VEHICLE_STOPPED_BY_POLICE == 'Once' | VEHICLE_STOPPED_BY_POLICE == 'More than once') ~ 2,
-    (VEHICLE_STOPPED_BY_POLICE == 'Not at all') ~ 3,
-    TRUE ~ NA_real_
-  ))
 
 #civilian_behavior
 is_not_missing <- function(x) {
