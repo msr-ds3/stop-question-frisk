@@ -6,10 +6,10 @@ library(dplyr)
 ppcs_1999 <- read_ascii_setup('03151-0001-Data.txt','03151-0001-Setup.sas')
 ppcs_1999 <- ppcs_1999[, !duplicated(colnames(ppcs_1999))]
 
-ppcs_1999 <- ppcs_1999 %>%
-  filter(ANY_POLICE_CONTACT_IN_LAST_12_MONTHS == 'Yes' & FACE_TO_FACE_CONTACT == 'Yes')
-
-dfcol <- data.frame(colnames(ppcs_1999)) %>% view
+# ppcs_1999 <- ppcs_1999 %>%
+#   filter(ANY_POLICE_CONTACT_IN_LAST_12_MONTHS == 'Yes' & FACE_TO_FACE_CONTACT == 'Yes')
+# 
+# dfcol <- data.frame(colnames(ppcs_1999)) %>% view
 
 #add row number
 ppcs_1999 <- ppcs_1999 %>%
@@ -194,6 +194,6 @@ ppcs_1999_cleaned <- ppcs_1999 %>%
   select(civilian_race, civilian_age, civilian_gender, civilian_income, civilian_employed, population_size, time_of_encounter, off_black, off_white, off_other, off_split, off_hispanic, type_of_incident, civilian_behavior, civilian_searched, civilian_arrested, civilian_guilty_of_illegal, civilian_injured, excess_force, force)
 
 ppcs_1999_cleaned <- ppcs_1999_cleaned %>%
-  mutate(year = 1999) %>% view
+  mutate(year = 1999)
 
 save(ppcs_1999_cleaned, file = 'ppcs_1999.RData')
