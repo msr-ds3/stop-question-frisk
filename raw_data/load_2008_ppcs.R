@@ -5,8 +5,13 @@ library(tidyverse)
 
 ppcs_2008 <- read_tsv("32022-0001-Data.tsv")
 
-ppcs_2008 <- ppcs_2008 %>% 
-  filter(V2 == 1)
+# ppcs_2008 <- ppcs_2008 %>% 
+#   filter(V2 == 1)
+
+ppcs_2008 <- ppcs_2008 %>%
+  mutate(face_to_face = V2) %>%
+  mutate(contact = NA_real_) %>%
+  mutate(num_face_to_face = NA_real_)
 # create the civilian race column
 # black includes black and black hispanic
 # hispanic includes white hispanic and any other combination
@@ -20,6 +25,7 @@ ppcs_2008 <- ppcs_2008 %>%
 # HISP = 1
 # other includes:
 # 3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20
+
 
 ppcs_2008_revised <- ppcs_2008 %>% 
   mutate(civilian_race = case_when(
@@ -190,7 +196,7 @@ ppcs_2008_revised <- ppcs_2008_revised %>%
 #Cleaned! Correct columns selected!
 # Add year column 
 ppcs_2008_cleaned <- ppcs_2008_revised %>%
-  select(civilian_race, civilian_age, civilian_gender, civilian_income, civilian_employed, population_size, time_of_encounter, off_black, off_white, off_other, off_split, off_hispanic, type_of_incident, civilian_behavior, civilian_searched, civilian_arrested, civilian_guilty_of_illegal, civilian_injured, excess_force, force) %>%
+  select(civilian_race, civilian_age, civilian_gender, civilian_income, civilian_employed, population_size, time_of_encounter, off_black, off_white, off_other, off_split, off_hispanic, type_of_incident, civilian_behavior, civilian_searched, civilian_arrested, civilian_guilty_of_illegal, civilian_injured, excess_force, force, contact, face_to_face, num_face_to_face) %>%
   mutate(year = 2008)
 
 save(ppcs_2008_cleaned, file = "ppcs_2008.RData")
