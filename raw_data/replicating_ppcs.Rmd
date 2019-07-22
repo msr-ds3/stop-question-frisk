@@ -25,6 +25,15 @@ load('ppcs_2011.RData')
 
 merged_ppcs <- rbind(ppcs_1996_cleaned, ppcs_1999_cleaned, ppcs_2008_cleaned, ppcs2002_polished, ppcs2005_polished, ppcs_2011)
 
+merged_ppcs <- merged_ppcs %>% 
+  mutate(civilian_age = as.numeric(civilian_age))
+
+colnames(merged_ppcs)
+unique(merged_ppcs$contact)
+
+yes <- c('Yes','(1) Yes', 1 )
+merged_ppcs <- merged_ppcs %>%
+  filter(face_to_face %in% yes | (num_face_to_face > 0 & num_face_to_face < 998))
 save(merged_ppcs, file = 'merged_ppcs.RData')
 ```
 
