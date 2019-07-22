@@ -8,6 +8,9 @@ ppcs_1999 <- ppcs_1999[, !duplicated(colnames(ppcs_1999))]
 
 ppcs_1999 <- ppcs_1999 %>%
   filter(ANY_POLICE_CONTACT_IN_LAST_12_MONTHS == 'Yes' & FACE_TO_FACE_CONTACT == 'Yes')
+
+dfcol <- data.frame(colnames(ppcs_1999)) %>% view
+
 #add row number
 ppcs_1999 <- ppcs_1999 %>%
   mutate(row = row_number())
@@ -139,11 +142,22 @@ ppcs_1999 <- ppcs_1999 %>%
 
 ppcs_1999 <- ppcs_1999 %>%
   mutate(civilian_arrested = ifelse(FORCE_USED_AND_RESPONDENT_ARRESTED == 'Yes', 1, 0))
-
+ppcs_1999%>%select(civilian_guilty_of_illegal)%>%group_by(civilian_guilty_of_illegal)%>%summarize(count =n())%>%view
 ppcs_1999 <- ppcs_1999 %>% 
   mutate(civilian_guilty_of_illegal = case_when(
     (ITEMS_FOUND_DURING_VEHICLE_PERSONAL_SEAR == 'Evidence found')~1,
     (FOUND_IN_VEHICLE != 'Out of Universe/Missing')~1,
+    (ILLEGAL_WEAPONS_FOUND_USE_OR_THREATEN_FO == 'Illegal weapons')~1,
+    (ILLEGAL_DRUGS_FOUND_USE_OR_THREATEN_FORC == 'Illegal drugs')~1,
+    (OPEN_ALCOHOL_FOUND_IN_VEHICLE == 'Open alcohol')~1,
+    (OPEN_ALCOHOL_FOUND_USE_OR_THREATEN_FORCE == 'Open alcohol') ~1,
+    (ALCOHOL_FOUND_ON_OR_NEAR_YOU_VEHICLE_S == 'Open alcohol')~1,
+    (DRUGS_FOUND_IN_VEHICLE == 'Illegal drugs')~1,
+    (DRUGS_FOUND_ON_OR_NEAR_YOU_VEHICLE_STO == 'Illegal drugs')~1,
+    (WEAPON_FOUND_IN_VEHICLE == 'Illegal weapons')~1,
+    (WEAPONS_FOUND_ON_OR_NEAR_YOU_VEHICLE_S == 'Illegal weapons')~1,
+    (POSSESSION_OF_WEAPON_CHARGE_USE_OR_THREA == 'Possession of weapon charge')~1,
+    (POSSESION_OF_WEAPON_CHARGE_VEHICLE_STO == 'Possession of weapon charge')~1,
     TRUE ~0
     ))
 
