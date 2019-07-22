@@ -48,3 +48,38 @@ sf_data1 %>%
 
 
 ```
+
+
+```{r plot-avg-race}
+#avg. age
+
+sf_data1 %>%
+  select(race, age) %>%
+  mutate(race = recode_factor(race,"P" = "B","Q" = "H")) %>%
+  filter(10<= age & age<= 90) %>% 
+  group_by(race) %>%
+  summarise(count = n(), total = nrow(sf_data1), avg_age = mean(age, na.rm = T)) %>%
+  ungroup() %>%
+  ggplot() +
+  geom_point(aes(x = reorder(race,count/total, sum),
+                 y = count/total, size = count),
+             color = "#893eb5") +
+  geom_text(aes(x = reorder(race,count/total, sum),
+                y = count/total,label = paste("Avg_age = ", round(avg_age,2))),
+            hjust = 0.2, vjust = -0.9, color ="#095e7d")+
+  labs(size="size",y="Proportion",x="Race",
+       title=paste("Proportion of Suspect by Race"))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 70, hjust = 1, face = "bold"))+
+  theme(axis.text.y = element_text(face = "bold"))+
+  theme(plot.title = element_text(hjust = 0.5,size=20)) +
+  scale_x_discrete(labels = c("X" = "Others", "I" = "AMERICAN  INDIAN", "U" = "UNKNOWN",
+                              "A" = "ASIAN / PACIFIC  ISLANDER", "Z" = "",
+                              "W" ="WHITE", "H" = "HISPANIC", "B" = "BLACK"),
+                   limits = c("I","A", "W", "H", "B")) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  scale_size_continuous(labels = comma)
+
+```
+
+
