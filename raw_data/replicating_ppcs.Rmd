@@ -169,6 +169,7 @@ merged_ppcs %>%
 ```{r}
 #check for outliers
 merged_ppcs %>%
+  filter(!is.na(type_of_incident)) %>%
   group_by(year) %>%
   mutate(count = n()) %>%
   ungroup() %>%
@@ -238,7 +239,8 @@ merged_ppcs %>%
   ungroup() %>%
   group_by(civilian_race) %>%
   mutate(sum = sum(beh_count)) %>%
-  mutate(prop = beh_count/sum) %>%
+  mutate(prop = beh_count/sum) %>% 
+  filter(civilian_behavior == 1) %>%
   select(civilian_race, civilian_behavior, prop)
 ```
 
@@ -425,7 +427,7 @@ merged_ppcs %>%
   mutate(prop = count/sum(count))
 ```
 
-```{r}
+```{r excess-force-by-race}
 merged_ppcs %>%
   group_by(civilian_race, excess_force) %>%
   summarise(ex_count = n()) %>%
