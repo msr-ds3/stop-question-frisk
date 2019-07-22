@@ -121,7 +121,7 @@ temp <- sf_data1 %>%
                               "A" = "Asian", "Z" = "Other"))
 
 model_no_cntrl <- glm(any_force_used ~ race,
-                           data = log_panel_data,
+                           data = temp,
                            family = "binomial")
 
 exp(coef(model_no_cntrl))
