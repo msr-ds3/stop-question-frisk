@@ -452,36 +452,3 @@ leaflet(joint_sqf_baton) %>%
             position = "topleft", 
             title = "Baton Prop Black")
 
-
-# #Testing out ggmaps 
-# police_precinct <- tidy(police_precincts, region = "Precinct")
-# 
-# black_proportions <- black_proportions %>% mutate(precinct = as.character(precinct))
-# 
-# jp <- police_precinct %>%
-#   left_join(black_proportions, by=c("id"="precinct"))
-# 
-# nyc_map <- get_map(location = c(lon = -74.00, lat = 40.71), maptype = "terrain", zoom = 11)
-# 
-# mypal11 <- colorNumeric(
-#   palette = "YlOrRd",
-#   domain = jp$prop
-# )
-# 
-# jp
-# colors <- c("red")
-# jp %>% View()
-# 
-# ?colorFactor()
-# 
-# install.packages("viridis")
-# library(viridis)
-# 
-# cp<- c("#ffffcc","#ffeda0", "#fed976","#feb24c","#fd8d3c", "#fc4e2a", "#e31a1c", "#b10026")
-# 
-# 
-# ggmap(nyc_map) + 
-#   geom_polygon(data=jp, aes(x=long, y=lat, group=group, fill = prop)) + 
-#   scale_fill_gradientn(colors = cp)
-
-
