@@ -20,10 +20,10 @@ library(foreign)
 #Load Data
 ```{r load-data}
 ppcs_1996 <- read_ascii_setup('06999-0001-Data.txt','06999-0001-Setup.sas')
-ppcs_1996 <- ppcs_1996 %>%
-  filter(LAST_12_MONTHS_CONTACT_W_POLICE_OFFICER == 'Yes' & CONTACTS_W_POLICE_OFFICER_IN_PERSON == 'Yes')
-
-dfcol <- data.frame(colnames(ppcs_1996)) %>% view
+# ppcs_1996 <- ppcs_1996 %>%
+#  filter(LAST_12_MONTHS_CONTACT_W_POLICE_OFFICER == 'Yes' & CONTACTS_W_POLICE_OFFICER_IN_PERSON == 'Yes')
+# 
+# dfcol <- data.frame(colnames(ppcs_1996)) %>% view
 ```
 
 #Civilian Race
@@ -272,8 +272,11 @@ ppcs_1996 <- ppcs_1996 %>%
 
 ##Cleaned Data Frame
 ```{r}
+ppcs_1996 <- ppcs_1996 %>% 
+  mutate(contact = LAST_12_MONTHS_CONTACT_W_POLICE_OFFICER, face_to_face = CONTACTS_W_POLICE_OFFICER_IN_PERSON, num_face_to_face = NA)
+
 ppcs_1996_cleaned <- ppcs_1996 %>%
-  select(civilian_race, civilian_age, civilian_gender, civilian_income, civilian_employed, population_size, time_of_encounter, off_black, off_white, off_other, off_split, off_hispanic, type_of_incident, civilian_behavior, civilian_searched, civilian_arrested, civilian_guilty_of_illegal, civilian_injured, excess_force, force)
+  select(contact, face_to_face, num_face_to_face, civilian_race, civilian_age, civilian_gender, civilian_income, civilian_employed, population_size, time_of_encounter, off_black, off_white, off_other, off_split, off_hispanic, type_of_incident, civilian_behavior, civilian_searched, civilian_arrested, civilian_guilty_of_illegal, civilian_injured, excess_force, force)
 
 ```
 #Add year column

@@ -25,6 +25,7 @@ load('ppcs_2011.RData')
 
 merged_ppcs <- rbind(ppcs_1996_cleaned, ppcs_1999_cleaned, ppcs_2008_cleaned, ppcs2002_polished, ppcs2005_polished, ppcs_2011)
 
+save(merged_ppcs, file = 'merged_ppcs.RData')
 ```
 
 ```{r}
