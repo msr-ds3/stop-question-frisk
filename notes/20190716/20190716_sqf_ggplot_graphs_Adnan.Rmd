@@ -115,3 +115,33 @@ sf_data1 %>%
   scale_size_continuous(labels = comma)
 ```
 
+```{r plot-photo-id}
+
+###photo id
+
+sf_data1 %>%
+  select(race, typeofid) %>%
+  mutate(race = recode_factor(race,"P" = "B","Q" = "H")) %>%
+  group_by(race, typeofid) %>%
+  summarise(count = n()) %>%
+  spread(typeofid, count) %>%
+  mutate(total = O+P+R+V) %>%
+  ggplot() +
+  geom_point(aes(x = reorder(race,P/total, sum),
+                 y = P/total, size = P),
+             color = "#893eb5") +
+  geom_text(aes(x = reorder(race,P/total, sum),
+                y = P/total,label = round(P/total,2)),
+            hjust = 0.2, vjust = -0.9, color ="#095e7d")+
+  labs(size="size",y="Proportion",x="Race",
+       title=paste("Photo ID Shown by Race"))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 70, hjust = 1, face = "bold"))+
+  theme(axis.text.y = element_text(face = "bold"))+
+  theme(plot.title = element_text(hjust = 0.5,size=20)) +
+  scale_x_discrete(labels = c("X" = "Others", "I" = "AMERICAN  INDIAN", "U" = "UNKNOWN",
+                              "A" = "ASIAN / PACIFIC  ISLANDER", "Z" = "",
+                              "W" ="WHITE", "H" = "HISPANIC", "B" = "BLACK")) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0,1,by =.05)) +
+  scale_size_continuous(labels = comma)
+```
