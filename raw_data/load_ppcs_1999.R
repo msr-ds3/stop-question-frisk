@@ -6,8 +6,6 @@ library(dplyr)
 ppcs_1999 <- read_ascii_setup('03151-0001-Data.txt','03151-0001-Setup.sas')
 ppcs_1999 <- ppcs_1999[, !duplicated(colnames(ppcs_1999))]
 
-colnames(ppcs_1999)
-
 ppcs_1999 <- ppcs_1999 %>%
   filter(ANY_POLICE_CONTACT_IN_LAST_12_MONTHS == 'Yes' & FACE_TO_FACE_CONTACT == 'Yes')
 #add row number
@@ -67,22 +65,8 @@ ppcs_1999 <- ppcs_1999 %>%
 #officer_race
 black <- c('All black', 'Mostly black', 'Black')
 white <- c('All white', 'Mostly white', 'White')
-other <- c('Some other race', 'All of another race', 'Equally Mixed', 'Mostly another race', 'Other', 'Mix of races')
-# ppcs_tmp <- ppcs_1999 %>% 
-#   select(row, OFFICERS_RACES_VEHICLE_STOP, OFFICER_RACE_VEHICLE_STOP, RACE_OF_OFFICERS_USE_OR_THREATEN_FORCE, RACE_OF_OFFICER_USE_OR_THREATEN_FORCE, RACE_OF_OFFICERS_VEHICLE_STOP, RACE_OF_OFFICERS_OTHER_CONTACT) %>%
-#   gather(key = "officer_race_incidents", value = "officer_race" , OFFICERS_RACES_VEHICLE_STOP, OFFICER_RACE_VEHICLE_STOP, RACE_OF_OFFICERS_USE_OR_THREATEN_FORCE, RACE_OF_OFFICER_USE_OR_THREATEN_FORCE, RACE_OF_OFFICERS_VEHICLE_STOP, RACE_OF_OFFICERS_OTHER_CONTACT ) %>%
-#   mutate(officer_races = case_when(
-#     (officer_race %in% black) ~ 'black',
-#     (officer_race %in% white) ~ 'white',
-#     (officer_race %in% other) ~ 'other'
-#   )) %>% select(row, officer_races)
-# 
-# ppcs_1999 <- left_join(ppcs_1999, ppcs_tmp, by='row')
-# 
-# ppcs_1999 <- ppcs_1999 %>%
-#   mutate(off_black = ifelse(officer_races == 'black', 1, 0)) %>%
-#   mutate(off_white = ifelse(officer_races == 'white', 1, 0)) %>%
-#   mutate(off_other = ifelse(officer_races == 'other', 1, 0)) 
+other <- c('Some other race', 'All of another race','Mostly another race', 'Other')
+split <- c('Equally Mixed','Mix of races')
 
 columns <- cbind(ppcs_1999$OFFICERS_RACES_VEHICLE_STOP, ppcs_1999$OFFICER_RACE_VEHICLE_STOP, ppcs_1999$RACE_OF_OFFICERS_USE_OR_THREATEN_FORCE, ppcs_1999$RACE_OF_OFFICER_USE_OR_THREATEN_FORCE, ppcs_1999$RACE_OF_OFFICERS_VEHICLE_STOP, ppcs_1999$RACE_OF_OFFICERS_OTHER_CONTACT)
 ppcs_1999 <- ppcs_1999 %>%
@@ -93,13 +77,39 @@ ppcs_1999 <- ppcs_1999 %>%
 
 ppcs_1999 <- ppcs_1999 %>%
   mutate(off_other = apply(columns, 1, function(x){max(x %in% other)}))
-#type_of_incident
-traffic_stops <- c('Roadside check drunk driver', 'Seat belt', 'Some other traffic offense', 'Vehicle defect', 'Suspected/charged with drinking & driving', 'Speeding')
+
 ppcs_1999 <- ppcs_1999 %>%
-  mutate(type_of_incident = case_when(
-    (REASON_FOR_STOP %in% traffic_stops) ~ 2,
-    TRUE ~ 3
-  ))
+  mutate(off_split = apply(columns, 1, function(x){max(x %in% split)}))
+
+ppcs_1999 <- ppcs_1999 %>%
+  mutate(off_hispanic = 0)
+
+#type_of_incident
+traffic_stops <- c('Roadside check drunk drivers', 'Seat belt', 'Open container', 'Some other traffic offense', 'Vehicle defect', 'Suspected/charged with drinking & driv', 'Speeding')
+ppcs_1999 %>% select(REASON_FOR_STOP) %>% group_by(REASON_FOR_STOP) %>% summarize(count = n()) %>% view
+happened <- c('Once', 'More than once')
+missing <- c('Not at all', 'Out of Universe/Missing')
+# ppcs_1999 <- ppcs_1999 %>%
+#   mutate(type_of_incident = case_when(
+#     (REASON_FOR_STOP %in% traffic_stops) ~ 2,
+#     (REASON_FOR_STOP == 'Out of Universe/Missing') ~ NA_real_,
+#     TRUE ~ 3
+#   ))
+# view(ppcs_1999$REASON_FOR_TRAFFIC_STOP)
+ ppcs_1999 <- ppcs_1999 %>%
+   mutate(type_of_incident = case_when(
+     (REASON_FOR_STOP == 'Out of Universe/Missing') ~NA_real_,
+     (REASON_FOR_TRAFFIC_STOP == "Yes" | REASON_FOR_STOP %in% traffic_stops) ~ 2,
+     (VEHICLE_STOPPED_BY_POLICE == 'Once' | VEHICLE_STOPPED_BY_POLICE == 'More than once')~2,
+     (REASON_FOR_TRAFFIC_STOP %in% missing | VEHICLE_STOPPED_BY_POLICE %in% missing)~ NA_real_,
+     TRUE ~ 3
+   ))
+# ppcs_1999 <- ppcs_1999 %>%
+#   mutate(type_of_incident = case_when(
+#     (VEHICLE_STOPPED_BY_POLICE == 'Once' | VEHICLE_STOPPED_BY_POLICE == 'More than once') ~ 2,
+#     (VEHICLE_STOPPED_BY_POLICE == 'Not at all') ~ 3,
+#     TRUE ~ NA_real_
+#   ))
 
 #civilian_behavior
 is_not_missing <- function(x) {
@@ -131,14 +141,45 @@ ppcs_1999 <- ppcs_1999 %>%
   mutate(civilian_arrested = ifelse(FORCE_USED_AND_RESPONDENT_ARRESTED == 'Yes', 1, 0))
 
 ppcs_1999 <- ppcs_1999 %>% 
-  mutate(civilian_guilty_of_illegal = ifelse(ITEMS_FOUND_DURING_VEHICLE_PERSONAL_SEAR == 'Evidence found', 1, 0))
+  mutate(civilian_guilty_of_illegal = case_when(
+    (ITEMS_FOUND_DURING_VEHICLE_PERSONAL_SEAR == 'Evidence found')~1,
+    (FOUND_IN_VEHICLE != 'Out of Universe/Missing')~1,
+    TRUE ~0
+    ))
 
+ppcs_1999 <- ppcs_1999 %>%
+  mutate(civilian_injured = ifelse(FORCE_USED_AND_RESPONDENT_INJURED == 'Yes', 1, 0))
+
+#perceived excessive force
+
+ppcs_1999 <- ppcs_1999 %>%
+  mutate(excess_force = case_when(
+  (EXCESSIVE_FORCE_USED_OR_THREATENED_VEH == 'Yes') ~ 1,
+  (EXCESSIVE_FORCE_USED_OR_THREATENED_OTHER == 'Yes') ~1,
+  TRUE ~ 0
+  ))
+
+ppcs_1999 <- ppcs_1999 %>%
+  mutate(force = case_when(
+    (FORCE_USED_IN_TRAFFIC_STOP_OR_OTHER_CONT == 'Yes') ~ 1,
+    (FORCE_USED_AND_RESPONDENT_HANDCUFFED == 'Yes') ~1,
+    (PUSHED_OR_GRABBED_WITHOUT_PAIN_VEHICLE == 'Pushed or grabbed without pain') ~1,
+    (PUSHED_OR_GRABBED_WITH_PAIN_VEHICLE_ST == 'Pushed or grabbed with pain')~1,
+    (PUSHED_OR_GRABBED_WITHOUT_PAIN_OTHER_CON == 'Pushed or grabbed without pain')~1,
+    (PUSHED_OR_GRABBED_WITH_PAIN_OTHER_CONTAC == 'Pushed or grabbed with pain')~1,
+    (SPRAYED_WITH_CHEMICAL_PEPPER_SPRAY_VEH ==  'Sprayed with chemical/pepper spray' )~1,
+    (SPRAYED_WITH_CHEMICAL_PEPPER_SPRAY_OTHER == ' Sprayed with chemical/pepper spray')~1,
+    (KICKED_OR_HIT_VEHICLE_STOP == 'Kicked or hit')~1,
+    (KICKED_OR_HIT_OTHER_CONTACT == 'Kicked or hit')~1,
+    (POINTED_GUN_VEHICLE_STOP == 'Pointed gun')~1,
+    (POINTED_GUN_OTHER_CONTACT == 'Pointed gun')~1,
+    TRUE ~ 0
+  ))
 
 ppcs_1999_cleaned <- ppcs_1999 %>%
-  select(civilian_race, civilian_age, civilian_gender, civilian_income, civilian_employed, population_size, time_of_encounter, off_black, off_white, off_other, type_of_incident, civilian_behavior, civilian_searched, civilian_arrested, civilian_guilty_of_illegal)
-View(head(ppcs_1999_cleaned))
+  select(civilian_race, civilian_age, civilian_gender, civilian_income, civilian_employed, population_size, time_of_encounter, off_black, off_white, off_other, off_split, off_hispanic, type_of_incident, civilian_behavior, civilian_searched, civilian_arrested, civilian_guilty_of_illegal, civilian_injured, excess_force, force)
 
 ppcs_1999_cleaned <- ppcs_1999_cleaned %>%
-  mutate(year = 1999)
+  mutate(year = 1999) %>% view
 
 save(ppcs_1999_cleaned, file = 'ppcs_1999.RData')
