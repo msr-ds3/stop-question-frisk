@@ -143,6 +143,19 @@ ppcs_1996 <- ppcs_1996 %>%
 #Type of incident
 Gathered data and then took all the values where the occurence was Once or More than once
 
+ ```{r type-of-incident }
+# ppcs_1996 <- ppcs_1996 %>% 
+#   gather( key = "incident", value = "occurence", REASON_REPORT_A_CRIME, REASON_ASK_FOR_ASSISTANCE, REASON_PROBLEM_IN_THE_NEIGHBORHOOD,
+#          REASON_TRAFFIC_PARKING_VIOLATION, REASON_INVOLVED_IN_TRAFFIC_ACCIDENT, REASON_WITNESS_TO_TRAFFIC_ACCIDENT,
+#          REASON_VICTIM_OF_A_CRIME, REASON_WITNESS_TO_A_CRIME, REASON_CRIME_THOUGHT_INVOLVED_IN, REASON_WHAT_YOU_WERE_DOING_IN_THE_AREA,
+#          REASON_HAD_WARRANT_FOR_YOUR_ARREST, REASON_CASUAL_ENCOUNTERS, REASON_COMMUNITY_MEETINGS, REASON_SOME_OTHER_REASON,
+#          REASON_NO_SPECIFIC_REASON) %>%
+#   mutate(type_of_incident = ifelse(occurence == 'Once' | occurence == "More than once", 3, NA)) %>%
+#   spread(incident, occurence)
+# #ungather/pread so can use again as columns for other variables
+
+#Turns out since every observation is a contact with a police officer they are all 'other stops' and #there should be no NA's
+```
 ```{r type-of-incident}
 happened <- c('Once', 'More than once')
 #View(ppcs_1996$REASON_TRAFFIC_PARKING_VIOLATION)
@@ -152,17 +165,17 @@ ppcs_1996 <- ppcs_1996 %>%
     (REASON_INVOLVED_IN_TRAFFIC_ACCIDENT %in% happened)~3,
     (REASON_WITNESS_TO_TRAFFIC_ACCIDENT %in% happened)~3,
     (REASON_REPORT_A_CRIME %in% happened) ~ 3,
-   # (REASON_ASK_FOR_ASSISTANCE %in% happened) ~3,
-   # (REASON_PROBLEM_IN_THE_NEIGHBORHOOD %in% happened)~3,
-    (REASON_VICTIM_OF_A_CRIME %in% happened) ~ 3,
-    (REASON_WITNESS_TO_A_CRIME %in% happened) ~3,
+    # (REASON_ASK_FOR_ASSISTANCE %in% happened) ~3,
+    # (REASON_PROBLEM_IN_THE_NEIGHBORHOOD %in% happened)~3,
+    # (REASON_VICTIM_OF_A_CRIME %in% happened) ~ 3,
+    # (REASON_WITNESS_TO_A_CRIME %in% happened) ~3,
     (REASON_CRIME_THOUGHT_INVOLVED_IN %in% happened) ~ 3,
-    #(REASON_WHAT_YOU_WERE_DOING_IN_THE_AREA %in% happened) ~3,
-    (REASON_HAD_WARRANT_FOR_YOUR_ARREST %in% happened) ~3,
-    #(REASON_CASUAL_ENCOUNTERS %in% happened) ~ 3,
-    #(REASON_COMMUNITY_MEETINGS %in% happened) ~3,
-    (REASON_SOME_OTHER_REASON %in% happened) ~3,
-    #(REASON_NO_SPECIFIC_REASON %in% happened) ~3,
+    # (REASON_WHAT_YOU_WERE_DOING_IN_THE_AREA %in% happened) ~3,
+    # (REASON_HAD_WARRANT_FOR_YOUR_ARREST %in% happened) ~3,
+    # (REASON_CASUAL_ENCOUNTERS %in% happened) ~ 3,
+    (REASON_COMMUNITY_MEETINGS %in% happened) ~3,
+    # (REASON_SOME_OTHER_REASON %in% happened) ~3,
+    # (REASON_NO_SPECIFIC_REASON %in% happened) ~3,
     TRUE ~ NA_real_
   ))
 ```
