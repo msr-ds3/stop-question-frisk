@@ -929,3 +929,39 @@ sf_data1 %>%
 
 
 ```
+
+
+```{r plot-pepperspray-baton}
+
+##Pepper Spray/Baton (panel_data)
+sf_data1 %>%
+  mutate(pf_pp_spray_baton = paste(pf_pepsp, pf_baton,sep = "")) %>%
+  mutate(pf_pp_spray_baton = ifelse(grepl("Y",pf_pp_spray_baton), "Y", "N")) %>%
+  select(race, pf_pp_spray_baton) %>%
+  mutate(race = recode_factor(race,"P" = "B","Q" = "H")) %>%
+  group_by(race, pf_pp_spray_baton) %>%
+  summarise(count = n()) %>%
+  spread(pf_pp_spray_baton, count) %>%
+  mutate(total = Y+N) %>%
+  ggplot() +
+  geom_point(aes(x = reorder(race,Y/total, sum),
+                 y = Y/total, size = Y),
+             color = "#893eb5") +
+  geom_text(aes(x = reorder(race,Y/total, sum),
+                y = Y/total,label = round(Y/total,2)),
+            hjust = 0.2, vjust = -0.9, color ="#095e7d")+
+  labs(size="size",y="Proportion",x="Race",
+       title=paste("Use of Force (Pepper Spray/Baton) by Race"))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 70, hjust = 1, face = "bold"))+
+  theme(axis.text.y = element_text(face = "bold"))+
+  theme(plot.title = element_text(hjust = 0.5,size=20)) +
+  scale_x_discrete(labels = c("X" = "Others", "I" = "AMERICAN  INDIAN", "U" = "UNKNOWN",
+                              "A" = "ASIAN / PACIFIC  ISLANDER", "Z" = "",
+                              "W" ="WHITE", "H" = "HISPANIC", "B" = "BLACK")) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0,1,by =.05)) +
+  scale_size_continuous(labels = comma)
+
+
+```
+
