@@ -13,7 +13,6 @@ ppcs_2011 <- da34276.0001
 ```{r}
 #filter out the face to face contacts 
 ppcs_2011 <- ppcs_2011 %>% filter(!is.na(V31)) # better screening condition?
-#ppcs_2011 <- ppcs_2011 %>% filter(V336 == "(1) Yes") 
 #nrow(ppcs_2011)
 
 ```
@@ -84,15 +83,15 @@ ppcs_2011 <- ppcs_2011 %>%
 ppcs_2011 <- ppcs_2011 %>% 
  mutate(time_of_encounter = case_when(
    (V81 == ('(01) After 6 a.m. - 12 noon')| 
-      V204 == ('(01) After 6 a.m. - 12 noon')) ~1,
+      V204 == ('(01) After 6 a.m. - 12 noon')) ~3,
    (V81 == ('(02) After 12 noon - 6 p.m.')|
-      V204 == ('(02) After 12 noon - 6 p.m.')) ~2, 
+      V204 == ('(02) After 12 noon - 6 p.m.')) ~3, 
     (V81 == ('(01) After 6 a.m. - 12 noon')| 
        V204 == ('(01) After 6 a.m. - 12 noon'))~3,
      (V81 == ('(04) After 6 p.m. - 12 midnight')| 
-        V204 == ('(04) After 6 p.m. - 12    midnight')) ~ 4,
+        V204 == ('(04) After 6 p.m. - 12    midnight')) ~ 6,
       (V81 == ('(05) After 12 midnight - 6 a.m.')| 
-         V204 == ('(05) After 12 midnight - 6 a.m.')) ~ 5,
+         V204 == ('(05) After 12 midnight - 6 a.m.')) ~ 6,
        (V81 == ("(06) Don't know what time of night")| 
           V204 == ("(06) Don't know what time of night")) ~ 6,
         TRUE ~ NA_real_))
@@ -102,15 +101,35 @@ ppcs_2011 <- ppcs_2011 %>%
 ```{r}
 #OFFICER RACE 
 ppcs_2011 <- ppcs_2011 %>%
-  mutate(off_black = case_when(V76 == '(1) Black or African American' ~ 1, TRUE ~ 0))%>%
-  mutate(off_white = case_when(V74 == '(1) White' ~ 1, TRUE ~ 0)) %>%
-  mutate(off_hispanic = case_when(V74 == '(1) Yes' ~ 1, 
-                                  V74 == '(2) No' ~ 0, TRUE ~ 0)) %>%
+  mutate(off_black = case_when(((V69 == '(1) Black or African American') | 
+                                  (V76 == '(1) Black or African American') | 
+                                  (V192 == '(1) Black or African American') |
+                                  (V199 == '(1) Black or African American')) ~ 1, 
+                                   TRUE ~ 0)) %>%
+  mutate(off_white = case_when(((V68 == '(1) White') | 
+                                  (V75 == '(1) White') | 
+                                  (V191 == '(1) White') | 
+                                  (V198 == '(1) White'))~ 1, 
+                                   TRUE ~ 0)) %>%
+  mutate(off_hispanic = case_when(((V67 == '(1) Yes') | 
+                                     (V74 == '(1) Yes') |
+                                    (V190 == '(1) Yes') | 
+                                     (V197 == '(1) Yes')) ~ 1,  
+                                    TRUE ~ 0)) %>%
   mutate(off_other = case_when(
-    (V77 == '(1) American Indian or Alaska Native' |  
-    V78 == '(1) Asian' |
-    V79 == 'Native Hawaiian or other Pacific Islander' |
-    V80 == "(1) Don't know") ~ 0, TRUE ~ 0)) 
+    V70 == '(1) American Indian or Alaska Native' | 
+      V77 == '(1) American Indian or Alaska Native' |  
+      V71 == '(1) Asian'|
+    V78 == '(1) Asian' | 
+      V72 == '(1) Native Hawaiian or other Pacific Islander' |
+    V79 == '(1) Native Hawaiian or other Pacific Islander' | 
+      V193 == '(1) American Indian or Alaska Native' | 
+      V200 == '(1) American Indian or Alaska Native' | 
+      V194 == '(1) Asian'| 
+      V201 == '(1) Asian'| 
+      V195 == '(1) Native Hawaiian or other Pacific Islander' | 
+      V202 == '(1) Native Hawaiian or other Pacific Islander' |
+       TRUE ~ 0))
 ```
 
 
@@ -118,23 +137,14 @@ ppcs_2011 <- ppcs_2011 %>%
 #CIVILIAN BEHAVIOR
 
 ppcs_2011 <- ppcs_2011 %>%
-  mutate(civilian_behavior = case_when((V399 == '(1) Yes') ~ 1,
-                                       (V399 == '(2) No') ~ 0,
-                                       (V401 == ('(1) Yes')| V166 == ('(1) Yes')) ~ 1,
-                                       (V401 == ('(2) No')| V166 == ('(2) No')) ~ 0,
-                                       V168 == '(1) Yes' ~ 1,
-                                       V168 == '(2) No' ~ 0,
-                                       (V405 == ('(1) Yes')| V170 == ('(1) Yes')) ~ 1,
-                                       (V405 == ('(2) No')| V170 == ('(2) No')) ~ 0,
-                                       V172 == '(1) Yes' ~ 1,
-                                       V172 == '(2) No' ~ 0,
-                                       V174 == '(1) Yes' ~ 1,
-                                       V174 == '(2) No' ~ 0,
-                                       (V398 == ('(1) Yes')| V176 == ('(1) Yes')) ~ 1,
-                                       (V398 == ('(2) No')| V176 == ('(2) No')) ~ 0,
-                                       (V407 == ('(1) Yes')| V178 == ('(1) Yes')) ~ 1,
-                                       (V407 == ('(2) No')| V178 == ('(2) No')) ~ 0,
-                                       TRUE ~ NA_real_)) 
+  mutate(civilian_behavior = case_when((V164 == '(1) Yes') | (V306 == '(1) Yes')~ 1,
+                                       (V166 == '(1) Yes')| (V308 == '(1) Yes') ~ 1,
+                                       (V170 == '(1) Yes')| (V312 == '(1) Yes') ~ 1,
+                                       (V172 == '(1) Yes')| (V314 == '(1) Yes') ~ 1,
+                                       (V174 == '(1) Yes') | (V316 == '(1) Yes') ~ 1,
+                                       (V176 == '(1) Yes') | (V318 == '(1) Yes') ~ 1,
+                                       (V178 == '(1) Yes')| (V320 == '(1) Yes') ~ 1,
+                                       TRUE ~ 0)) 
 ```
 
 
@@ -156,19 +166,62 @@ ppcs_2011 <- ppcs_2011 %>%
   #V475, V501 also had to do with finding illegal stuff but were all NA
   mutate(civilian_guilty_of_illegal = case_when(
       (V187 == '(1) Yes' | V334 == '(1) Yes') ~ 1, 
-        TRUE ~ 0))
+        TRUE ~ 0)) %>%
+  
+  mutate(civilian_injured = case_when(
+      (V180 == '(1) Yes' | V322 == '(1) Yes')~ 1,
+      TRUE ~ 0)) %>%
+  
+  mutate(excess_force = case_when(
+      (V163 == '(1) Yes' | V305 == '(1) Yes' | V378 == '(1) Yes') ~1,
+      TRUE ~ 0))
+
+
 ```
 
 
 ```{r}
 #TYPE OF INCIDENT
-#Interpretations of columns V55, V56, V57, V58,V59, V60, V61, V62, V63, V64 are unclear  
+#Interpretations of columns V55, V56, V57, V58,V59, V60, V61, V62, V63, V64 are unclear
+#view(ppcs_2011$V210)
+#Why V189? that's number of officers
 ppcs_2011 <- ppcs_2011 %>% 
    mutate(type_of_incident = case_when(
+                                       (V11 == '(1) Yes') ~ 1,
                                        (!is.na(V34)) ~ 1,
-                                       (!is.na(V189)) ~ 2,
-                                       (TRUE) ~ 3
-                                       ))
+                                       (V13 == '(1) Yes') ~ 2,
+                                       (V15 == '(1) Yes') ~ 2,
+                                       (V7 == '(1) Yes') ~ 3,
+                                       #(V17 == '(1) Yes') ~ 3,
+                                       TRUE ~ NA_real_))
+```
+
+
+```{r}
+#OFFICER SPLIT
+ppcs_2011 <- ppcs_2011 %>%
+  mutate(off_split = NA)
+
+```
+
+
+```{r}
+#FORCE USE 
+ppcs_2011 <- ppcs_2011 %>% 
+  mutate(force = case_when(
+    (V148 == '(1) Yes') ~ 1, 
+    (V289 == '(1) Yes') ~ 1,
+    (V152 == '(1) Yes') ~ 1,
+    (V293 == '(1) Yes') ~ 1,
+    (V158 == '(1) Yes') ~ 1,
+    (V299 == '(1) Yes') ~ 1,
+    (V150 == '(1) Yes') ~ 1,
+    (V291 == '(1) Yes') ~ 1,
+    (V154 == '(1) Yes') ~ 1,
+    (V156 == '(1) Yes') ~ 1,
+    (V295 == '(1) Yes') ~ 1,
+    (V297 == '(1) Yes') ~ 1,
+    TRUE ~ 0))
 ```
 
 
@@ -191,12 +244,17 @@ ppcs_2011 <- ppcs_2011 %>%
          time_of_encounter,
          off_black,
          off_white,
+         off_hispanic,
          off_other,
          type_of_incident,
          civilian_behavior,
          civilian_searched,
          civilian_arrested,
          civilian_guilty_of_illegal,
+         civilian_injured,
+         excess_force,
+         force,
+         off_split,
          year
          )
 
