@@ -76,3 +76,9 @@ model_no_cntrl <- glm(any_force_used ~ race,
 exp(coef(model_no_cntrl))
 
 ```
+
+```{r temp}
+
+
+
+```
