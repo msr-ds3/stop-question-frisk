@@ -5,8 +5,13 @@ library(tidyverse)
 
 ppcs_2008 <- read_tsv("32022-0001-Data.tsv")
 
-ppcs_2008 <- ppcs_2008 %>% 
-  filter(V2 == 1)
+# ppcs_2008 <- ppcs_2008 %>% 
+#   filter(V2 == 1)
+
+ppcs2008 <- ppcs2008 %>%
+  mutate(face_to_face = V2) %>%
+  mutate(contact = NA_real_) %>%
+  mutate(num_face_to_face = NA_real_)
 # create the civilian race column
 # black includes black and black hispanic
 # hispanic includes white hispanic and any other combination
