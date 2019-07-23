@@ -253,18 +253,48 @@ ppcs_1996 <- ppcs_1996 %>%
 #force
 ```{r}
 
+# ppcs_1996 <- ppcs_1996 %>%
+#   mutate(force = case_when(
+#     (OFFICER_USE_ANY_FORM_OF_PHYSICAL_FORCE == 'Yes')~1,
+#     (POLICE_DO_HOLD_YOU_BY_THE_ARM == 'Yes')~1,
+#     (POLICE_DO_PUSH_YOU == 'Yes')~1,
+#     (POLICE_DO_HIT_OR_PUNCH_YOU == 'Yes')~1,
+#     (POLICE_DO_KICK_YOU == 'Yes')~1,
+#     (POLICE_DO_USE_A_CHOKEHOLD == 'Yes')~1,
+#     (POLICE_DO_USE_SOME_OTHER_FORM_OF_FORCE == 'Yes')~1,
+#     (WEAPONS_CHEMICAL_OR_PEPPER_SPRAY == 'Yes')~1,
+#     (WEAPONS_FIREARM == 'Yes')~1,
+#     (DID_A_POLICE_OFFICER_HANDCUFF_YOU == 'Yes')~1,
+#     TRUE ~ 0
+#   ))
+
 ppcs_1996 <- ppcs_1996 %>%
-  mutate(force = case_when(
-    (OFFICER_USE_ANY_FORM_OF_PHYSICAL_FORCE == 'Yes')~1,
-    (POLICE_DO_HOLD_YOU_BY_THE_ARM == 'Yes')~1,
-    (POLICE_DO_PUSH_YOU == 'Yes')~1,
-    (POLICE_DO_HIT_OR_PUNCH_YOU == 'Yes')~1,
-    (POLICE_DO_KICK_YOU == 'Yes')~1,
-    (POLICE_DO_USE_A_CHOKEHOLD == 'Yes')~1,
-    (POLICE_DO_USE_SOME_OTHER_FORM_OF_FORCE == 'Yes')~1,
-    (WEAPONS_CHEMICAL_OR_PEPPER_SPRAY == 'Yes')~1,
-    (WEAPONS_FIREARM == 'Yes')~1,
-    (DID_A_POLICE_OFFICER_HANDCUFF_YOU == 'Yes')~1,
+  mutate(any_force = case_when(
+    (OFFICER_USE_ANY_FORM_OF_PHYSICAL_FORCE == 'Yes') ~ 1,
+    (POLICE_DO_USE_SOME_OTHER_FORM_OF_FORCE == 'Yes') ~ 1,
+    (POLICE_DO_USE_A_CHOKEHOLD == 'Yes') ~ 1,
+    TRUE ~ 0
+  )) %>%
+  mutate(grab_push = case_when(
+    (POLICE_DO_HOLD_YOU_BY_THE_ARM == 'Yes') ~ 1,
+    (POLICE_DO_PUSH_YOU == 'Yes') ~ 1,
+    TRUE ~ 0
+  )) %>%
+  mutate(hit_kick = case_when(
+    (POLICE_DO_HIT_OR_PUNCH_YOU == 'Yes') ~ 1,
+    (POLICE_DO_KICK_YOU == 'Yes') ~ 1,
+    TRUE ~ 0
+  )) %>%
+  mutate(point_gun = case_when(
+    (WEAPONS_FIREARM == 'Yes') ~ 1,
+    TRUE ~ 0
+  )) %>%
+  mutate(handcuffed = case_when(
+    (DID_A_POLICE_OFFICER_HANDCUFF_YOU == 'Yes') ~ 1,
+    TRUE ~ 0
+  )) %>%
+  mutate(pepper_stun = case_when(
+    (WEAPONS_CHEMICAL_OR_PEPPER_SPRAY == 'Yes') ~ 1,
     TRUE ~ 0
   ))
 ```
@@ -276,7 +306,7 @@ ppcs_1996 <- ppcs_1996 %>%
   mutate(contact = LAST_12_MONTHS_CONTACT_W_POLICE_OFFICER, face_to_face = CONTACTS_W_POLICE_OFFICER_IN_PERSON, num_face_to_face = NA)
 
 ppcs_1996_cleaned <- ppcs_1996 %>%
-  select(contact, face_to_face, num_face_to_face, civilian_race, civilian_age, civilian_gender, civilian_income, civilian_employed, population_size, time_of_encounter, off_black, off_white, off_other, off_split, off_hispanic, type_of_incident, civilian_behavior, civilian_searched, civilian_arrested, civilian_guilty_of_illegal, civilian_injured, excess_force, force)
+  select(contact, face_to_face, num_face_to_face, civilian_race, civilian_age, civilian_gender, civilian_income, civilian_employed, population_size, time_of_encounter, off_black, off_white, off_other, off_split, off_hispanic, type_of_incident, civilian_behavior, civilian_searched, civilian_arrested, civilian_guilty_of_illegal, civilian_injured, excess_force, any_force, grab_push, hit_kick, point_gun, handcuffed, pepper_stun)
 
 ```
 #Add year column
