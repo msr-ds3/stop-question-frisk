@@ -78,9 +78,11 @@ white_proportions <- precinct_race %>%
   select(precinct, prop) %>%
   ungroup()
 
+View(white_proportions)
+
 # Add precinct 121 to the data, using the value from precinct 122
 # (Precinct 121 was created in 2013, used to be part of 122)
-last_precinct_prop <- data.frame(c(121), c(0.0229286))
+last_precinct_prop <- data.frame(c(121), c(0.82905935))
 names(last_precinct_prop) = c("precinct", "prop")
 white_proportions <- rbind(white_proportions, last_precinct_prop)
 
@@ -363,7 +365,7 @@ leaflet(joint_sqf_wall) %>%
 
 #Map the proportion of stopped civilians pushed to the ground in each precinct that are white
 mypopup6 <- paste0("Precinct: ", joint_sqf_grnd$Precinct, "<br>", 
-                   "Pushed to Ground Proportion Black: ", joint_sqf_grnd$props)
+                   "Pushed to Ground Proportion White: ", joint_sqf_grnd$props)
 
 mypal6 <- colorNumeric(
   palette = "YlOrRd",
