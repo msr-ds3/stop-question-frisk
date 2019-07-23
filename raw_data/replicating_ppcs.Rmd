@@ -29,11 +29,16 @@ merged_ppcs <- merged_ppcs %>%
   mutate(civilian_age = as.numeric(civilian_age))
 
 colnames(merged_ppcs)
-unique(merged_ppcs$contact)
+unique(merged_ppcs$num_face_to_face)
 
 yes <- c('Yes','(1) Yes', 1 )
 merged_ppcs <- merged_ppcs %>%
   filter(face_to_face %in% yes | (num_face_to_face > 0 & num_face_to_face < 998))
+
+#add at least grabbed/pushed
+
+
+
 save(merged_ppcs, file = 'merged_ppcs.RData')
 ```
 
@@ -477,5 +482,194 @@ merged_ppcs %>%
   summarise(force_count = n()) %>%
   mutate(prop = force_count/sum(force_count)) %>%
   filter(force == 1)
+```
+
+```{r check-for-outliers-any_force}
+merged_ppcs %>%
+  group_by(year) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  group_by(year, any_force) %>%
+  mutate(any_force_count = n()) %>% 
+  mutate(prop = any_force_count/count) %>% 
+  ggplot(aes(x = year, y = prop)) +
+  geom_point() +
+  facet_wrap(~ any_force)
+```
+
+```{r any-force-full-sample} 
+merged_ppcs %>%
+  group_by(any_force) %>%
+  summarise(count = n()) %>%
+  mutate(prop = count/sum(count))
+```
+
+```{r any-force-by-race}
+merged_ppcs %>%
+  group_by(any_force) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  group_by(civilian_race, any_force) %>%
+  summarise(any_force_count = n()) %>%
+  mutate(prop = any_force_count/sum(any_force_count)) %>%
+  filter(any_force == 1)
+```
+
+```{r check-for-outliers-grab-push}
+merged_ppcs %>%
+  group_by(year) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  group_by(year, grab_push) %>%
+  mutate(grab_push_count = n()) %>% 
+  mutate(prop = grab_push_count/count) %>% 
+  ggplot(aes(x = year, y = prop)) +
+  geom_point() +
+  facet_wrap(~ grab_push)
+```
+
+```{r grab-push-full-sample}
+merged_ppcs %>%
+  group_by(grab_push) %>%
+  summarise(count = n()) %>%
+  mutate(prop = count/sum(count))
+```
+
+```{r grab-push-by-race}
+merged_ppcs %>%
+  group_by(grab_push) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  group_by(civilian_race, grab_push) %>%
+  summarise(grab_push_count = n()) %>%
+  mutate(prop = grab_push_count/sum(grab_push_count)) %>%
+  filter(grab_push == 1)
+```
+
+#hit and kick
+```{r check-for-outliers-hit-kick}
+merged_ppcs %>%
+  group_by(year) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  group_by(year, hit_kick) %>%
+  mutate(hit_kick_count = n()) %>% 
+  mutate(prop = hit_kick_count/count) %>% 
+  ggplot(aes(x = year, y = prop)) +
+  geom_point() +
+  facet_wrap(~ hit_kick)
+```
+
+```{r hit-kick-full-sample}
+merged_ppcs %>%
+  group_by(hit_kick) %>%
+  summarise(count = n()) %>%
+  mutate(prop = count/sum(count))
+```
+
+```{r hit-kick-by-race}
+merged_ppcs %>%
+  group_by(hit_kick) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  group_by(civilian_race, hit_kick) %>%
+  summarise(hit_kick_count = n()) %>%
+  mutate(prop = hit_kick_count/sum(hit_kick_count)) %>%
+  filter(hit_kick == 1)
+```
+
+#point gun
+```{r check-for-outliers-point-gun}
+merged_ppcs %>%
+  group_by(year) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  group_by(year, point_gun) %>%
+  mutate(point_gun_count = n()) %>% 
+  mutate(prop = point_gun_count/count) %>% 
+  ggplot(aes(x = year, y = prop)) +
+  geom_point() +
+  facet_wrap(~ point_gun)
+```
+
+```{r point-gun-full-sample}
+merged_ppcs %>%
+  group_by(hit_kick) %>%
+  summarise(count = n()) %>%
+  mutate(prop = count/sum(count))
+```
+
+```{r point-gun-by-race}
+merged_ppcs %>%
+  group_by(point_gun) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  group_by(civilian_race, point_gun) %>%
+  summarise(point_gun_count = n()) %>%
+  mutate(prop = point_gun_count/sum(point_gun_count)) %>%
+  filter(point_gun == 1)
+```
+
+#handcuffed
+```{r check-for-outliers-handcuffed}
+merged_ppcs %>%
+  group_by(year) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  group_by(year, handcuffed) %>%
+  mutate(handcuffed_count = n()) %>% 
+  mutate(prop = handcuffed_count/count) %>% 
+  ggplot(aes(x = year, y = prop)) +
+  geom_point() +
+  facet_wrap(~ handcuffed)
+```
+
+```{r handcuffed-full-sample}
+merged_ppcs %>%
+  group_by(handcuffed) %>%
+  summarise(count = n()) %>%
+  mutate(prop = count/sum(count))
+```
+
+```{r handcuffed-by-race}
+merged_ppcs %>%
+  group_by(handcuffed) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  group_by(civilian_race, handcuffed) %>%
+  summarise(handcuffed_count = n()) %>%
+  mutate(prop = handcuffed_count/sum(handcuffed_count)) %>%
+  filter(handcuffed == 1)
+```
+#pepperspray stungun
+```{r check-for-outliers-pepper-stun}
+merged_ppcs %>%
+  group_by(year) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  group_by(year, pepper_stun) %>%
+  mutate(pepper_count = n()) %>% 
+  mutate(prop = pepper_count/count) %>% 
+  ggplot(aes(x = year, y = prop)) +
+  geom_point() +
+  facet_wrap(~ pepper_stun)
+```
+
+```{r pepper-stun-full-sample}
+merged_ppcs %>%
+  group_by(pepper_stun) %>%
+  summarise(count = n()) %>%
+  mutate(prop = count/sum(count))
+```
+
+```{r pepper-stun-by-race}
+merged_ppcs %>%
+  group_by(pepper_stun) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  group_by(civilian_race, pepper_stun) %>%
+  summarise(pepper_count = n()) %>%
+  mutate(prop = pepper_count/sum(pepper_count)) %>%
+  filter(pepper_stun == 1)
 ```
 
