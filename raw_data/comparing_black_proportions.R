@@ -100,3 +100,4 @@ leaflet(nyc_blocks) %>%
   addProviderTiles("CartoDB.Positron")
 nyc_tracts <- tracts(state = "NY", county = "New York", year = 2010)
 plot(nyc_tracts)
+
