@@ -214,6 +214,13 @@ ppcs_2011 <- ppcs_2011 %>%
 
 ```
 
+```{r}
+#CONTACT, 
+ppcs_2011 <- ppcs_2011 %>%
+  mutate(contact = NA) %>%
+  mutate(num_face_to_face = V30) %>%
+  mutate(face_to_face = V31)
+```
 
 ```{r}
 #FORCE USE 
@@ -272,7 +279,10 @@ ppcs_2011 <- ppcs_2011 %>%
          hit_kick,
          point_gun,
          handcuffed,
-         pepper_stun
+         pepper_stun,
+         contact,
+         num_face_to_face,
+         face_to_face
          )
 
 
