@@ -39,9 +39,6 @@ options(digits = 15)
 census <- mutate(census, variable = as.factor(variable)) %>%
   mutate(geoid10 = as.numeric(GEOID)) %>% select(-GEOID)
 
-# reset digits to the default
-options(digits = 7)
-
 # rename variables for clarity
 census$variable <- recode(census$variable, P003004 = "American_Indian_and_Alaska_Native",
                           P003005 = "Asian", P003006 = "Native_Hawaiian_and_Pacific_Islander",
@@ -94,3 +91,12 @@ proportions <- left_join(sqf_black_prop, black_proportions) %>%
   mutate(discrimination = sqf_prop_black > pop_prop_black)
 
 no_discrimination <- proportions %>% filter(discrimination == FALSE)
+
+nyc_blocks <- block_groups(state = "NY", county = "New York", year = 2010)
+mypopup <- paste0(nyc_blocks$GEOID10)
+leaflet(nyc_blocks) %>%
+  addTiles() %>% 
+  addPolygons(popup = mypopup) %>%
+  addProviderTiles("CartoDB.Positron")
+nyc_tracts <- tracts(state = "NY", county = "New York", year = 2010)
+plot(nyc_tracts)
