@@ -24,62 +24,6 @@ load("../../raw_data/sqf_03_13.Rdata")
 ```{r logistic-models}
 
 log_panel_data <- sf_data1 %>%
-  filter(race != " " & race != "U" & race != "X" & sex != "Z" & typeofid != "O") %>%
-  mutate(race = recode_factor(race,"P" = "B","Q" = "H"),
-         any_force_used = paste(pf_hands, pf_grnd, pf_wall, pf_drwep, pf_ptwep,
-                                pf_hcuff,pf_baton, pf_pepsp, sep = ""),
-         any_force_used = as.factor(if_else(grepl("Y",any_force_used), 1, 0)),
-         age = age > 10 & age <=90,
-         sex = as.factor(if_else(grepl("M",sex), 1, 0)),
-         inout = as.factor(if_else(grepl("I",inout), 1, 0)),
-         timestop = as.numeric(timestop),
-         daytime = as.factor(ifelse(600<=timestop & timestop<=1700,"1","0")),
-         ac_incid = as.factor(if_else(grepl("Y",ac_incid), 1, 0)),
-         ac_time = as.factor(if_else(grepl("Y",ac_time), 1, 0)),
-         offunif = as.factor(if_else(grepl("Y",offunif), 1, 0)),
-         othpers = as.factor(if_else(grepl("Y",othpers), 1, 0)),
-         cs_objcs = as.factor(if_else(grepl("Y",cs_objcs), 1, 0)),
-         cs_descr = as.factor(if_else(grepl("Y",cs_descr), 1, 0)),
-         cs_casng = as.factor(if_else(grepl("Y",cs_casng), 1, 0)),
-         cs_lkout = as.factor(if_else(grepl("Y",cs_lkout), 1, 0)),
-         cs_cloth = as.factor(if_else(grepl("Y",cs_cloth), 1, 0)),
-         cs_drgtr = as.factor(if_else(grepl("Y",cs_drgtr), 1, 0)),
-         cs_furtv = as.factor(if_else(grepl("Y",cs_furtv), 1, 0)),
-         cs_vcrim = as.factor(if_else(grepl("Y",cs_vcrim), 1, 0)),
-         cs_bulge = as.factor(if_else(grepl("Y",cs_bulge), 1, 0)),
-         cs_other = as.factor(if_else(grepl("Y",cs_other), 1, 0)),
-         wepnfnd = paste(contrabn,asltweap,pistol,riflshot,knifcuti,machgun,othrweap, sep = ""),
-         wepnfnd = as.factor(if_else(grepl("Y",wepnfnd), 1, 0)),
-         pf_pp_spray_baton = paste(pf_pepsp, pf_baton,sep = ""),
-         pf_pp_spray_baton = as.factor(ifelse(grepl("Y",pf_pp_spray_baton), "Y", "N")),
-         year = as.factor(year),
-         addrpct = as.factor(addrpct),
-         race = recode_factor(race, "W" = "White", "B" = "Black",  "H" ="Hispanic",
-                              "A" = "Asian", "I" ="Other", "Z" = "Other"))
-
-
-mylogit <- glm(any_force_used ~ race + sex + I(age^2) + inout + daytime + ac_incid + ac_time +
-                 offunif + typeofid + othpers + cs_bulge + cs_cloth + cs_casng + cs_lkout +
-                 cs_descr + cs_drgtr + cs_furtv + cs_vcrim +
-                 cs_objcs + cs_other + wepnfnd + addrpct + year,
-               data = log_panel_data,
-               family = "binomial")
-
-
-
-
-model_no_cntrl <- glm(any_force_used ~ race,
-                           data = log_panel_data,
-                           family = "binomial")
-
-
-exp(coef(model_no_cntrl))
-
-```
-
-```{r temp}
-
-temp <- sf_data1 %>%
   # filter out unknown races, unknown genders, ages outside of the range 10-90,
   # and types of id equal to "other"
   filter(race != " " & race != "U" & race != "X" & sex != "Z" & typeofid != "O" &
@@ -88,9 +32,9 @@ temp <- sf_data1 %>%
   mutate(race = recode_factor(race,"P" = "B", "I" = "Z"),
          # create an any_force_used column - ADDED pf_other TO THIS CALCULATION
          any_force_used = paste(pf_hands, pf_grnd, pf_wall, pf_drwep, pf_ptwep,
-                                pf_hcuff,pf_baton, pf_pepsp, pf_other, sep = ""),
-         any_force_used = as.factor(if_else(grepl("Y",any_force_used), 1, 0)),
+                                pf_hcuff,pf_baton, pf_pepsp, sep = ""),
          # create factors from columns
+         any_force_used = as.factor(if_else(grepl("Y",any_force_used), 1, 0)),
          sex = as.factor(if_else(grepl("M",sex), 1, 0)),
          inout = as.factor(if_else(grepl("I",inout), 1, 0)),
          timestop = as.numeric(timestop),
@@ -120,8 +64,17 @@ temp <- sf_data1 %>%
          race = recode_factor(race, "W" = "White", "B" = "Black",  "Q" ="Hispanic",
                               "A" = "Asian", "Z" = "Other"))
 
+
+mylogit <- glm(any_force_used ~ race + sex + I(age^2) + inout + daytime + ac_incid + ac_time +
+                 offunif + typeofid + othpers + cs_bulge + cs_cloth + cs_casng + cs_lkout +
+                 cs_descr + cs_drgtr + cs_furtv + cs_vcrim +
+                 cs_objcs + cs_other + wepnfnd + addrpct + year,
+               data = log_panel_data,
+               family = "binomial")
+
+
 model_no_cntrl <- glm(any_force_used ~ race,
-                           data = temp,
+                           data = log_panel_data,
                            family = "binomial")
 
 exp(coef(model_no_cntrl))
