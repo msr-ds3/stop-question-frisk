@@ -186,17 +186,50 @@ ppcs_2008_revised <- ppcs_2008_revised %>%
   mutate(excess_force = ifelse(V7 == 1, 1, 0))
 #----------------------------------------------------------
 
+# ppcs_2008_revised <- ppcs_2008_revised %>%
+#   mutate(force = case_when(
+#     (V5 == 1 | V6D == 1 | V6E == 1 | V6F == 1 | V6G == 1 | V6H == 1 | V6I == 1 | V10 == 1 | V55 == 1) ~1,
+#     TRUE ~ 0
+#   ))
+
 ppcs_2008_revised <- ppcs_2008_revised %>%
-  mutate(force = case_when(
-    (V5 == 1 | V6D == 1 | V6E == 1 | V6F == 1 | V6G == 1 | V6H == 1 | V6I == 1 | V10 == 1 | V55 == 1) ~1,
+  mutate(any_force = case_when(
+    (V5 == 1) ~ 1,
+    TRUE ~ 0
+  )) %>%
+  mutate(grab_push = case_when(
+    (V6D == 1) ~ 1,
+    TRUE ~ 0
+  )) %>%
+  mutate(hit_kick = case_when(
+    (V6E == 1) ~ 1,
+    TRUE ~ 0
+  )) %>%
+  mutate(point_gun = case_when(
+    (V6H == 1) ~ 1,
+    TRUE ~ 0
+  )) %>%
+  mutate(handcuffed = case_when(
+    (V10 == 1) ~ 1,
+    TRUE ~ 0
+  )) %>%
+  mutate(pepper_stun = case_when(
+    (V6F == 1) ~ 1,
+    (V6G == 1) ~ 1,
     TRUE ~ 0
   ))
+
 
 #----------------------------------------------------------
 #Cleaned! Correct columns selected!
 # Add year column 
 ppcs_2008_cleaned <- ppcs_2008_revised %>%
-  select(civilian_race, civilian_age, civilian_gender, civilian_income, civilian_employed, population_size, time_of_encounter, off_black, off_white, off_other, off_split, off_hispanic, type_of_incident, civilian_behavior, civilian_searched, civilian_arrested, civilian_guilty_of_illegal, civilian_injured, excess_force, force, contact, face_to_face, num_face_to_face) %>%
+  select(civilian_race, civilian_age, civilian_gender, civilian_income, civilian_employed, population_size, time_of_encounter, off_black, off_white, off_other, off_split, off_hispanic, type_of_incident, civilian_behavior, civilian_searched, civilian_arrested, civilian_guilty_of_illegal, civilian_injured, excess_force, contact, face_to_face, num_face_to_face, any_force,
+         grab_push, 
+         hit_kick,
+         point_gun,
+         handcuffed,
+         pepper_stun) %>%
   mutate(year = 2008)
 
 save(ppcs_2008_cleaned, file = "ppcs_2008.RData")
