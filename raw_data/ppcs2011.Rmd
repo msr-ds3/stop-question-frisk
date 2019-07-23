@@ -3,12 +3,16 @@ title: "ppcs_2011"
 output: html_document
 ---
 
+
+
 ```{r}
 knitr::opts_chunk$set(echo = TRUE)
 #CREATED PPCS_2011 DATAFRAME
 ppcs_2011 <- da34276.0001
 #nrow(ppcs_2011)
 ```
+
+
 
 ```{r}
 #filter out the face to face contacts 
@@ -31,11 +35,15 @@ ppcs_2011 <- ppcs_2011 %>%
 
 
 
+
 ```{r}
 #AGE                                 
 ppcs_2011 <- ppcs_2011 %>% 
   mutate(civilian_age = AGE) 
 ```
+
+
+
 
 ```{r}
 #INCOME
@@ -45,6 +53,8 @@ ppcs_2011 <- ppcs_2011 %>%
                                      INCOME == '(3) $50,000 or more' ~ 3)) 
 
 ```
+
+
 
 
 ```{r}
@@ -208,16 +218,18 @@ ppcs_2011 <- ppcs_2011 %>%
 ```{r}
 #FORCE USE 
 ppcs_2011 <- ppcs_2011 %>% 
-  mutate(force = case_when(
-    (V148 == '(1) Yes') ~ 1, 
-    (V289 == '(1) Yes') ~ 1,
-    (V152 == '(1) Yes') ~ 1,
-    (V293 == '(1) Yes') ~ 1,
-    (V158 == '(1) Yes') ~ 1,
-    (V299 == '(1) Yes') ~ 1,
-    (V150 == '(1) Yes') ~ 1,
-    (V291 == '(1) Yes') ~ 1,
-    (V154 == '(1) Yes') ~ 1,
+  mutate(any_force = case_when((V160 == '(1) Yes') ~ 1,
+    (V301 == '(1) Yes') ~ 1,
+    TRUE ~ 0)) %>%
+  mutate(grab_push = case_when((V148 == '(1) Yes') ~ 1, 
+    (V289 == '(1) Yes') ~ 1, TRUE ~ 0)) %>%
+  mutate(hit_kick = case_when((V152 == '(1) Yes') ~ 1,
+    (V293 == '(1) Yes') ~ 1, TRUE ~ 0)) %>%
+  mutate(point_gun = case_when( (V158 == '(1) Yes') ~ 1,
+    (V299 == '(1) Yes') ~ 1, TRUE ~ 0)) %>%
+  mutate(handcuffed = case_when((V150 == '(1) Yes') ~ 1,
+    (V291 == '(1) Yes') ~ 1, TRUE ~ 0)) %>%
+  mutate(pepper_stun = case_when((V154 == '(1) Yes') ~ 1,
     (V156 == '(1) Yes') ~ 1,
     (V295 == '(1) Yes') ~ 1,
     (V297 == '(1) Yes') ~ 1,
@@ -253,13 +265,25 @@ ppcs_2011 <- ppcs_2011 %>%
          civilian_guilty_of_illegal,
          civilian_injured,
          excess_force,
-         force,
          off_split,
-         year
+         year,
+         any_force,
+         grab_push,
+         hit_kick,
+         point_gun,
+         handcuffed,
+         pepper_stun
          )
 
- 
 
+```
+
+```{r}
+ppcs_2011 %>% group_by(civilian_arrested) %>% 
+  ggplot(aes(x = civilian_searched, y = civilian_race)) + geom_point() + facet_wrap(~civilian_gender)
+```
+
+```{r}
 save(ppcs_2011, file = 'ppcs_2011.RData')
 ```
 
