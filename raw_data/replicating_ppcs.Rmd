@@ -69,9 +69,9 @@ merged_ppcs <- merged_ppcs %>%
       point_gun == 1 |
       hit_kick == 1  |
       pepper_stun == 1, 1, 0),
-    
+    off_split = ifelse(is.na(off_split), 0, 1),
     year = as.factor(year),
-    civilian_race = as.factor(civilian_race),
+    civilian_race = factor(civilian_race, levels = c("white", "black", "hispanic", "other")),
     civilian_gender = as.factor(civilian_gender),
     civilian_income = as.factor(civilian_income),
     civilian_employed = as.factor(civilian_employed),

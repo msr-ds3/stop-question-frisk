@@ -247,8 +247,7 @@ ppcs_2011 <- ppcs_2011 %>%
 ```{r}
 #YEAR
 ppcs_2011 <- ppcs_2011 %>%
-  mutate(year = 2011) %>%
-  mutate(year = factor(year, levels = c(2011)))
+  mutate(year = 2011) 
 ```
 
 
