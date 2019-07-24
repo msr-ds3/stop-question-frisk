@@ -18,7 +18,11 @@ load("merged_ppcs.RData")
 ```{r}
 merged_ppcs <- merged_ppcs %>%
   mutate(civilian_race = factor(civilian_race, levels = c('white', 'black', 'other', 'hispanic')),
-         civilian_age = as.numeric(civilian_age))
+         civilian_age = as.numeric(civilian_age),
+         off_hispanic = 0)
+
+
+options(na.action = "na.omit")
 ```
 
 
@@ -49,5 +53,26 @@ exp(coef(logit3))
 logit4 <- glm(force ~ civilian_race + civilian_gender + civilian_income + civilian_employed + population_size + I(civilian_age^2) + time_of_encounter + type_of_incident + off_hispanic + off_white + off_black + off_other + off_split + civilian_behavior + year, family='binomial', data = merged_ppcs)
 summary(logit4)
 exp(coef(logit4))
+```
+
+
+#Regression for at least grabbed
+Need to filter for all non-misisng use of force data
+```{r}
+#not missing 
+filtered_merged_ppcs <- merged_ppcs %>% filter(force != 0)
+```
+
+```{r}
+at_lst_grab_model1 <- glm(at_least_grabbed ~ civilian_race, family = "binomial", data= merged_ppcs)
+exp(coef(at_lst_grab_model1))
+summary(at_lst_grab_model1)
+```
+
+```{r}
+at_lst_grab_model2 <- glm(at_least_grabbed ~ civilian_race + civilian_gender + civilian_employed + civilian_income + population_size + I(civilian_age^2), family = "binomial", data = merged_ppcs)
+
+exp(coef(at_lst_grab_model2))
+summary(at_lst_grab_model2)
 ```
 
