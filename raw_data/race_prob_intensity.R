@@ -66,7 +66,7 @@ precinct_race <- precinct_populations %>% ungroup() %>%
 
 
 
-#Splitting intensity
+#Splitting intensity Low and High
 low_intensity <-sf_data1 %>%
   mutate(pf_low = paste(pf_hands, pf_wall,pf_hcuff, sep = ""),
          pf_low = if_else(grepl("Y", pf_low), 1, 0))
@@ -92,12 +92,6 @@ prob_low_intensity_given_race <- low_intensity %>%
     group_by(addrpct, race) %>%
     summarize(prob = mean(pf_low)) 
   
-prob_low_white <- prob_low_intensity_given_race  %>% filter(race == "White")
-prob_low_black <- prob_low_intensity_given_race  %>% filter(race == "Black")
-
-prob_high_white <- prob_high_intensity_given_race  %>% filter(race == "White")
-prob_high_black <- prob_high_intensity_given_race  %>% filter(race == "Black")
-
 
 
 prob_high_intensity_given_race <- high_intensity %>%
@@ -109,13 +103,20 @@ prob_high_intensity_given_race <- high_intensity %>%
   summarize(prob = mean(pf_high))
 
 
-  
+#Splitting Intensities into different dataframes given race
+prob_low_white <- prob_low_intensity_given_race  %>% filter(race == "White")
+prob_low_black <- prob_low_intensity_given_race  %>% filter(race == "Black")
+
+prob_high_white <- prob_high_intensity_given_race  %>% filter(race == "White")
+prob_high_black <- prob_high_intensity_given_race  %>% filter(race == "Black")
+
 
 
 
 # read in police precinct shape data
 r <- GET('http://services5.arcgis.com/GfwWNkhOj9bNBqoJ/arcgis/rest/services/nypp/FeatureServer/0/query?where=1=1&outFields=*&outSR=4326&f=geojson')
 police_precincts <- readOGR(content(r,'text'), 'OGRGeoJSON', verbose = F)
+
 
 # Join the precinct shape data with the data about the precincts
 joint_prop_low_white <- geo_join(police_precincts, prob_low_white, "Precinct", "addrpct")
@@ -129,14 +130,17 @@ joint_prop_high_black <- geo_join(police_precincts, prob_high_black, "Precinct",
 
 
 #Feature with Radio buttons on map
+
+#Low White
 mypopup <- paste0("Precinct: ", joint_prop_low_white$addrpct, "<br>", 
-                  "Black Low Intensity Prop: ", joint_prop_low_white$prob)
+                  "White Low Intensity Prop: ", joint_prop_low_white$prob)
 
 mypal <- colorNumeric(
   palette = "YlOrRd",
   domain = joint_prop_low_white$prob
 )
 
+#Low Black
 mypopup2 <- paste0("Precinct: ", joint_prop_low_black$addrpct, "<br>", 
                    "Black High Intensity Prop: ", joint_prop_low_black$prob)
 
@@ -145,14 +149,16 @@ mypal2 <- colorNumeric(
   domain = joint_prop_low_black$prob
 )
 
+#High White
 mypopup3 <- paste0("Precinct: ", joint_prop_high_white$addrpct, "<br>", 
-                  "Black Low Intensity Prop: ", joint_prop_high_white$prob)
+                  "White Low Intensity Prop: ", joint_prop_high_white$prob)
 
 mypal3 <- colorNumeric(
   palette = "YlOrRd",
   domain = joint_prop_high_white$prob
 )
 
+#High Black
 mypopup4 <- paste0("Precinct: ", joint_prop_high_black$addrpct, "<br>", 
                    "Black High Intensity Prop: ", joint_prop_high_black$prob)
 
@@ -162,7 +168,7 @@ mypal4 <- colorNumeric(
 )
 
 
-
+#Generating leaflet map with all the options
 leafletmap <- leaflet() %>% 
   addProviderTiles("CartoDB.Positron") %>%
   addPolygons(data=joint_prop_low_white,
