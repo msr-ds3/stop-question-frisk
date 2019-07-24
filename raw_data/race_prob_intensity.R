@@ -85,7 +85,7 @@ mypopup <- paste0("Precinct: ", joint_prop_low_white$addrpct, "<br>",
 
 mypal <- colorNumeric(
   palette = "YlOrRd",
-  domain = joint_prop_low_white$prob
+  domain = 0:1
 )
 
 #Low Black
@@ -94,7 +94,7 @@ mypopup2 <- paste0("Precinct: ", joint_prop_low_black$addrpct, "<br>",
 
 mypal2 <- colorNumeric(
   palette = "YlOrRd",
-  domain = joint_prop_low_black$prob
+  domain = 0:1
 )
 
 #High White
@@ -103,7 +103,7 @@ mypopup3 <- paste0("Precinct: ", joint_prop_high_white$addrpct, "<br>",
 
 mypal3 <- colorNumeric(
   palette = "YlOrRd",
-  domain = joint_prop_high_white$prob
+  domain = 0:1
 )
 
 #High Black
@@ -112,7 +112,7 @@ mypopup4 <- paste0("Precinct: ", joint_prop_high_black$addrpct, "<br>",
 
 mypal4 <- colorNumeric(
   palette = "YlOrRd",
-  domain = joint_prop_high_black$prob
+  domain = 0:1
 )
 
 
