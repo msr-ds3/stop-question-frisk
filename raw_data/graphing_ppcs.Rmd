@@ -21,7 +21,6 @@ graph_ppcs <- merged_ppcs
 ```{r income bar graph}
 # force graph comparing income and race
 
-
 graph_ppcs$civilian_income <- recode_factor(graph_ppcs$civilian_income,
                                             "1" = '< $20,000',
                                             "2" = '$20,000 - $50,000',
@@ -39,6 +38,7 @@ graph_ppcs %>%
   ylab("Number of Interactions Involving Force") +
   labs(fill = "Civilian Race") 
 
+# white removed
 graph_ppcs %>%
   filter(civilian_race != "white") %>% 
   filter(!is.na(civilian_income)) %>%
@@ -50,6 +50,35 @@ graph_ppcs %>%
   xlab("Civilian Income") + 
   ylab("Number of Interactions Involving Force") +
   labs(fill = "Civilian Race")
+
+```
+
+
+```{r male and female graphs}
+# force graph comparing gender
+graph_ppcs$civilian_gender <- recode_factor(graph_ppcs$civilian_gender,
+                                            "male" = 'Male',
+                                            "female" = 'Female'
+                                            )
+
+graph_ppcs %>%
+  group_by(year, civilian_gender) %>%
+  mutate(year_count = n()) %>%
+  filter(force == 1) %>%
+  mutate(force_count = n()) %>%
+  summarize(year_count = mean(year_count),
+            force_count = mean(force_count)) %>%
+  mutate(prop = force_count / year_count) %>%
+  ggplot(aes(x = year, y = prop, color = civilian_gender, group = civilian_gender)) +
+  geom_point(aes(size = year_count)) + 
+  geom_line(lwd = 1.15) + 
+  labs(color = "Civilian Gender", 
+       size = " Number of Interactions\n Involving Force") +
+  xlab("Year") + 
+  ylab("Proportion of Use of Force")
+
+```
+```{r type of force by race}
 
 ```
 
