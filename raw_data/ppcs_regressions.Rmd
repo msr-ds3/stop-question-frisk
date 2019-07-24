@@ -15,64 +15,188 @@ library(tidyverse)
 load("merged_ppcs.RData")
 ```
 
-```{r}
-merged_ppcs <- merged_ppcs %>%
-  mutate(civilian_race = factor(civilian_race, levels = c('white', 'black', 'other', 'hispanic')),
-         civilian_age = as.numeric(civilian_age),
-         off_hispanic = 0)
-
-
-options(na.action = "na.omit")
-```
-
-
-```{r}
-logit <- glm(force ~ civilian_race, family = "binomial", data= merged_ppcs)
-exp(coef(logit))
-summary(logit)
-```
-
-```{r}
-logit1 <- glm(force ~ civilian_race + civilian_gender + civilian_income + civilian_employed + population_size + I(civilian_age^2), family='binomial', data = merged_ppcs)
-summary(logit1)
-exp(coef(logit1))
-```
-```{r}
-logit2 <- glm(force ~ civilian_race + civilian_gender + civilian_income + civilian_employed + population_size + I(civilian_age^2) + time_of_encounter + type_of_incident + off_hispanic + off_white + off_black + off_other + off_split, family='binomial', data = merged_ppcs)
-summary(logit2)
-exp(coef(logit2))
-```
-
-```{r}
-logit3 <- glm(force ~ civilian_race + civilian_gender + civilian_income + civilian_employed + population_size + I(civilian_age^2) + time_of_encounter + type_of_incident + off_hispanic + off_white + off_black + off_other + off_split + civilian_behavior, family='binomial', data = merged_ppcs)
-summary(logit3)
-exp(coef(logit3))
-```
-
-```{r}
-logit4 <- glm(force ~ civilian_race + civilian_gender + civilian_income + civilian_employed + population_size + I(civilian_age^2) + time_of_encounter + type_of_incident + off_hispanic + off_white + off_black + off_other + off_split + civilian_behavior + year, family='binomial', data = merged_ppcs)
-summary(logit4)
-exp(coef(logit4))
-```
-
 
 #Regression for at least grabbed
-Need to filter for all non-misisng use of force data
+added columns according to fryer
 ```{r}
-#not missing 
-filtered_merged_ppcs <- merged_ppcs %>% filter(force != 0)
+merged_ppcs <- merged_ppcs %>% mutate(
+    at_least_grabbed_fry = ifelse(
+      grab_push == 1 |
+      handcuffed == 1|
+      point_gun == 1 |
+      hit_kick == 1  |
+      pepper_stun == 1, 1, 0),
+    
+    at_least_handcuffed_fry = case_when(
+     (handcuffed == 1|
+      point_gun == 1 |
+      hit_kick == 1  |
+      pepper_stun == 1) ~ 1,
+     (grab_push == 1) ~NA_real_,
+     TRUE ~ 0),
+    
+    at_least_point_gun_fry = case_when(
+      (point_gun == 1 |
+      hit_kick == 1  |
+      pepper_stun == 1) ~ 1,
+      (grab_push == 1 | handcuffed == 1) ~ NA_real_,
+    TRUE ~ 0),
+
+    at_least_kick_pepper_stun_fry = case_when(
+      (hit_kick == 1  |
+      pepper_stun == 1) ~ 1,
+      (grab_push == 1 | handcuffed == 1 | point_gun == 1) ~ NA_real_,
+      TRUE ~ 0),
+    
+    at_least_grabbed_fry = as.factor(at_least_grabbed_fry),
+    at_least_handcuffed_fry = as.factor(at_least_handcuffed_fry),
+    at_least_point_gun_fry = as.factor(at_least_point_gun_fry),
+    at_least_kick_pepper_stun_fry = as.factor(at_least_kick_pepper_stun_fry)
+)
+
+```
+
+
+```{r}
+at_least_grab_model1 <- glm(at_least_grabbed_fry ~ civilian_race, family = "binomial", data= merged_ppcs)
+exp(coef(at_least_grab_model1))
+summary(at_least_grab_model1)
 ```
 
 ```{r}
-at_lst_grab_model1 <- glm(at_least_grabbed ~ civilian_race, family = "binomial", data= merged_ppcs)
-exp(coef(at_lst_grab_model1))
-summary(at_lst_grab_model1)
+at_least_grab_model2 <- glm(at_least_grabbed_fry ~ civilian_race + civilian_gender + civilian_employed + civilian_income + population_size + I(civilian_age^2), family = "binomial", data = merged_ppcs)
+
+exp(coef(at_least_grab_model2))
+summary(at_least_grab_model2)
 ```
 
 ```{r}
-at_lst_grab_model2 <- glm(at_least_grabbed ~ civilian_race + civilian_gender + civilian_employed + civilian_income + population_size + I(civilian_age^2), family = "binomial", data = merged_ppcs)
+at_least_grab_model3 <- glm(at_least_grabbed_fry ~ civilian_race + civilian_gender + civilian_employed + civilian_income + population_size + I(civilian_age^2) + time_of_encounter + type_of_incident + off_white + off_black + off_hispanic + off_other + off_hispanic + off_split, family = "binomial", data = merged_ppcs)
 
-exp(coef(at_lst_grab_model2))
-summary(at_lst_grab_model2)
+exp(coef(at_least_grab_model3))
+summary(at_least_grab_model3)
+
+summary(merged_ppcs)
+```
+
+```{r}
+at_least_grab_model4 <- glm(at_least_grabbed_fry  ~ civilian_race + civilian_gender + civilian_employed + civilian_income + population_size + I(civilian_age^2) + time_of_encounter + type_of_incident + off_white + off_black + off_hispanic + off_other + off_hispanic + off_split + civilian_behavior, family = "binomial", data = merged_ppcs)
+
+exp(coef(at_least_grab_model4))
+summary(at_least_grab_model4)
+```
+
+```{r}
+
+at_least_grab_model5 <- glm(at_least_grabbed ~ civilian_race + civilian_gender + civilian_employed + civilian_income + population_size + I(civilian_age^2) + time_of_encounter + type_of_incident + off_white + off_black + off_hispanic + off_other + off_hispanic + off_split + civilian_behavior + year, family = "binomial", data = merged_ppcs)
+
+exp(coef(at_least_grab_model5))
+summary(at_least_grab_model5)
+```
+
+
+#At least handcuffed
+```{r}
+at_least_handcuffed_model1 <- glm(at_least_handcuffed_fry ~ civilian_race, family = "binomial", data = merged_ppcs)
+
+summary(at_least_handcuffed_model1)
+exp(coef(at_least_handcuffed_model1))
+```
+
+```{r}
+at_least_handcuffed_model2 <- glm(at_least_handcuffed_fry ~ civilian_race+ civilian_gender + civilian_employed + civilian_income + population_size + I(civilian_age^2), family = "binomial", data = merged_ppcs)
+
+summary(at_least_handcuffed_model2)
+exp(coef(at_least_handcuffed_model2))
+```
+
+```{r}
+at_least_handcuffed_model3 <- glm(at_least_handcuffed_fry ~ civilian_race + civilian_gender + civilian_employed + civilian_income + population_size + I(civilian_age^2) + time_of_encounter + type_of_incident + off_white + off_black + off_other + off_hispanic + off_split, family = "binomial", data = merged_ppcs)
+
+exp(coef(at_least_handcuffed_model3))
+summary(at_least_handcuffed_model3)
+```
+
+```{r}
+at_least_handcuffed_model4 <- glm(at_least_handcuffed_fry ~ civilian_race + civilian_gender + civilian_employed + civilian_income + population_size + I(civilian_age^2) + time_of_encounter + type_of_incident + off_white + off_black + off_other + off_hispanic + off_split + civilian_behavior, family = "binomial", data = merged_ppcs)
+
+exp(coef(at_least_handcuffed_model4))
+summary(at_least_handcuffed_model4)
+```
+```{r}
+at_least_handcuffed_model5 <- glm(at_least_handcuffed_fry ~ civilian_race + civilian_gender + civilian_employed + civilian_income + population_size + I(civilian_age^2) + time_of_encounter + type_of_incident + off_white + off_black + off_other + off_hispanic + off_split + civilian_behavior + year, family = "binomial", data = merged_ppcs)
+
+exp(coef(at_least_handcuffed_model5))
+summary(at_least_handcuffed_model5)
+```
+#At least point Gun Regressions
+```{r}
+at_least_point_gun_model1 <- glm(at_least_point_gun_fry ~ civilian_race, family = "binomial", data = merged_ppcs)
+
+summary(at_least_point_gun_model1)
+exp(coef(at_least_point_gun_model1))
+```
+
+```{r}
+at_least_point_gun_model2 <- glm(at_least_point_gun_fry ~ civilian_race + civilian_gender + civilian_employed + civilian_income + population_size + I(civilian_age^2), family = "binomial", data = merged_ppcs)
+
+summary(at_least_point_gun_model2)
+exp(coef(at_least_point_gun_model2))
+```
+
+```{r}
+at_least_point_gun_model3 <- glm(at_least_point_gun ~ civilian_race + civilian_gender + civilian_employed + civilian_income + population_size + I(civilian_age^2) + time_of_encounter + type_of_incident + off_white + off_black + off_other + off_hispanic + off_split, family = "binomial", data = merged_ppcs)
+
+exp(coef(at_least_point_gun_model3))
+summary(at_least_point_gun_model3)
+```
+
+
+```{r}
+at_least_point_gun_model4 <- glm(at_least_point_gun ~ civilian_race + civilian_gender + civilian_employed + civilian_income + population_size + I(civilian_age^2) + time_of_encounter + type_of_incident + off_white + off_black + off_other + off_hispanic + off_split + civilian_behavior, family = "binomial", data = merged_ppcs)
+
+exp(coef(at_least_point_gun_model4))
+summary(at_least_point_gun_model4)
+```
+```{r}
+at_least_point_gun_model5 <- glm(at_least_point_gun_fry ~ civilian_race + civilian_gender + civilian_employed + civilian_income + population_size + I(civilian_age^2) + time_of_encounter + type_of_incident + off_white + off_black + off_other + off_hispanic + off_split + civilian_behavior + year, family = "binomial", data = merged_ppcs)
+
+exp(coef(at_least_point_gun_model5))
+summary(at_least_point_gun_model5)
+
+```
+#At least kick and pepper spray
+```{r}
+at_least_kick_pepper_stun_model1 <- glm(at_least_kick_pepper_stun_fry ~ civilian_race, family = "binomial", data = merged_ppcs)
+
+summary(at_least_kick_pepper_stun_model1)
+exp(coef(at_least_kick_pepper_stun_model1))
+```
+
+```{r}
+at_least_kick_pepper_stun_model2 <- glm(at_least_kick_pepper_stun_fry ~ civilian_race + civilian_gender + civilian_employed + civilian_income + population_size + I(civilian_age^2), family = "binomial", data = merged_ppcs)
+
+summary(at_least_kick_pepper_stun_model2)
+exp(coef(at_least_kick_pepper_stun_model2))
+```
+
+```{r}
+at_least_kick_pepper_stun_model3 <- glm(at_least_kick_pepper_stun_fry ~ civilian_race + civilian_gender + civilian_employed + civilian_income + population_size + I(civilian_age^2) + time_of_encounter + type_of_incident + off_white + off_black + off_other + off_hispanic + off_split, family = "binomial", data = merged_ppcs)
+
+exp(coef(at_least_kick_pepper_stun_model3))
+summary(at_least_kick_pepper_stun_model3)
+```
+
+```{r}
+at_least_kick_pepper_stun_model4 <- glm(at_least_kick_pepper_stun_fry ~ civilian_race + civilian_gender + civilian_employed + civilian_income + population_size + I(civilian_age^2) + time_of_encounter + type_of_incident + off_white + off_black + off_other + off_hispanic + off_split + civilian_behavior, family = "binomial", data = merged_ppcs)
+
+exp(coef(at_least_kick_pepper_stun_model4))
+summary(at_least_kick_pepper_stun_model4)
+```
+```{r}
+at_least_kick_pepper_stun_model5 <- glm(at_least_kick_pepper_stun_fry ~ civilian_race + civilian_gender + civilian_employed + civilian_income + population_size + I(civilian_age^2) + time_of_encounter + type_of_incident + off_white + off_black + off_other + off_hispanic + off_split + civilian_behavior + year, family = "binomial", data = merged_ppcs)
+
+exp(coef(at_least_kick_pepper_stun_model5))
+summary(at_least_kick_pepper_stun_model5)
 ```
 
