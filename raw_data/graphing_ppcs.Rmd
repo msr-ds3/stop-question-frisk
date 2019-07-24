@@ -18,6 +18,8 @@ graph_ppcs <- merged_ppcs
 ```
 
 
+
+
 ```{r income bar graph}
 # force graph comparing income and race
 # normalize based on count of incidents involving force over number of incidents
@@ -28,16 +30,16 @@ graph_ppcs$civilian_income <- recode_factor(graph_ppcs$civilian_income,
                                             "3" = '> $50,000'
                                             )
 
-graph_ppcs %>%
-  filter(!is.na(civilian_income)) %>%
-  group_by(civilian_income) %>%
-  filter(force == 1) %>%
-  ggplot() +
-  geom_bar(aes(x = civilian_income, fill = civilian_race), color = "white", position = "dodge") +
-  coord_flip() +
-  xlab("Civilian Income") + 
-  ylab("Number of Interactions Involving Force") +
-  labs(fill = "Civilian Race") 
+# graph_ppcs %>%
+#   filter(!is.na(civilian_income)) %>%
+#   group_by(civilian_income) %>%
+#   filter(force == 1) %>%
+#   ggplot() +
+#   geom_bar(aes(x = civilian_income, fill = civilian_race), color = "white", position = "dodge") +
+#   coord_flip() +
+#   xlab("Civilian Income") + 
+#   ylab("Number of Interactions Involving Force") +
+#   labs(fill = "Civilian Race") 
 
 graph_ppcs %>%
   filter(!is.na(civilian_income)) %>%
