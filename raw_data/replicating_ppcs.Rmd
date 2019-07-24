@@ -100,9 +100,9 @@ merged_ppcs <- merged_ppcs %>%
     at_least_point_gun = as.factor(at_least_point_gun),
     at_least_kick_pepper_stun = as.factor(at_least_kick_pepper_stun),
     force = as.factor(force)
-  )
+  ) %>%
+  filter(civilian_age >= 16)
 
-str(merged_ppcs)
 save(merged_ppcs, file = 'merged_ppcs.RData')
 ```
 
