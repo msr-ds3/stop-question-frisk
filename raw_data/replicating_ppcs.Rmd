@@ -36,8 +36,39 @@ merged_ppcs <- merged_ppcs %>%
   filter(face_to_face %in% yes | (num_face_to_face > 0 & num_face_to_face < 998))
 
 #add at least grabbed/pushed
-
-
+merged_ppcs <- merged_ppcs %>%
+  mutate(
+    at_least_grabbed = ifelse(
+      grab_push == 1 |
+      handcuffed == 1|
+      point_gun == 1 |
+      hit_kick == 1  |
+      pepper_stun == 1, 1, 0),
+    
+    at_least_handcuffed = ifelse(
+      handcuffed == 1|
+      point_gun == 1 |
+      hit_kick == 1  |
+      pepper_stun == 1, 1, 0),
+    
+    at_least_point_gun = ifelse(
+      point_gun == 1 |
+      hit_kick == 1  |
+      pepper_stun == 1, 1, 0),
+    
+    at_least_kick_pepper_stun = ifelse(
+      point_gun == 1 |
+      hit_kick == 1  |
+      pepper_stun == 1, 1, 0),
+    
+    force = ifelse(
+      any_force == 1 |
+      grab_push == 1 |
+      handcuffed == 1|
+      point_gun == 1 |
+      hit_kick == 1  |
+      pepper_stun == 1, 1, 0)
+  )
 
 save(merged_ppcs, file = 'merged_ppcs.RData')
 ```
