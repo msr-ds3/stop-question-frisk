@@ -13,6 +13,7 @@ library(broom)
 library(httr)
 library(rgdal)
 library(dplyr)
+
 ########## LOAD AND CREATE/CLEAN DATAFRAMES ##########
 
 # Load stop and frisk data for 2003-2013
@@ -42,7 +43,8 @@ prob_low_intensity_given_race <- low_intensity %>%
     group_by(addrpct, race) %>%
     summarize(prob = mean(pf_low)) 
   
-
+# the probability of having high intensity force used on you,
+# given your race and precinct, conditional on being stopped
 prob_high_intensity_given_race <- high_intensity %>%
   filter(race != "U" & race != "X" & race != " ") %>%
   mutate(race = recode_factor(race,"P" = "B", "I" = "Z"), 
@@ -51,15 +53,6 @@ prob_high_intensity_given_race <- high_intensity %>%
   group_by(addrpct, race) %>%
   summarize(prob = mean(pf_high))
 
-#Computational Comparison:
-comparing_low <- prob_low_intensity_given_race %>%
-  spread(race, prob) %>%
-  mutate(discrimination = Black > White)
-
-comparing_high <- prob_high_intensity_given_race %>%
-  spread(race, prob) %>%
-  mutate(discrimination = Black > White)
-
 
 #Splitting Intensities into different dataframes given race
 prob_low_white <- prob_low_intensity_given_race  %>% filter(race == "White")
@@ -67,7 +60,6 @@ prob_low_black <- prob_low_intensity_given_race  %>% filter(race == "Black")
 
 prob_high_white <- prob_high_intensity_given_race  %>% filter(race == "White")
 prob_high_black <- prob_high_intensity_given_race  %>% filter(race == "Black")
-
 
 
 # read in police precinct shape data
@@ -85,6 +77,24 @@ joint_prop_high_white <- geo_join(police_precincts, prob_high_white, "Precinct",
 joint_prop_high_black <- geo_join(police_precincts, prob_high_black, "Precinct", "addrpct")
 
 
+####### Computational Comparison of Blacks and Whites #######
+
+# Is the probability of having low intensity force used on a stopped
+# black civilian greater than the probability for a stopped white
+# civilian in each precinct
+comparing_low <- prob_low_intensity_given_race %>%
+  spread(race, prob) %>%
+  mutate(discrimination = Black > White)
+
+# Is the probability of having low intensity force used on a stopped
+# black civilian greater than the probability for a stopped white
+# civilian in each precinct
+comparing_high <- prob_high_intensity_given_race %>%
+  spread(race, prob) %>%
+  mutate(discrimination = Black > White)
+
+
+####### Visual Comparison of Blacks and Whites #######
 
 #Feature with Radio buttons on map
 
@@ -99,7 +109,7 @@ mypal <- colorNumeric(
 
 #Low Black
 mypopup2 <- paste0("Precinct: ", joint_prop_low_black$addrpct, "<br>", 
-                   "Black High Intensity Prop: ", joint_prop_low_black$prob)
+                   "Black Low Intensity Prop: ", joint_prop_low_black$prob)
 
 mypal2 <- colorNumeric(
   palette = "YlOrRd",
@@ -108,7 +118,7 @@ mypal2 <- colorNumeric(
 
 #High White
 mypopup3 <- paste0("Precinct: ", joint_prop_high_white$addrpct, "<br>", 
-                  "White Low Intensity Prop: ", joint_prop_high_white$prob)
+                  "White High Intensity Prop: ", joint_prop_high_white$prob)
 
 mypal3 <- colorNumeric(
   palette = "YlOrRd",
@@ -125,9 +135,9 @@ mypal4 <- colorNumeric(
 )
 
 
-#Generating leaflet map with all the options
+#Generating leaflet maps with all the options
 
-#Leaflet Map Low
+#Leaflet Map for Low Intensity Force
 leafletmaplow <- leaflet() %>% 
   addProviderTiles("CartoDB.Positron") %>%
   addPolygons(data=joint_prop_low_white,
@@ -142,14 +152,17 @@ leafletmaplow <- leaflet() %>%
               opacity = 1,
               fillOpacity = 0.7,
               popup = mypopup2, group="Low-Black") %>%
-  addLegend(position = "topleft", pal = mypal, values = prob_low_intensity_given_race$prob)
- 
-
-leafletmaplow %>% addLayersControl(c("Low-White", "Low-Black"),
+  addLegend(position = "topleft", 
+            pal = mypal, 
+            values = prob_low_intensity_given_race$prob) %>%
+  addLayersControl(c("Low-White", "Low-Black"),
                                 options = layersControlOptions(collapsed = FALSE))
 
 
-#Leaflet map High
+leafletmaplow 
+
+
+#Leaflet Map for High Intensity Force
 leafletmaphigh <- leaflet() %>% 
   addProviderTiles("CartoDB.Positron") %>%
 
@@ -165,12 +178,13 @@ leafletmaphigh <- leaflet() %>%
               opacity = 1,
               fillOpacity = 0.7,
               popup = mypopup4, group="High-Black") %>%
-  addLegend(position = "topleft", pal = mypal3, values = prob_high_intensity_given_race$prob)
+  addLegend(position = "topleft", 
+            pal = mypal3, 
+            values = prob_high_intensity_given_race$prob) %>%
+  addLayersControl(c("High-White", "High-Black"),
+                     options = layersControlOptions(collapsed = FALSE))
 
 
-
-leafletmaphigh %>% addLayersControl(c("High-White", "High-Black"),
-                                options = layersControlOptions(collapsed = FALSE))
-
+leafletmaphigh 
 
 
