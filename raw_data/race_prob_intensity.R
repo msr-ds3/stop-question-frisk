@@ -143,7 +143,8 @@ leafletmap <- leaflet() %>%
               opacity = 1,
               fillOpacity = 0.7,
               popup = mypopup4, group="High-Black") %>%
-  addLegend(position = "topleft", pal = mypal, values = prob_low_intensity_given_race$prob)
+  addLegend(position = "topleft", pal = mypal, values = prob_low_intensity_given_race$prob) %>%
+  addLegend(position = "topleft", pal = mypal3, values = prob_high_intensity_given_race$prob)
 
 
 leafletmap %>% addLayersControl(c("Low-White", "Low-Black", "High-White", "High-Black"),
