@@ -59,7 +59,6 @@ log_panel_data <- sf_data1 %>%
          # CHANGED Y/N TO 1/0
          pf_pp_spray_baton = as.factor(ifelse(grepl("Y",pf_pp_spray_baton), 1, 0)),
          year = as.factor(year),
-         addrpct = as.factor(addrpct),
          # recode race names for clarity
          race = recode_factor(race, "W" = "White", "B" = "Black",  "Q" ="Hispanic",
                               "A" = "Asian", "Z" = "Other"))
