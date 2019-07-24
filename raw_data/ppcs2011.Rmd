@@ -210,7 +210,7 @@ ppcs_2011 <- ppcs_2011 %>%
 ```{r}
 #OFFICER SPLIT
 ppcs_2011 <- ppcs_2011 %>%
-  mutate(off_split = NA)
+  mutate(off_split = 0)
 
 ```
 
