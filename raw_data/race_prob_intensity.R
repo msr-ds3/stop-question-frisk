@@ -103,7 +103,7 @@ mypopup3 <- paste0("Precinct: ", joint_prop_high_white$addrpct, "<br>",
 
 mypal3 <- colorNumeric(
   palette = "YlOrRd",
-  domain = seq(0, .55, .01)
+  domain = seq(0, .05, .001)
 )
 
 #High Black
@@ -112,7 +112,7 @@ mypopup4 <- paste0("Precinct: ", joint_prop_high_black$addrpct, "<br>",
 
 mypal4 <- colorNumeric(
   palette = "YlOrRd",
-  domain = seq(0, .55, .01)
+  domain = seq(0, .05, .001)
 )
 
 
