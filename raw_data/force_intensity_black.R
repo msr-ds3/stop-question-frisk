@@ -171,3 +171,48 @@ leaflet(joint_prop_high) %>%
             values = joint_prop_high_black$high_force_prop_black, 
             position = "topleft", 
             title = "High Intensity Prop")
+
+
+#Feature with Radio buttons on map
+mypopup <- paste0("Precinct: ", joint_prop_low_black$addrpct, "<br>", 
+                  "Black Low Intensity Prop: ", joint_prop_low_black$low_force_prop_black)
+
+mypal <- colorNumeric(
+  palette = "YlOrRd",
+  domain = joint_prop_low_black$low_force_prop_black
+)
+
+mypopup2 <- paste0("Precinct: ", joint_prop_high_black$addrpct, "<br>", 
+                   "Black High Intensity Prop: ", joint_prop_high_black$high_force_prop_black)
+
+mypal2 <- colorNumeric(
+  palette = "YlOrRd",
+  domain = joint_prop_high_black$high_force_prop_black
+)
+
+
+leafletmap <- leaflet() %>% 
+  addProviderTiles("CartoDB.Positron") %>%
+  
+  addPolygons(data=joint_prop_low_black,
+              fillColor = ~mypal(joint_prop_low_black$low_force_prop_black),
+              weight = 2,
+              opacity = 1,
+              color = "blue",
+              dashArray = "3",
+              fillOpacity = 0.7,
+              popup = mypopup, group="Low") %>%
+  addPolygons(data=joint_prop_high_white,
+              fillColor = ~mypal2(joint_prop_high_black$high_force_prop_black),
+              weight = 2,
+              opacity = 1,
+              color = "blue",
+              dashArray = "3",
+              fillOpacity = 0.7,
+              popup = mypopup2, group="High")
+
+leafletmap %>% addLayersControl(c("Low", "High"),
+                                options = layersControlOptions(collapsed = FALSE))
+
+
+
