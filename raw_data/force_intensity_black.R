@@ -118,7 +118,7 @@ high_props_black <- high_intensity %>% filter(pf_high == 1) %>%
 
 
 # the probability of having low intensity force used on you,
-# given your race and precinct, conditional on being stopped
+# giunven your race and precinct, conditional on being stopped
 prob_low_intensity_given_race <- low_intensity %>%
   filter(race != "U") %>%
   mutate(race = recode_factor(race,"P" = "B", "I" = "Z"), 
