@@ -26,6 +26,7 @@ load('ppcs_2011.RData')
 merged_ppcs <- rbind(ppcs_1996_cleaned, ppcs_1999_cleaned, ppcs_2008_cleaned, ppcs2002_polished, ppcs2005_polished, ppcs_2011)
 
 merged_ppcs <- merged_ppcs %>% 
+  mutate(civilian_age = ifelse(civilian_age == 'missing/ni/ou', NA_real_, civilian_age)) %>%
   mutate(civilian_age = as.numeric(civilian_age))
 
 colnames(merged_ppcs)
@@ -67,9 +68,41 @@ merged_ppcs <- merged_ppcs %>%
       handcuffed == 1|
       point_gun == 1 |
       hit_kick == 1  |
-      pepper_stun == 1, 1, 0)
+      pepper_stun == 1, 1, 0),
+    
+    year = as.factor(year),
+    civilian_race = as.factor(civilian_race),
+    civilian_gender = as.factor(civilian_gender),
+    civilian_income = as.factor(civilian_income),
+    civilian_employed = as.factor(civilian_employed),
+    population_size = as.factor(population_size),
+    time_of_encounter = as.factor(time_of_encounter),
+    off_black = as.factor(off_black),
+    off_white = as.factor(off_white),
+    off_hispanic = as.factor(off_hispanic),
+    off_other = as.factor(off_other),
+    off_split = as.factor(off_split),
+    type_of_incident = as.factor(type_of_incident),
+    civilian_behavior = as.factor(civilian_behavior),
+    civilian_searched = as.factor(civilian_searched),
+    civilian_arrested = as.factor(civilian_arrested),
+    civilian_guilty_of_illegal = as.factor(civilian_guilty_of_illegal),
+    civilian_injured = as.factor(civilian_injured),
+    excess_force = as.factor(excess_force),
+    any_force = as.factor(any_force),
+    grab_push = as.factor(grab_push),
+    hit_kick = as.factor(hit_kick),
+    point_gun = as.factor(point_gun),
+    handcuffed = as.factor(handcuffed),
+    pepper_stun = as.factor(pepper_stun),
+    at_least_grabbed = as.factor(at_least_grabbed),
+    at_least_handcuffed = as.factor(at_least_handcuffed),
+    at_least_point_gun = as.factor(at_least_point_gun),
+    at_least_kick_pepper_stun = as.factor(at_least_kick_pepper_stun),
+    force = as.factor(force)
   )
 
+str(merged_ppcs)
 save(merged_ppcs, file = 'merged_ppcs.RData')
 ```
 
