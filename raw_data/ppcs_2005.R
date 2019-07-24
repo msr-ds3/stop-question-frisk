@@ -182,7 +182,8 @@ summary(ppcs2005$civilian_guilty_of_illegal)
 
 ppcs2005 <- ppcs2005 %>%
   mutate(any_force = case_when(
-    (V12 == "Yes") ~ 1,
+    # (V12 == "Yes") ~ 1,
+    (V14 == "Yes") ~ 1,
     TRUE ~ 0
   )) %>%
   mutate(grab_push = case_when(
