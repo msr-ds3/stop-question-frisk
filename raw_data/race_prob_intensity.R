@@ -85,7 +85,7 @@ mypopup <- paste0("Precinct: ", joint_prop_low_white$addrpct, "<br>",
 
 mypal <- colorNumeric(
   palette = "YlOrRd",
-  domain = 0:1
+  domain = seq(0, .55, .01)
 )
 
 #Low Black
@@ -94,7 +94,7 @@ mypopup2 <- paste0("Precinct: ", joint_prop_low_black$addrpct, "<br>",
 
 mypal2 <- colorNumeric(
   palette = "YlOrRd",
-  domain = 0:1
+  domain = seq(0, .55, .01)
 )
 
 #High White
@@ -103,7 +103,7 @@ mypopup3 <- paste0("Precinct: ", joint_prop_high_white$addrpct, "<br>",
 
 mypal3 <- colorNumeric(
   palette = "YlOrRd",
-  domain = 0:1
+  domain = seq(0, .55, .01)
 )
 
 #High Black
@@ -112,7 +112,7 @@ mypopup4 <- paste0("Precinct: ", joint_prop_high_black$addrpct, "<br>",
 
 mypal4 <- colorNumeric(
   palette = "YlOrRd",
-  domain = 0:1
+  domain = seq(0, .55, .01)
 )
 
 
@@ -142,7 +142,8 @@ leafletmap <- leaflet() %>%
               weight = 2,
               opacity = 1,
               fillOpacity = 0.7,
-              popup = mypopup4, group="High-Black")
+              popup = mypopup4, group="High-Black") %>%
+  addLegend(position = "topleft", pal = mypal, values = prob_low_intensity_given_race$prob)
 
 
 leafletmap %>% addLayersControl(c("Low-White", "Low-Black", "High-White", "High-Black"),
