@@ -103,7 +103,7 @@ mypopup3 <- paste0("Precinct: ", joint_prop_high_white$addrpct, "<br>",
 
 mypal3 <- colorNumeric(
   palette = "YlOrRd",
-  domain = seq(0, .05, .001)
+  domain = seq(0, .055, .001)
 )
 
 #High Black
@@ -112,12 +112,14 @@ mypopup4 <- paste0("Precinct: ", joint_prop_high_black$addrpct, "<br>",
 
 mypal4 <- colorNumeric(
   palette = "YlOrRd",
-  domain = seq(0, .05, .001)
+  domain = seq(0, .055, .001)
 )
 
 
 #Generating leaflet map with all the options
-leafletmap <- leaflet() %>% 
+
+#Leaflet Map Low
+leafletmaplow <- leaflet() %>% 
   addProviderTiles("CartoDB.Positron") %>%
   addPolygons(data=joint_prop_low_white,
               fillColor = ~mypal(joint_prop_low_white$prob),
@@ -131,6 +133,17 @@ leafletmap <- leaflet() %>%
               opacity = 1,
               fillOpacity = 0.7,
               popup = mypopup2, group="Low-Black") %>%
+  addLegend(position = "topleft", pal = mypal, values = prob_low_intensity_given_race$prob)
+ 
+
+leafletmaplow %>% addLayersControl(c("Low-White", "Low-Black"),
+                                options = layersControlOptions(collapsed = FALSE))
+
+
+#Leaflet map High
+leafletmaphigh <- leaflet() %>% 
+  addProviderTiles("CartoDB.Positron") %>%
+
   addPolygons(data=joint_prop_high_white,
               fillColor = ~mypal3(joint_prop_high_white$prob),
               weight = 2,
@@ -143,11 +156,11 @@ leafletmap <- leaflet() %>%
               opacity = 1,
               fillOpacity = 0.7,
               popup = mypopup4, group="High-Black") %>%
-  addLegend(position = "topleft", pal = mypal, values = prob_low_intensity_given_race$prob) %>%
   addLegend(position = "topleft", pal = mypal3, values = prob_high_intensity_given_race$prob)
 
 
-leafletmap %>% addLayersControl(c("Low-White", "Low-Black", "High-White", "High-Black"),
+
+leafletmaphigh %>% addLayersControl(c("High-White", "High-Black"),
                                 options = layersControlOptions(collapsed = FALSE))
 
 
