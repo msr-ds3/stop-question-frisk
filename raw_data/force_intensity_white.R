@@ -93,6 +93,13 @@ high_intensity <- sf_data1 %>% mutate(pf_high = paste(pf_grnd, pf_drwep, pf_ptwe
                                pf_baton, pf_pepsp, sep = ""),
                                pf_high = if_else(grepl("Y",pf_high), 1, 0))
 
+
+low_intensity_race <- low_intensity %>% filter(pf_low == 1)%>% group_by(race, addrpct) %>% 
+  select(pf_low, race, addrpct)
+
+
+View(low_intensity_race)
+
 #Low proportions white
 low_props_white <- low_intensity %>% filter(pf_low == 1) %>% 
   mutate(tally = 1) %>%
@@ -168,3 +175,46 @@ leaflet(joint_prop_high) %>%
             values = joint_prop_high_white$high_force_prop_white, 
             position = "topleft", 
             title = "High Intensity Prop")
+
+
+
+
+#Feature with Radio buttons on map
+mypopup <- paste0("Precinct: ", joint_prop_low_white$addrpct, "<br>", 
+                  "White Low Intensity Prop: ", joint_prop_low_white$low_force_prop_white)
+
+mypal <- colorNumeric(
+  palette = "YlOrRd",
+  domain = joint_prop_low_white$low_force_prop_white
+)
+
+mypopup2 <- paste0("Precinct: ", joint_prop_high_white$addrpct, "<br>", 
+                   "White High Intensity Prop: ", joint_prop_high_white$high_force_prop_white)
+
+mypal2 <- colorNumeric(
+  palette = "YlOrRd",
+  domain = joint_prop_high_white$high_force_prop_white
+)
+
+map_white_intensities <- leaflet() %>% 
+  addProviderTiles("CartoDB.Positron") %>%
+                   
+  addPolygons(data=joint_prop_low_white,
+              fillColor = ~mypal(joint_prop_low_white$low_force_prop_white),
+              weight = 2,
+              opacity = 1,
+              color = "blue",
+              dashArray = "3",
+              fillOpacity = 0.7,
+              popup = mypopup, group="Low") %>%
+  addPolygons(data=joint_prop_high_white,
+              fillColor = ~mypal2(joint_prop_high_white$high_force_prop_white),
+              weight = 2,
+              opacity = 1,
+              color = "blue",
+              dashArray = "3",
+              fillOpacity = 0.7,
+              popup = mypopup2, group="High")
+
+map_white_intensities %>% addLayersControl(c("Low", "High"),
+                                options = layersControlOptions(collapsed = FALSE))
