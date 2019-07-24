@@ -35,7 +35,7 @@ high_intensity <- sf_data1 %>%
 # the probability of having low intensity force used on you,
 # given your race and precinct, conditional on being stopped
 prob_low_intensity_given_race <- low_intensity %>%
-    filter(race != "U") %>%
+    filter(race != "U" & race != "X" & race != " ") %>%
     mutate(race = recode_factor(race,"P" = "B", "I" = "Z"), 
            race = recode_factor(race, "W" = "White", "B" = "Black",  
            "Q" ="Hispanic",  "A" = "Asian", "Z" = "Other")) %>%
@@ -44,12 +44,21 @@ prob_low_intensity_given_race <- low_intensity %>%
   
 
 prob_high_intensity_given_race <- high_intensity %>%
-  filter(race != "U") %>%
+  filter(race != "U" & race != "X" & race != " ") %>%
   mutate(race = recode_factor(race,"P" = "B", "I" = "Z"), 
          race = recode_factor(race, "W" = "White", "B" = "Black",  
          "Q" ="Hispanic",  "A" = "Asian", "Z" = "Other")) %>%
   group_by(addrpct, race) %>%
   summarize(prob = mean(pf_high))
+
+#Computational Comparison:
+comparing_low <- prob_low_intensity_given_race %>%
+  spread(race, prob) %>%
+  mutate(discrimination = Black > White)
+
+comparing_high <- prob_high_intensity_given_race %>%
+  spread(race, prob) %>%
+  mutate(discrimination = Black > White)
 
 
 #Splitting Intensities into different dataframes given race
