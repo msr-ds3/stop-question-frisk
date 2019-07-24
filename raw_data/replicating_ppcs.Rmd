@@ -69,7 +69,7 @@ merged_ppcs <- merged_ppcs %>%
       point_gun == 1 |
       hit_kick == 1  |
       pepper_stun == 1, 1, 0),
-    
+    off_split = ifelse(is.na(off_split), 0, 1),
     year = as.factor(year),
     civilian_race = factor(civilian_race, levels = c("white", "black", "hispanic", "other")),
     civilian_gender = as.factor(civilian_gender),
@@ -100,9 +100,9 @@ merged_ppcs <- merged_ppcs %>%
     at_least_point_gun = as.factor(at_least_point_gun),
     at_least_kick_pepper_stun = as.factor(at_least_kick_pepper_stun),
     force = as.factor(force)
-  )
+  ) %>%
+  filter(civilian_age >= 16)
 
-str(merged_ppcs)
 save(merged_ppcs, file = 'merged_ppcs.RData')
 ```
 

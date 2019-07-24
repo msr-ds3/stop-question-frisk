@@ -98,9 +98,8 @@ high_intensity <- sf_data1 %>%
 
 
 low_props_black <- low_intensity %>% filter(pf_low == 1) %>% 
-                   mutate(tally = 1) %>%
                    group_by(addrpct, race) %>% 
-                   summarize(total = sum(tally)) %>%
+                   summarize(total = n()) %>%
                    ungroup() %>% group_by(addrpct) %>%
                    mutate(prop = total/sum(total)) %>%
                    filter(race == "B" | race == "P") %>%
@@ -109,13 +108,24 @@ low_props_black <- low_intensity %>% filter(pf_low == 1) %>%
 
 
 high_props_black <- high_intensity %>% filter(pf_high == 1) %>% 
-                    mutate(tally = 1) %>%
                     group_by(addrpct, race) %>% 
-                    summarize(total = sum(tally)) %>%
+                    summarize(total = n()) %>%
                     ungroup() %>% group_by(addrpct) %>% 
                     mutate(prop = total/sum(total)) %>%
                     filter(race == "B" | race == "P") %>%
                     summarize(high_force_prop_black = sum(prop))
+
+
+
+# the probability of having low intensity force used on you,
+# given your race and precinct, conditional on being stopped
+prob_low_intensity_given_race <- low_intensity %>%
+  filter(race != "U") %>%
+  mutate(race = recode_factor(race,"P" = "B", "I" = "Z"), 
+         race = recode_factor(race, "W" = "White", "B" = "Black",  
+                              "Q" ="Hispanic",  "A" = "Asian", "Z" = "Other")) %>%
+  group_by(addrpct, race) %>%
+  summarize(prob = mean(pf_low))
 
 
 
@@ -171,3 +181,48 @@ leaflet(joint_prop_high) %>%
             values = joint_prop_high_black$high_force_prop_black, 
             position = "topleft", 
             title = "High Intensity Prop")
+
+
+#Feature with Radio buttons on map
+mypopup <- paste0("Precinct: ", joint_prop_low_black$addrpct, "<br>", 
+                  "Black Low Intensity Prop: ", joint_prop_low_black$low_force_prop_black)
+
+mypal <- colorNumeric(
+  palette = "YlOrRd",
+  domain = joint_prop_low_black$low_force_prop_black
+)
+
+mypopup2 <- paste0("Precinct: ", joint_prop_high_black$addrpct, "<br>", 
+                   "Black High Intensity Prop: ", joint_prop_high_black$high_force_prop_black)
+
+mypal2 <- colorNumeric(
+  palette = "YlOrRd",
+  domain = joint_prop_high_black$high_force_prop_black
+)
+
+
+leafletmap <- leaflet() %>% 
+  addProviderTiles("CartoDB.Positron") %>%
+  
+  addPolygons(data=joint_prop_low_black,
+              fillColor = ~mypal(joint_prop_low_black$low_force_prop_black),
+              weight = 2,
+              opacity = 1,
+              color = "blue",
+              dashArray = "3",
+              fillOpacity = 0.7,
+              popup = mypopup, group="Low") %>%
+  addPolygons(data=joint_prop_high_white,
+              fillColor = ~mypal2(joint_prop_high_black$high_force_prop_black),
+              weight = 2,
+              opacity = 1,
+              color = "blue",
+              dashArray = "3",
+              fillOpacity = 0.7,
+              popup = mypopup2, group="High")
+
+leafletmap %>% addLayersControl(c("Low", "High"),
+                                options = layersControlOptions(collapsed = FALSE))
+
+
+
