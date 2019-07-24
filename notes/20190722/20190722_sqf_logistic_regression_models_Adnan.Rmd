@@ -59,7 +59,6 @@ log_panel_data <- sf_data1 %>%
          # CHANGED Y/N TO 1/0
          pf_pp_spray_baton = as.factor(ifelse(grepl("Y",pf_pp_spray_baton), 1, 0)),
          year = as.factor(year),
-         addrpct = as.factor(addrpct),
          # recode race names for clarity
          race = recode_factor(race, "W" = "White", "B" = "Black",  "Q" ="Hispanic",
                               "A" = "Asian", "Z" = "Other"))
@@ -139,13 +138,6 @@ mylogit_prec <- glm(any_force_used ~ race + sex + I(age^2) + inout + daytime + a
                data = log_panel_data,
                family = "binomial")
 
-r <- GET('http://services5.arcgis.com/GfwWNkhOj9bNBqoJ/arcgis/rest/services/nypp/FeatureServer/0/query?where=1=1&outFields=*&outSR=4326&f=geojson')
-police_precincts <- readOGR(content(r,'text'), 'OGRGeoJSON', verbose = F)
-
-precincts <- police_precincts$Precinct
-tally <- rep(1, 77)
-gender <- rep("M", 77)
-tog <- data.frame(races, tally, gender)
 
 save(mylogit_prec, file = "C:/Users/Etta Rapp/Documents/GitHub/stop-question-frisk/raw_data/log_model.RData")
 

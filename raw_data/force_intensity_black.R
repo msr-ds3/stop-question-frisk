@@ -98,9 +98,8 @@ high_intensity <- sf_data1 %>%
 
 
 low_props_black <- low_intensity %>% filter(pf_low == 1) %>% 
-                   mutate(tally = 1) %>%
                    group_by(addrpct, race) %>% 
-                   summarize(total = sum(tally)) %>%
+                   summarize(total = n()) %>%
                    ungroup() %>% group_by(addrpct) %>%
                    mutate(prop = total/sum(total)) %>%
                    filter(race == "B" | race == "P") %>%
@@ -109,13 +108,24 @@ low_props_black <- low_intensity %>% filter(pf_low == 1) %>%
 
 
 high_props_black <- high_intensity %>% filter(pf_high == 1) %>% 
-                    mutate(tally = 1) %>%
                     group_by(addrpct, race) %>% 
-                    summarize(total = sum(tally)) %>%
+                    summarize(total = n()) %>%
                     ungroup() %>% group_by(addrpct) %>% 
                     mutate(prop = total/sum(total)) %>%
                     filter(race == "B" | race == "P") %>%
                     summarize(high_force_prop_black = sum(prop))
+
+
+
+# the probability of having low intensity force used on you,
+# given your race and precinct, conditional on being stopped
+prob_low_intensity_given_race <- low_intensity %>%
+  filter(race != "U") %>%
+  mutate(race = recode_factor(race,"P" = "B", "I" = "Z"), 
+         race = recode_factor(race, "W" = "White", "B" = "Black",  
+                              "Q" ="Hispanic",  "A" = "Asian", "Z" = "Other")) %>%
+  group_by(addrpct, race) %>%
+  summarize(prob = mean(pf_low))
 
 
 
