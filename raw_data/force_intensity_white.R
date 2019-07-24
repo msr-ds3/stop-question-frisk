@@ -59,63 +59,60 @@ precinct_block_key <- read_csv("precinct_blocks_key.csv")
 precinct_populations <- left_join(census, precinct_block_key)
 
 
+
 # find the population of each race in each precinct
 precinct_race <- precinct_populations %>% ungroup() %>%
   group_by(precinct, variable) %>%
   summarize(total = sum(value))
 
-View(precinct_race)
-
-precinct_black <- precinct_race %>% filter(variable == "Black_or_African_American_other" |
-                           variable == "Black_or_African_American_Hispanic_Latino")
 
 
-# find the proportion of each precinct that is Black/African American (Hispanic or not)
-# (filter out N/A's - blocks with no corresponding precint - 
-# this is justified because no people live in these blocks (population 0))
-black_proportions <- precinct_race %>%
-  group_by(precinct) %>%
-  filter(!(is.na(precinct))) %>%
-  mutate(props = total/sum(total)) %>%
-  filter(variable == "Black_or_African_American_other" |
-           variable == "Black_or_African_American_Hispanic_Latino") %>%
-  summarize(prop = sum(props)) %>%
-  select(precinct, prop) %>%
-  ungroup()
+#Filter out only white population
+precinct_white <- precinct_race %>% filter(variable == "White_other" | variable == "White_Hispanic_Latino")
 
 
+# find the proportion of each precinct that is White
+white_proportions <- precinct_race %>%
+                     group_by(precinct) %>%
+                     filter(!(is.na(precinct))) %>%
+                     mutate(props = total/sum(total)) %>%
+                     filter(variable == "White_other" |
+                     variable == "White_Hispanic_Latino") %>%
+                     summarize(prop = sum(props)) %>%
+                     select(precinct, prop) %>%
+                     ungroup()
 
-low_intensity <-sf_data1 %>%
-                mutate(pf_low = paste(pf_hands, pf_wall,pf_hcuff, sep = ""),
-                pf_low = if_else(grepl("Y", pf_low), 1, 0))
+#Low intensity 
+low_intensity <- sf_data1 %>%
+                 mutate(pf_low = paste(pf_hands, pf_wall,pf_hcuff, sep = ""),
+                 pf_low = if_else(grepl("Y", pf_low), 1, 0))
 
+View(low_intensity)
 
+high_intensity <- sf_data1 %>% mutate(pf_high = paste(pf_grnd, pf_drwep, pf_ptwep,
+                               pf_baton, pf_pepsp, sep = ""),
+                               pf_high = if_else(grepl("Y",pf_high), 1, 0))
 
-high_intensity <- sf_data1 %>% 
-                  mutate(pf_high = paste(pf_grnd, pf_drwep, pf_ptwep,
-                  pf_baton, pf_pepsp, sep = ""),
-                  pf_high = if_else(grepl("Y",pf_high), 1, 0))
-
-
-low_props_black <- low_intensity %>% filter(pf_low == 1) %>% 
-                   mutate(tally = 1) %>%
-                   group_by(addrpct, race) %>% 
-                   summarize(total = sum(tally)) %>%
-                   ungroup() %>% group_by(addrpct) %>%
-                   mutate(prop = total/sum(total)) %>%
-                   filter(race == "B" | race == "P") %>%
-                   summarize(low_force_prop_black = sum(prop)) 
+#Low proportions white
+low_props_white <- low_intensity %>% filter(pf_low == 1) %>% 
+  mutate(tally = 1) %>%
+  group_by(addrpct, race) %>% 
+  summarize(total = sum(tally)) %>%
+  ungroup() %>% group_by(addrpct) %>%
+  mutate(prop = total/sum(total)) %>%
+  filter(race == "W") %>%
+  summarize(low_force_prop_white = sum(prop)) 
 
 
 
-high_props_black <- high_intensity %>% filter(pf_high == 1) %>% 
-                    mutate(tally = 1) %>%
-                    group_by(addrpct, race) %>% 
-                    summarize(total = sum(tally)) %>%
-                    ungroup() %>% group_by(addrpct) %>% 
-                    mutate(prop = total/sum(total)) %>%
-                    filter(race == "B" | race == "P") %>%
-                    summarize(high_force_prop_black = sum(prop))
+high_props_white <- high_intensity %>% filter(pf_high == 1) %>% 
+  mutate(tally = 1) %>%
+  group_by(addrpct, race) %>% 
+  summarize(total = sum(tally)) %>%
+  ungroup() %>% group_by(addrpct) %>% 
+  mutate(prop = total/sum(total)) %>%
+  filter(race == "W") %>%
+  summarize(high_force_prop_white = sum(prop))
 
 
 
@@ -124,50 +121,50 @@ r <- GET('http://services5.arcgis.com/GfwWNkhOj9bNBqoJ/arcgis/rest/services/nypp
 police_precincts <- readOGR(content(r,'text'), 'OGRGeoJSON', verbose = F)
 
 # Join the precinct shape data with the data about the precincts
-joint_prop_low_black <- geo_join(police_precincts, low_props_black, "Precinct", "addrpct")
+joint_prop_low_white <- geo_join(police_precincts, low_props_white, "Precinct", "addrpct")
 
-joint_prop_high_black <- geo_join(police_precincts, high_props_black, "Precinct", "addrpct")
+joint_prop_high_white <- geo_join(police_precincts, high_props_white, "Precinct", "addrpct")
 
 
-#Low intensity proportions for black
-mypopup <- paste0("Precinct: ", joint_prop_low_black$addrpct, "<br>", 
-                  "Black Low Intensity Prop: ", joint_prop_low_black$low_force_prop_black)
+#Low intensity proportions for total population
+mypopup <- paste0("Precinct: ", joint_prop_low_white$addrpct, "<br>", 
+                  "White Low Intensity Prop: ", joint_prop_low_white$low_force_prop_white)
 
 mypal <- colorNumeric(
   palette = "YlOrRd",
-  domain = joint_prop_low_black$low_force_prop_black
+  domain = joint_prop_low_white$low_force_prop_white
 )
 
-leaflet(joint_prop_low_black) %>%
+leaflet(joint_prop_low_white) %>%
   addTiles() %>% 
-  addPolygons(fillColor = ~mypal(joint_prop_low_black$low_force_prop_black),
+  addPolygons(fillColor = ~mypal(joint_prop_low_white$low_force_prop_white),
               fillOpacity = 0.7,
               weight = 1,
               popup = mypopup) %>%
   addProviderTiles("CartoDB.Positron") %>%
   addLegend(pal = mypal, 
-            values = joint_prop_low_black$low_force_prop_black, 
+            values = joint_prop_low_white$low_force_prop_white, 
             position = "topleft", 
             title = "Low Intensity Prop")
 
 
 #High Intensity Proportions for total population
-mypopup2 <- paste0("Precinct: ", joint_prop_high_black$addrpct, "<br>", 
-                   "Black High Intensity Prop: ", joint_prop_high_black$high_force_prop_black)
+mypopup2 <- paste0("Precinct: ", joint_prop_high_white$addrpct, "<br>", 
+                   "White High Intensity Prop: ", joint_prop_high_white$high_force_prop_white)
 
 mypal2 <- colorNumeric(
   palette = "YlOrRd",
-  domain = joint_prop_high_black$high_force_prop_black
+  domain = joint_prop_high_white$high_force_prop_white
 )
 
 leaflet(joint_prop_high) %>%
   addTiles() %>% 
-  addPolygons(fillColor = ~mypal2(joint_prop_high_black$high_force_prop_black),
+  addPolygons(fillColor = ~mypal2(joint_prop_high_white$high_force_prop_white),
               fillOpacity = 0.7,
               weight = 1,
               popup = mypopup2) %>%
   addProviderTiles("CartoDB.Positron") %>%
   addLegend(pal = mypal2, 
-            values = joint_prop_high_black$high_force_prop_black, 
+            values = joint_prop_high_white$high_force_prop_white, 
             position = "topleft", 
             title = "High Intensity Prop")
