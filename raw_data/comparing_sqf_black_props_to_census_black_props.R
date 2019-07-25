@@ -17,6 +17,7 @@ library(rgdal)
 # Load stop and frisk data for 2003-2013
 load("sqf_03_13.RData")
 
+# Load census data with distributions of race at a precinct level
 load("census_race_data.RData")
 
 # find the proportion of each precinct that is Black/African American (Hispanic or not)
