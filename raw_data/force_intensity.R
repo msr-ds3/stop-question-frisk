@@ -16,13 +16,11 @@ library(rgdal)
 ########## LOAD AND CREATE/CLEAN DATAFRAMES ##########
 
 # Load stop and frisk data for 2003-2013
-
 load("sqf_03_13.RData")
 
+# Load census data for race distributions by precinct
 load("census_race_data.RData")
 
-
-#intensities <- sf_data1 %>% gather(sf_data1, `pf_hands``, `pf_hcuff``, `pf_wall", "pf_grnd", "pf_drwep", "pf_ptwep", "pf_pepsp", "pf_baton", key = "type_f_used", value = "force_used")  
 
 low_intensity <-sf_data1 %>%
   mutate(pf_low = paste(pf_hands, pf_wall,pf_hcuff, sep = ""),
@@ -30,24 +28,27 @@ low_intensity <-sf_data1 %>%
 
 
 high_intensity <- sf_data1 %>% mutate(pf_high = paste(pf_grnd, pf_drwep, pf_ptwep,
-                                                             pf_baton, pf_pepsp, sep = ""),
+                                                      pf_baton, pf_pepsp, sep = ""),
                                       pf_high = if_else(grepl("Y",pf_high), 1, 0))
 
-low_intensity_props <- low_intensity %>% group_by(addrpct) %>% summarize(props_low_force = mean(pf_low))
+low_intensity_props <- low_intensity %>% 
+  group_by(addrpct) %>% 
+  summarize(props_low_force = mean(pf_low))
 
 
-high_intensity_props <- high_intensity %>% group_by(addrpct) %>% summarize(props_high_force = mean(pf_high))
-
+high_intensity_props <- high_intensity %>% 
+  group_by(addrpct) %>% 
+  summarize(props_high_force = mean(pf_high))
 
 total_pop <- precinct_race %>% group_by(precinct) %>% summarize(total_p = sum(total))
-
 
 
 # find the proportion of each precinct 
 # (filter out N/A's - blocks with no corresponding precint - 
 # this is justified because no people live in these blocks (population 0))
 total_sqf_pop <- sf_data1 %>%
-  group_by(pct) %>% summarize(total_pop = sum(pct)) 
+  group_by(pct) %>% 
+  summarize(total_pop = sum(pct)) 
 
 total_proportion <- left_join(total_pop, total_sqf_pop, by = c("precinct"="pct")) 
 
