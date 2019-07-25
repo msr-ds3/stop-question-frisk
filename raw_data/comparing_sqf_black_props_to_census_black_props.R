@@ -100,6 +100,7 @@ leaflet(nyc_blocks) %>%
   addProviderTiles("CartoDB.Positron")
 nyc_tracts <- tracts(state = "NY", county = "New York", year = 2010)
 plot(nyc_tracts)
+plot(nyc_blocks)
 
 # Conclusion: The proportion of the people stopped in each precinct that are black
 # is greater than the proportion of the people who live in that precinct that are black
