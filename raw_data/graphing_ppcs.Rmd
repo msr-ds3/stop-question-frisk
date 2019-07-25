@@ -208,3 +208,18 @@ merged_ppcs %>%
   
 ```
 
+```{r}
+# number of observations per year
+
+merged_ppcs %>%
+  group_by(year) %>%
+  summarize(count = n()) %>%
+  ungroup() %>%
+  ggplot(aes(x = year, y = count, group = 1)) + 
+  geom_point() + 
+  geom_line() + 
+  xlab("Year") + 
+  ylab("Number of Incidents") + 
+  scale_y_continuous(labels = comma)
+```
+
