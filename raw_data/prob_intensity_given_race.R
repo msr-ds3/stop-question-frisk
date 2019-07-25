@@ -93,6 +93,7 @@ comparing_high <- prob_high_intensity_given_race %>%
   spread(race, prob) %>%
   mutate(discrimination = Black > White)
 
+comparing_low
 
 ####### Visual Comparison of Blacks and Whites #######
 

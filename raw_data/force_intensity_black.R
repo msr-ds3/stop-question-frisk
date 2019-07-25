@@ -12,6 +12,7 @@ library(maptools)
 library(broom)
 library(httr)
 library(rgdal)
+library(dplyr)
 
 ########## LOAD AND CREATE/CLEAN DATAFRAMES ##########
 

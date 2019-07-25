@@ -15,8 +15,9 @@ library(ggplot2)
 library(modelr)
 library(dplyr)
 library(ggthemes) 
-
+theme_set(theme_classic())
 load("merged_ppcs.RData")
+
 graph_ppcs <- merged_ppcs
 
 ```
@@ -64,25 +65,27 @@ graph_ppcs %>%
 
 ```{r polar-and-flip-plot-of-force-by-race}
 
-x <- merged_ppcs %>% filter(civilian_race != "white") %>% group_by(civilian_race) %>% summarize(race_count = n())
+x <- merged_ppcs %>% filter(civilian_race != "white") %>% group_by(year, civilian_race) %>% tally(name = "Civilian count")
 
 plot <- merged_ppcs %>%
   filter(civilian_race != "white") %>%
-  group_by(civilian_race, force) %>%
+  group_by(year, civilian_race, force) %>%
   filter(force == 1) %>%
-  summarize(force_count = n())
+  tally(name = "Force count")
 
-plot_ <- full_join(plot, x)
+plot_ <- full_join(x, plot)
 
-plot_ <-plot_ %>%  
-  mutate(prop = force_count / race_count) 
+plot_ <-plot_ %>% 
+  filter(!is.na(`Force count`), !is.na(`Civilian count`))%>%
+  mutate(prop = `Force count` / `Civilian count`) 
 
 
-bar <-  ggplot(data = plot_,  aes(x=civilian_race, y=prop, fill=force_count)) +
+bar <-  ggplot(data = plot_,  aes(x=civilian_race, y=prop, fill=civilian_race)) +
   geom_bar( stat="identity", position = "dodge") + 
   labs(fill = "Size of civilian race that force was used") +
   xlab('Civilian Race') +
-  ylab('Proportion of force')
+  ylab('Proportion of force')+
+   facet_wrap(~ year)
 
 
 bar
@@ -194,8 +197,38 @@ forces
 
 ```
 
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+```{r number of face-to-face contacts}
+merged_ppcs %>%
+  filter(!is.na(num_face_to_face)) %>%
+  ggplot(aes(x = num_face_to_face)) +
+  geom_histogram(color = "white", fill = "indianred1", bins = 11) +
+  geom_vline(xintercept = median(na.omit(merged_ppcs$num_face_to_face)), color = "blue", lwd = 1.5, linetype = "dashed") +
+  geom_vline(xintercept = mean(na.omit(merged_ppcs$num_face_to_face)), color = "green3", lwd = 1.5, linetype = "dashed") +
+  scale_y_log10() + 
+  scale_x_log10() +
+  ylab("Frequency") +
+  xlab("Number of Face-To-Face Contacts with Police")
+  
+```
 
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+```{r}
+# number of observations per year
 
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+merged_ppcs %>%
+  group_by(year) %>%
+  summarize(count = n()) %>%
+  ungroup() %>%
+  ggplot(aes(x = year, y = count, group = 1)) + 
+  geom_point() + 
+  geom_line() + 
+  xlab("Year") + 
+  ylab("Number of Incidents") + 
+  scale_y_continuous(labels = comma)
+```
+
+
+```{r}
+plot4 <- merged_ppcs%>%
+  group_by(population_size, civilian_arrested)
+```
+
