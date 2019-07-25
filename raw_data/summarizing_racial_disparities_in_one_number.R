@@ -95,3 +95,29 @@ stop_rates <- joint %>%
 proportions <- stop_rates %>%
   mutate(proportion = Black/White) %>%
   select(precinct, proportion)
+
+# get the list of police precincts
+r <- GET('http://services5.arcgis.com/GfwWNkhOj9bNBqoJ/arcgis/rest/services/nypp/FeatureServer/0/query?where=1=1&outFields=*&outSR=4326&f=geojson')
+police_precincts <- readOGR(content(r,'text'), 'OGRGeoJSON', verbose = F)
+
+spatial_proportions <- geo_join(police_precincts, proportions, "Precinct", "precinct")
+
+mypopup <- paste0("Precinct: ", spatial_proportions$Precinct, "<br>", 
+                  "Ratio Black to White Stop Rates: ", spatial_proportions$proportion)
+
+mypal <- colorNumeric(
+  palette = "YlOrRd",
+  domain = log(spatial_proportions$proportion)
+)
+
+leaflet(spatial_proportions) %>%
+  addTiles() %>% 
+  addPolygons(fillColor = ~mypal(log(spatial_proportions$proportion)),
+              fillOpacity = 0.7,
+              weight = 1,
+              popup = mypopup) %>%
+  addProviderTiles("CartoDB.Positron") %>%
+  addLegend(pal = mypal, 
+            values = log(spatial_proportions$proportion), 
+            position = "topleft", 
+            title = "Stop Rate Ratio")
