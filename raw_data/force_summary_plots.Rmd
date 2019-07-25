@@ -1,0 +1,143 @@
+---
+title: "Use of Force Summary Plots"
+output: html_notebook
+---
+
+```{r set-up}
+merged_ppcs$civilian_race <- recode_factor(merged_ppcs$civilian_race,
+                                            "white" = 'White',
+                                            "black" = 'Black',
+                                            "hispanic" = 'Hispanic',
+                                            "other" = "Other"
+                                            )
+```
+
+```{r any force}
+# any use of force
+fryer_any_force <- c(0.01,0.02,0.02,NA)
+merged_ppcs %>% 
+  group_by(civilian_race) %>%
+  mutate(full_count = n()) %>%
+  filter(any_force == 1) %>%
+  summarize(any_force_count = n(), full_count = mean(full_count)) %>%
+  mutate(prop = any_force_count / full_count) %>%
+  mutate(fryer_prop = fryer_any_force) %>%
+  mutate(se = sqrt(prop * (1 - prop) / full_count)) %>%
+  ggplot(aes(x = civilian_race, y = prop)) +
+  geom_point() + 
+  geom_point(aes(y = fryer_prop), shape = "X", size = 3.5, color = "red") + 
+  geom_pointrange(aes(ymin = prop - se, ymax = prop + se)) + 
+  labs(color = "Civilian Race") + 
+  xlab("Civilian Race") + 
+  ylab("Proportions") +
+  ggtitle("Proportion of the Civilians Involved in Force-Related Incidents by Race")
+
+```
+
+```{r grab or push}
+# grab or push
+fryer_grab_push <- c(0.00,0.01,0.01,NA)
+merged_ppcs %>% 
+  group_by(civilian_race) %>%
+  mutate(full_count = n()) %>%
+  filter(grab_push == 1) %>%
+  summarize(grab_push_count = n(), full_count = mean(full_count)) %>%
+  mutate(prop = grab_push_count / full_count) %>%
+  mutate(fryer_prop = fryer_grab_push) %>%
+  mutate(se = sqrt(prop * (1 - prop) / full_count)) %>%
+  ggplot(aes(x = civilian_race, y = prop)) +
+  geom_point() + 
+  geom_point(aes(y = fryer_prop), shape = "X", size = 3.5, color = "red") + 
+  geom_pointrange(aes(ymin = prop - se, ymax = prop + se)) + 
+  labs(color = "Civilian Race") + 
+  xlab("Civilian Race") + 
+  ylab("Proportions") +
+  ggtitle("Proportion of Civilians Grabbed or Pushed During an Incident by Race")
+
+```
+
+```{r hit or kick}
+# hit or kick
+fryer_hit_kick <- c(0.00,0.00,0.00)
+merged_ppcs %>% 
+  group_by(civilian_race) %>%
+  mutate(full_count = n()) %>%
+  filter(hit_kick == 1) %>%
+  summarize(hit_kick_count = n(), full_count = mean(full_count)) %>%
+  mutate(prop = hit_kick_count / full_count) %>%
+  mutate(fryer_prop = fryer_hit_kick) %>%
+  mutate(se = sqrt(prop * (1 - prop) / full_count)) %>%
+  ggplot(aes(x = civilian_race, y = prop)) +
+  geom_point() + 
+  geom_point(aes(y = fryer_prop), shape = "X", size = 3.5, color = "red") + 
+  geom_pointrange(aes(ymin = prop - se, ymax = prop + se)) + 
+  labs(color = "Civilian Race") + 
+  xlab("Civilian Race") + 
+  ylab("Proportions") +
+  ggtitle("Proportion of Civilians Hit or Kicked During an Incident")
+```
+
+```{r point gun}
+# point gun
+fryer_point_gun <- c(0.00,0.01,0.00, NA)
+merged_ppcs %>% 
+  group_by(civilian_race) %>%
+  mutate(full_count = n()) %>%
+  filter(point_gun == 1) %>%
+  summarize(point_gun_count = n(), full_count = mean(full_count)) %>%
+  mutate(prop = point_gun_count / full_count) %>%
+  mutate(fryer_prop = fryer_point_gun) %>%
+  mutate(se = sqrt(prop * (1 - prop) / full_count)) %>%
+  ggplot(aes(x = civilian_race, y = prop)) +
+  geom_point() + 
+  geom_point(aes(y = fryer_prop), shape = "X", size = 3.5, color = "red") + 
+  geom_pointrange(aes(ymin = prop - se, ymax = prop + se)) + 
+  labs(color = "Civilian Race") + 
+  xlab("Civilian Race") + 
+  ylab("Proportions") +
+  ggtitle("Proportion of Civilians Involved in Incidents in which the Officer(s) Pointed Gun by Race")
+
+```
+
+```{r handcuffed}
+# handcuffed
+fryer_handcuffed <- c(0.02,0.04,0.03, NA)
+merged_ppcs %>% 
+  group_by(civilian_race) %>%
+  mutate(full_count = n()) %>%
+  filter(handcuffed == 1) %>%
+  summarize(handcuffed_count = n(), full_count = mean(full_count)) %>%
+  mutate(prop = handcuffed_count / full_count) %>%
+  mutate(fryer_prop = fryer_handcuffed) %>%
+  mutate(se = sqrt(prop * (1 - prop) / full_count)) %>%
+  ggplot(aes(x = civilian_race, y = prop)) +
+  geom_point() + 
+  geom_point(aes(y = fryer_prop), shape = "X", size = 3.5, color = "red") + 
+  geom_pointrange(aes(ymin = prop - se, ymax = prop + se)) + 
+  labs(color = "Civilian Race") + 
+  xlab("Civilian Race") + 
+  ylab("Proportions") +
+  ggtitle("Proportion of Civilians Handcuffed During an Incident by Race")
+```
+
+```{r pepper spray stungun}
+# pepper spray/stungun
+fryer_pepper_stun <- c(0,0,0,0)
+merged_ppcs %>% 
+  group_by(civilian_race) %>%
+  mutate(full_count = n()) %>%
+  filter(pepper_stun == 1) %>%
+  summarize(pepper_stun_count = n(), full_count = mean(full_count)) %>%
+  mutate(prop = pepper_stun_count / full_count) %>%
+  mutate(fryer_prop = fryer_pepper_stun) %>%
+  mutate(se = sqrt(prop * (1 - prop) / full_count)) %>%
+  ggplot(aes(x = civilian_race, y = prop)) +
+  geom_point() + 
+  geom_point(aes(y = fryer_prop), shape = "X", size = 3.5, color = "red") + 
+  geom_pointrange(aes(ymin = prop - se, ymax = prop + se)) + 
+  labs(color = "Civilian Race") + 
+  xlab("Civilian Race") + 
+  ylab("Proportions") +
+  ggtitle("Proportion of Civilians Involved in an Incident by Race")
+
+```
