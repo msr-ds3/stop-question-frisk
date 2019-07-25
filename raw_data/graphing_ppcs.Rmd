@@ -17,6 +17,7 @@ library(dplyr)
 library(ggthemes) 
 
 load("merged_ppcs.RData")
+theme_set(theme_bw())
 graph_ppcs <- merged_ppcs
 
 ```
