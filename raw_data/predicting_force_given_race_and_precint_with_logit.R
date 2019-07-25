@@ -1,6 +1,7 @@
 library(tidyverse)
 library(httr)
 library(rgdal)
+library(ROCR)
 
 # load the logistic model that uses year and precinct as controls
 load("log_model.RData")
@@ -55,3 +56,5 @@ discrimination <- test_predictions %>%
   mutate(HgreaterW = Hispanic > White,
          BgreaterW = Black > White,
          AgreaterW = Asian > White)
+
+
