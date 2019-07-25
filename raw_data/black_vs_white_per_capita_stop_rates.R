@@ -69,8 +69,9 @@ mypopup <- paste0("Precinct: ", spatial_proportions$Precinct, "<br>",
                   "Ratio Black to White Stop Rates: ", spatial_proportions$proportion)
 
 mypal <- colorNumeric(
-  palette = "YlOrRd",
-  domain = log(spatial_proportions$proportion)
+  palette = "Spectral",
+  domain = c(-5,5),
+  reverse = TRUE
 )
 
 leaflet(spatial_proportions) %>%
@@ -81,6 +82,10 @@ leaflet(spatial_proportions) %>%
               popup = mypopup) %>%
   addProviderTiles("CartoDB.Positron") %>%
   addLegend(pal = mypal, 
-            values = log(spatial_proportions$proportion), 
+            values = c(-5,5),
             position = "topleft", 
-            title = "Stop Rate Ratio")
+            title = "Log Stop<br>Rate Ratio")
+
+# Explanation: Dark red areas have high levels of discrimination against blacks
+# white areas show no  discrimination, green/blue areas are biased against whites.
+# Precinct 121 is gray because it was only created in 2013, after the 2010 census.
