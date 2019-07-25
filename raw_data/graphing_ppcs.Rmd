@@ -11,6 +11,10 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(scales)
 library(varhandle)
+library(ggplot2)
+library(modelr)
+library(dplyr)
+library(ggthemes) 
 
 load("merged_ppcs.RData")
 graph_ppcs <- merged_ppcs
@@ -58,6 +62,35 @@ graph_ppcs %>%
 ```
 
 
+```{r polar-and-flip-plot-of-force-by-race}
+
+x <- merged_ppcs %>% filter(civilian_race != "white") %>% group_by(civilian_race) %>% summarize(race_count = n())
+
+plot <- merged_ppcs %>%
+  filter(civilian_race != "white") %>%
+  group_by(civilian_race, force) %>%
+  filter(force == 1) %>%
+  summarize(force_count = n())
+
+plot_ <- full_join(plot, x)
+
+plot_ <-plot_ %>%  
+  mutate(prop = force_count / race_count) 
+
+
+bar <-  ggplot(data = plot_,  aes(x=civilian_race, y=prop, fill=force_count)) +
+  geom_bar( stat="identity", position = "dodge") + 
+  labs(fill = "Size of civilian race that force was used") +
+  xlab('Civilian Race') +
+  ylab('Proportion of force')
+
+
+bar
+bar + coord_polar()
+bar + coord_flip()
+```
+
+
 ```{r male and female graphs}
 # force graph comparing gender
 graph_ppcs$civilian_gender <- recode_factor(graph_ppcs$civilian_gender,
@@ -82,7 +115,82 @@ graph_ppcs %>%
   ylab("Proportion of Use of Force")
 
 ```
-```{r type of force by race}
+
+```{r male-and-female- force #2}
+plot2 <- merged_ppcs%>%
+  mutate(civilian_gender = recode_factor(civilian_gender, `1` = 'Male',
+ `2` = 'Female'))%>%
+  group_by(year, civilian_gender)%>%
+  mutate(count_year = n())%>%
+  filter(force ==1)%>%
+  mutate(count_force = n())%>% 
+  summarize(count_year = mean(count_year), count_force = mean(count_force))%>% 
+  mutate(prop = count_force / count_year) %>%
+  ungroup()
+  
+options(repr.plot.width=6, repr.plot.height=3)
+
+line <- ggplot(plot2, aes(x = year, y= prop , color = civilian_gender, group=civilian_gender)) +
+  geom_point(aes(size = count_year))+
+  geom_line(lwd = 1) +
+  labs(size = "Size"  , color = "Civilian Gender") +
+  xlab('Year') +
+  ylab('Proportion of use of force')
+  
+   
+
+line 
+
+
+```
+
+```{r type-of-force-by-race}
+plot01 <- merged_ppcs %>%
+  group_by(civilian_race, grab_push)%>%
+  filter(grab_push == 1)%>%
+  summarize(count_grab = n())
+  #dplyr::select(civilian_race, grab_push)
+
+plot02 <- merged_ppcs %>%
+  group_by(civilian_race, handcuffed)%>%
+  filter(handcuffed == 1)%>%
+  summarize(count_handcuffed = n())
+
+plot03 <- merged_ppcs %>%
+  group_by(civilian_race, point_gun)%>%
+  filter(point_gun == 1)%>%
+  summarize(count_point_gun = n())
+  
+
+plot04 <- merged_ppcs %>%
+  group_by(civilian_race, hit_kick)%>%
+  filter(hit_kick == 1)%>%
+  summarize(count_hit_kick = n())
+  
+
+plot05 <- merged_ppcs %>%
+ group_by(civilian_race, pepper_stun)%>%
+  filter(pepper_stun == 1)%>%
+  summarize(count_pepper_stun = n())
+  
+
+forces <- ggplot() + 
+  geom_point(data = plot01, aes(y = count_grab, x = civilian_race, size = count_grab, color = "Grab or pushed")) + 
+  
+  geom_point(data = plot02, aes(y = count_handcuffed, x = civilian_race, size = count_handcuffed, color = "Handcuffed")) +
+  
+  geom_point(data = plot03, aes(y =count_point_gun, x = civilian_race, size = count_point_gun, color = "Point gun")) +
+  
+  geom_point(data = plot04, aes(y = count_hit_kick, x = civilian_race, size = count_hit_kick, color = "Hit or Kick"))+
+  
+  geom_point(data = plot05, aes(y = count_pepper_stun, x = civilian_race, size = count_pepper_stun, color = "Peper or Stun")) +
+  labs(color = "Type of force")+
+   labs(size = "Size")+
+  xlab('Civilian Race') +
+  ylab('Size of force used')
+  
+
+forces
 
 ```
 
