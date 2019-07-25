@@ -13,16 +13,11 @@ library(broom)
 library(httr)
 library(rgdal)
 
-
 # Load stop and frisk data for 2003-2013
 load("sqf_03_13.RData")
 
 # Load census data with race distributions on the precinct level
 load("census_race_data.RData")
-
-
-sqf_race_dist <- sf_data1 %>% 
-  select(addrpct, race)
 
 census_race_dist <- precinct_race %>% filter(!is.na(precinct)) %>%
   mutate(variable = recode_factor(variable,"Two_Or_More_Races" = "Other", 
@@ -37,8 +32,8 @@ census_race_dist <- precinct_race %>% filter(!is.na(precinct)) %>%
   summarize(census_count = sum(census_count)) %>%
   ungroup()
 
-sqf_race_dist <- sqf_race_dist %>%
-  ungroup() %>%
+sqf_race_dist <- sf_data1 %>% 
+  select(addrpct, race) %>%
   filter(race != " " & race != "U" & race != "X") %>%
   mutate(race = recode_factor(race,"P" = "B", "I" = "Z"),
          race = recode_factor(race, "W" = "White", "B" = "Black",  "Q" ="Hispanic",
@@ -50,20 +45,26 @@ sqf_race_dist <- sqf_race_dist %>%
 
 joint <- left_join(census_race_dist, sqf_race_dist)
 
+# Calculate per capita stop rates (# stopped / # in population)
+# for every race in every precinct
 stop_rates <- joint %>%
   mutate(per_capita_stop_rate = sqf_count/census_count) %>%
   select(precinct, race, per_capita_stop_rate) %>%
   spread(race, per_capita_stop_rate)
 
+# Calculate the ratio of Black to White per capita stop rates
 proportions <- stop_rates %>%
   mutate(proportion = Black/White) %>%
   select(precinct, proportion)
 
-# get the list of police precincts
+# get police precinct shape data
 r <- GET('http://services5.arcgis.com/GfwWNkhOj9bNBqoJ/arcgis/rest/services/nypp/FeatureServer/0/query?where=1=1&outFields=*&outSR=4326&f=geojson')
 police_precincts <- readOGR(content(r,'text'), 'OGRGeoJSON', verbose = F)
 
+# Join stop rate ratios with precinct shape data
 spatial_proportions <- geo_join(police_precincts, proportions, "Precinct", "precinct")
+
+#Map the results:
 
 mypopup <- paste0("Precinct: ", spatial_proportions$Precinct, "<br>", 
                   "Ratio Black to White Stop Rates: ", spatial_proportions$proportion)
@@ -86,6 +87,6 @@ leaflet(spatial_proportions) %>%
             position = "topleft", 
             title = "Log Stop<br>Rate Ratio")
 
-# Explanation: Dark red areas have high levels of discrimination against blacks
+# Map explanation: Dark red areas have high levels of discrimination against blacks
 # white areas show no  discrimination, green/blue areas are biased against whites.
 # Precinct 121 is gray because it was only created in 2013, after the 2010 census.
