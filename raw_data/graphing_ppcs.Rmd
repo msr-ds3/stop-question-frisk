@@ -201,8 +201,6 @@ merged_ppcs %>%
   ggplot(aes(x = num_face_to_face)) +
   geom_histogram(color = "white", fill = "indianred1", bins = 11) +
   geom_vline(xintercept = median(na.omit(merged_ppcs$num_face_to_face)), color = "blue", lwd = 1.5, linetype = "dashed") +
-  geom_vline(xintercept = mean(na.omit(merged_ppcs$num_face_to_face)), color = "green3", lwd = 1.5, linetype = "dashed") +
-  scale_y_log10() + 
   scale_x_log10() +
   ylab("Frequency") +
   xlab("Number of Face-To-Face Contacts with Police")
