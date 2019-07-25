@@ -71,7 +71,8 @@ census_race_dist <- precinct_race %>% filter(!is.na(precinct)) %>%
                                   "White_Hispanic_Latino" = "Hispanic")) %>%
   rename("race" = "variable", "census_count" = "total") %>%
   group_by(precinct, race) %>%
-  summarize(census_count = sum(census_count))
+  summarize(census_count = sum(census_count)) %>%
+  ungroup()
 
 sqf_race_dist <- sqf_race_dist %>%
   ungroup() %>%
@@ -81,6 +82,16 @@ sqf_race_dist <- sqf_race_dist %>%
                               "A" = "Asian", "Z" = "Other")) %>%
   rename("precinct" = "addrpct") %>%
   group_by(precinct, race) %>%
-  summarize(sqf_count = n())
+  summarize(sqf_count = n()) %>%
+  ungroup()
 
 joint <- left_join(census_race_dist, sqf_race_dist)
+
+stop_rates <- joint %>%
+  mutate(per_capita_stop_rate = sqf_count/census_count) %>%
+  select(precinct, race, per_capita_stop_rate) %>%
+  spread(race, per_capita_stop_rate)
+
+proportions <- stop_rates %>%
+  mutate(proportion = Black/White) %>%
+  select(precinct, proportion)
