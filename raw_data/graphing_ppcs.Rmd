@@ -11,6 +11,10 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(scales)
 library(varhandle)
+library(ggplot2)
+library(modelr)
+library(dplyr)
+library(ggthemes) 
 
 load("merged_ppcs.RData")
 graph_ppcs <- merged_ppcs
@@ -18,9 +22,11 @@ graph_ppcs <- merged_ppcs
 ```
 
 
+
+
 ```{r income bar graph}
 # force graph comparing income and race
-
+# normalize based on count of incidents involving force over number of incidents
 
 graph_ppcs$civilian_income <- recode_factor(graph_ppcs$civilian_income,
                                             "1" = '< $20,000',
@@ -28,33 +34,177 @@ graph_ppcs$civilian_income <- recode_factor(graph_ppcs$civilian_income,
                                             "3" = '> $50,000'
                                             )
 
+# graph_ppcs %>%
+#   filter(!is.na(civilian_income)) %>%
+#   group_by(civilian_income) %>%
+#   filter(force == 1) %>%
+#   ggplot() +
+#   geom_bar(aes(x = civilian_income, fill = civilian_race), color = "white", position = "dodge") +
+#   coord_flip() +
+#   xlab("Civilian Income") + 
+#   ylab("Number of Interactions Involving Force") +
+#   labs(fill = "Civilian Race") 
+
 graph_ppcs %>%
   filter(!is.na(civilian_income)) %>%
-  group_by(civilian_income) %>%
+  group_by(civilian_income, civilian_race) %>%
+  mutate(incident_count = n()) %>%
   filter(force == 1) %>%
+  summarize(force_count = n(), incident_count = mean(incident_count)) %>%
+  mutate(prop = force_count / incident_count) %>%
   ggplot() +
-  geom_bar(aes(x = civilian_income, fill = civilian_race), color = "white", position = "dodge") +
+  geom_col(aes(x = civilian_income, y = prop, fill = civilian_race), color = "white", position = "dodge") +
   coord_flip() +
   xlab("Civilian Income") + 
   ylab("Number of Interactions Involving Force") +
   labs(fill = "Civilian Race") 
 
-graph_ppcs %>%
-  filter(civilian_race != "white") %>% 
-  filter(!is.na(civilian_income)) %>%
-  group_by(civilian_income) %>%
+```
+
+
+```{r polar-and-flip-plot-of-force-by-race}
+
+x <- merged_ppcs %>% filter(civilian_race != "white") %>% group_by(civilian_race) %>% summarize(race_count = n())
+
+plot <- merged_ppcs %>%
+  filter(civilian_race != "white") %>%
+  group_by(civilian_race, force) %>%
   filter(force == 1) %>%
-  ggplot() +
-  geom_bar(aes(x = civilian_income, fill = civilian_race), color = "white", position = "dodge") +
-  coord_flip() +
-  xlab("Civilian Income") + 
-  ylab("Number of Interactions Involving Force") +
-  labs(fill = "Civilian Race")
+  summarize(force_count = n())
+
+plot_ <- full_join(plot, x)
+
+plot_ <-plot_ %>%  
+  mutate(prop = force_count / race_count) 
+
+
+bar <-  ggplot(data = plot_,  aes(x=civilian_race, y=prop, fill=force_count)) +
+  geom_bar( stat="identity", position = "dodge") + 
+  labs(fill = "Size of civilian race that force was used") +
+  xlab('Civilian Race') +
+  ylab('Proportion of force')
+
+
+bar
+bar + coord_polar()
+bar + coord_flip()
+```
+
+
+```{r male and female graphs}
+# force graph comparing gender
+graph_ppcs$civilian_gender <- recode_factor(graph_ppcs$civilian_gender,
+                                            "male" = 'Male',
+                                            "female" = 'Female'
+                                            )
+
+graph_ppcs %>%
+  group_by(year, civilian_gender) %>%
+  mutate(year_count = n()) %>%
+  filter(force == 1) %>%
+  mutate(force_count = n()) %>%
+  summarize(year_count = mean(year_count),
+            force_count = mean(force_count)) %>%
+  mutate(prop = force_count / year_count) %>%
+  ggplot(aes(x = year, y = prop, color = civilian_gender, group = civilian_gender)) +
+  geom_point(aes(size = year_count)) + 
+  geom_line(lwd = 1.15) + 
+  labs(color = "Civilian Gender", 
+       size = " Number of Interactions\n Involving Force") +
+  xlab("Year") + 
+  ylab("Proportion of Use of Force")
 
 ```
 
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+```{r male-and-female- force #2}
+plot2 <- merged_ppcs%>%
+  mutate(civilian_gender = recode_factor(civilian_gender, `1` = 'Male',
+ `2` = 'Female'))%>%
+  group_by(year, civilian_gender)%>%
+  mutate(count_year = n())%>%
+  filter(force ==1)%>%
+  mutate(count_force = n())%>% 
+  summarize(count_year = mean(count_year), count_force = mean(count_force))%>% 
+  mutate(prop = count_force / count_year) %>%
+  ungroup()
+  
+options(repr.plot.width=6, repr.plot.height=3)
 
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+line <- ggplot(plot2, aes(x = year, y= prop , color = civilian_gender, group=civilian_gender)) +
+  geom_point(aes(size = count_year))+
+  geom_line(lwd = 1) +
+  labs(size = "Size"  , color = "Civilian Gender") +
+  xlab('Year') +
+  ylab('Proportion of use of force')
+  
+   
 
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+line 
+
+
+```
+
+```{r type-of-force-by-race}
+plot01 <- merged_ppcs %>%
+  group_by(civilian_race, grab_push)%>%
+  filter(grab_push == 1)%>%
+  summarize(count_grab = n())
+  #dplyr::select(civilian_race, grab_push)
+
+plot02 <- merged_ppcs %>%
+  group_by(civilian_race, handcuffed)%>%
+  filter(handcuffed == 1)%>%
+  summarize(count_handcuffed = n())
+
+plot03 <- merged_ppcs %>%
+  group_by(civilian_race, point_gun)%>%
+  filter(point_gun == 1)%>%
+  summarize(count_point_gun = n())
+  
+
+plot04 <- merged_ppcs %>%
+  group_by(civilian_race, hit_kick)%>%
+  filter(hit_kick == 1)%>%
+  summarize(count_hit_kick = n())
+  
+
+plot05 <- merged_ppcs %>%
+ group_by(civilian_race, pepper_stun)%>%
+  filter(pepper_stun == 1)%>%
+  summarize(count_pepper_stun = n())
+  
+
+forces <- ggplot() + 
+  geom_point(data = plot01, aes(y = count_grab, x = civilian_race, size = count_grab, color = "Grab or pushed")) + 
+  
+  geom_point(data = plot02, aes(y = count_handcuffed, x = civilian_race, size = count_handcuffed, color = "Handcuffed")) +
+  
+  geom_point(data = plot03, aes(y =count_point_gun, x = civilian_race, size = count_point_gun, color = "Point gun")) +
+  
+  geom_point(data = plot04, aes(y = count_hit_kick, x = civilian_race, size = count_hit_kick, color = "Hit or Kick"))+
+  
+  geom_point(data = plot05, aes(y = count_pepper_stun, x = civilian_race, size = count_pepper_stun, color = "Peper or Stun")) +
+  labs(color = "Type of force")+
+   labs(size = "Size")+
+  xlab('Civilian Race') +
+  ylab('Size of force used')
+  
+
+forces
+
+```
+
+```{r number of face-to-face contacts}
+merged_ppcs %>%
+  filter(!is.na(num_face_to_face)) %>%
+  ggplot(aes(x = num_face_to_face)) +
+  geom_histogram(color = "white", fill = "indianred1", bins = 11) +
+  geom_vline(xintercept = median(na.omit(merged_ppcs$num_face_to_face)), color = "blue", lwd = 1.5, linetype = "dashed") +
+  geom_vline(xintercept = mean(na.omit(merged_ppcs$num_face_to_face)), color = "green3", lwd = 1.5, linetype = "dashed") +
+  scale_y_log10() + 
+  scale_x_log10() +
+  ylab("Frequency") +
+  xlab("Number of Face-To-Face Contacts with Police")
+  
+```
+
