@@ -224,3 +224,32 @@ merged_ppcs %>%
   scale_y_continuous(labels = comma)
 ```
 
+```{r polar-and-flip-plot-of-force-by-race}
+
+x <- merged_ppcs %>% filter(civilian_race != "white") %>% group_by(year, civilian_race) %>% tally(name = "Civilian count")
+
+plot <- merged_ppcs %>%
+  filter(civilian_race != "white") %>%
+  group_by(year, civilian_race, force) %>%
+  filter(force == 1) %>%
+  tally(name = "Force count")
+
+plot_ <- full_join(x, plot)
+
+plot_ <-plot_ %>% 
+  filter(!is.na(`Force count`), !is.na(`Civilian count`))%>%
+  mutate(prop = `Force count` / `Civilian count`) 
+
+
+bar <-  ggplot(data = plot_,  aes(x=civilian_race, y=prop, fill=civilian_race)) +
+  geom_bar( stat="identity", position = "dodge") + 
+  labs(fill = "Size of civilian race that force was used") +
+  xlab('Civilian Race') +
+  ylab('Proportion of force')+
+   facet_wrap(~ year)
+
+
+bar
+bar + coord_polar()
+bar + coord_flip()
+```
