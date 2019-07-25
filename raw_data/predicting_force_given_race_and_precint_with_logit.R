@@ -5,6 +5,7 @@ library(ROCR)
 
 # load the logistic model that uses year and precinct as controls
 load("log_model.RData")
+
 # load the stop and frisk data
 load("sqf_03_13.RData")
 
