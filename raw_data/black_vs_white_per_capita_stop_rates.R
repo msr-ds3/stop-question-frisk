@@ -12,6 +12,8 @@ library(maptools)
 library(broom)
 library(httr)
 library(rgdal)
+library(htmlwidgets)
+library(webshot)
 
 # Load stop and frisk data for 2003-2013
 load("sqf_03_13.RData")
@@ -75,7 +77,7 @@ mypal <- colorNumeric(
   reverse = TRUE
 )
 
-leaflet(spatial_proportions) %>%
+per_capita_stop_rates <- leaflet(spatial_proportions) %>%
   addTiles() %>% 
   addPolygons(fillColor = ~mypal(log(spatial_proportions$proportion)),
               fillOpacity = 0.7,
@@ -86,6 +88,12 @@ leaflet(spatial_proportions) %>%
             values = c(-5,5),
             position = "topleft", 
             title = "Log Stop<br>Rate Ratio")
+
+
+saveWidget(per_capita_stop_rates, "../figures/per_capita_stop_rates.html", selfcontained = FALSE)
+
+#webshot("temp.html", file = "../figures/per_capita_stop_rates.png",
+#        cliprect = "viewport")
 
 # Map explanation: Dark red areas have high levels of discrimination against blacks
 # white areas show no  discrimination, green/blue areas are biased against whites.
