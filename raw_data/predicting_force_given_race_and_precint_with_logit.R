@@ -58,4 +58,3 @@ discrimination <- test_predictions %>%
          BgreaterW = Black > White,
          AgreaterW = Asian > White)
 
-
