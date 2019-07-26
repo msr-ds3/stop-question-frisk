@@ -13,6 +13,8 @@ library(broom)
 library(httr)
 library(rgdal)
 library(dplyr)
+library(htmlwidgets)
+library(webshot)
 
 ########## LOAD AND CREATE/CLEAN DATAFRAMES ##########
 
@@ -93,7 +95,6 @@ comparing_high <- prob_high_intensity_given_race %>%
   spread(race, prob) %>%
   mutate(discrimination = Black > White)
 
-comparing_low
 
 ####### Visual Comparison of Blacks and Whites #######
 
@@ -187,5 +188,17 @@ leafletmaphigh <- leaflet() %>%
 
 
 leafletmaphigh 
+
+#Saving interactive leaflet map
+saveWidget(leafletmaphigh, "high-intensity.html", selfcontained = FALSE)
+
+webshot("high-intensity.html", file = "high-white.png",
+        cliprect = "viewport")
+
+
+saveWidget(leafletmaplow, "low-intensity.html", selfcontained = FALSE)
+
+webshot("low-intensity.html", file = "low-white.png",
+        cliprect = "viewport")
 
 

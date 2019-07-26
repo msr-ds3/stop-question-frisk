@@ -1,7 +1,7 @@
 library(shiny)
 library(leaflet)
 
-census_race <- source("~/stop-question-frisk/raw_data/census_race_data.RData")
+census_by_race <- source("~/stop-question-frisk/raw_data/census_race_data.RData")
 
 
 
@@ -15,7 +15,7 @@ ui <- fluidPage(
       h3("Predict Stop and Frisk"),
       radioButtons("race", h5("Race"),
                    choices = list("Black" = 1, "White" = 2, "Hispanic" = 3),selected = 1),
-      numericInput("age", "Age", 90),
+      numericInput("age", "Age", 90)
       
       # selectInput("intensity", h5("Select your choice of intensity"), 
       #           choices = list("Hands" = 1, "Handcuffed" = 2,"Pushed to Wall" = 3,
@@ -26,30 +26,46 @@ ui <- fluidPage(
 # Add a main panel around the plot and table
           mainPanel(
              plotOutput("plot"),
-             tableOutput("table"), leafletOutput(mymap)
+             tableOutput("table"), leafletOutput("leafletmap", height = "500"))
               )
               )
-            )
+            
 
 
 # Define the server logic
 server <- function(input, output) {
 
-  output$mymap <- renderLeaflet({
+  #Working leaflet map 
+  output$leafletmap <- renderLeaflet(leafletmaphigh <- leaflet() %>% 
+                  addProviderTiles("CartoDB.Positron") %>%
+                  
+                  addPolygons(data=joint_prop_high_white,
+                              fillColor = ~mypal3(joint_prop_high_white$prob),
+                              weight = 2,
+                              opacity = 1,
+                              fillOpacity = 0.7,
+                              popup = mypopup3, group="High-White") %>%
+                  addPolygons(data=joint_prop_high_black,
+                              fillColor = ~mypal4(joint_prop_high_black$prob),
+                              weight = 2,
+                              opacity = 1,
+                              fillOpacity = 0.7,
+                              popup = mypopup4, group="High-Black") %>%
+                  addLegend(position = "topleft", 
+                            pal = mypal3, 
+                            values = prob_high_intensity_given_race$prob) %>%
+                  addLayersControl(c("High-White", "High-Black"),
+                                   options = layersControlOptions(collapsed = FALSE))
+                
+  )
+  
+  
+  #selected data reactive function
+
+  
+
     
-    
-    race <- switch(input$race, 
-                   "White" = counties$white,
-                   "Black" = counties$black,
-                   "Hispanic" = counties$hispanic)
-    
-    age <- switch(input$var)
-    
-    
-    predict(data, input$race, input$age)
-    
-   
-  })
+
  
 }
 
