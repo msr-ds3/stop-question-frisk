@@ -94,7 +94,7 @@ saveWidget(per_capita_stop_rates,
            "../figures/maps/per_capita_stop_rates.html", 
            selfcontained = FALSE)
 webshot("../figures/maps/per_capita_stop_rates.html",
-        file = "../figures/per_capita_stop_rates.png",
+        file = "../figures/maps/per_capita_stop_rates.png",
         cliprect = "viewport")
 
 # Map explanation: Dark red areas have high levels of discrimination against blacks
