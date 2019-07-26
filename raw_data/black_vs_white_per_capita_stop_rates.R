@@ -75,7 +75,7 @@ mypal <- colorNumeric(
   reverse = TRUE
 )
 
-leaflet(spatial_proportions) %>%
+per_capita_stop_rates <- leaflet(spatial_proportions) %>%
   addTiles() %>% 
   addPolygons(fillColor = ~mypal(log(spatial_proportions$proportion)),
               fillOpacity = 0.7,
@@ -86,6 +86,7 @@ leaflet(spatial_proportions) %>%
             values = c(-5,5),
             position = "topleft", 
             title = "Log Stop<br>Rate Ratio")
+
 
 # Map explanation: Dark red areas have high levels of discrimination against blacks
 # white areas show no  discrimination, green/blue areas are biased against whites.
