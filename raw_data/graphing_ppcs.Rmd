@@ -222,12 +222,12 @@ merged_ppcs %>%
   scale_y_continuous(labels = comma)
 ```
 
-```{r polar-and-flip-plot-of-force-by-race}
+```{r polar-and-flip-plot-of-force-by-race-2}
 
-x <- merged_ppcs %>% filter(civilian_race != "white") %>% group_by(year, civilian_race) %>% tally(name = "Civilian count")
+x <- merged_ppcs %>% filter(civilian_race != "White") %>% group_by(year, civilian_race) %>% tally(name = "Civilian count")
 
 plot <- merged_ppcs %>%
-  filter(civilian_race != "white") %>%
+  filter(civilian_race != "White") %>%
   group_by(year, civilian_race, force) %>%
   filter(force == 1) %>%
   tally(name = "Force count")
@@ -241,13 +241,19 @@ plot_ <-plot_ %>%
 
 bar <-  ggplot(data = plot_,  aes(x=civilian_race, y=prop, fill=civilian_race)) +
   geom_bar( stat="identity", position = "dodge") + 
-  labs(fill = "Size of civilian race that force was used") +
+  labs(fill = " ") +
   xlab('Civilian Race') +
-  ylab('Proportion of force')+
-   facet_wrap(~ year)
+  ylab('Proportion of Force Used')+
+   facet_wrap(~ year) + theme(legend.position = "none")
 
 
-bar
-bar + coord_polar()
-bar + coord_flip()
+bar +
+  theme( axis.text.x = element_text(size=10, angle = 40, vjust=.5) )
+
+bar + coord_polar() 
+
+ppcs_force_proportion_used_per_race_and_year <- bar + coord_flip() +
+  theme( axis.text.x = element_text(size=10, angle = 40, vjust=.5) )
+ppcs_force_proportion_used_per_race_and_year
+ggsave("ppcs_force_proportion_used_per_race_and_year.png")
 ```
