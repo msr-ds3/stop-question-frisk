@@ -16,7 +16,6 @@ library(rgdal)
 ########## LOAD AND CREATE/CLEAN DATAFRAMES ##########
 
 # Load stop and frisk data for 2003-2013
-
 load("sqf_03_13.RData")
 
 # Load census data with race distributions on the precinct level
