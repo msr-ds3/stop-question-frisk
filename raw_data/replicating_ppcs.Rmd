@@ -38,72 +38,9 @@ merged_ppcs <- merged_ppcs %>%
 
 #add at least grabbed/pushed
 merged_ppcs <- merged_ppcs %>%
-  mutate(
-    at_least_grabbed = ifelse(
-      grab_push == 1 |
-      handcuffed == 1|
-      point_gun == 1 |
-      hit_kick == 1  |
-      pepper_stun == 1, 1, 0),
-    
-    at_least_handcuffed = ifelse(
-      handcuffed == 1|
-      point_gun == 1 |
-      hit_kick == 1  |
-      pepper_stun == 1, 1, 0),
-    
-    at_least_point_gun = ifelse(
-      point_gun == 1 |
-      hit_kick == 1  |
-      pepper_stun == 1, 1, 0),
-    
-    at_least_kick_pepper_stun = ifelse(
-      point_gun == 1 |
-      hit_kick == 1  |
-      pepper_stun == 1, 1, 0),
-    
-    force = ifelse(
-      any_force == 1 |
-      grab_push == 1 |
-      handcuffed == 1|
-      point_gun == 1 |
-      hit_kick == 1  |
-      pepper_stun == 1, 1, 0),
-    off_split = ifelse(is.na(off_split), 0, 1),
-    year = as.factor(year),
-    civilian_race = factor(civilian_race, levels = c("white", "black", "hispanic", "other")),
-    civilian_gender = as.factor(civilian_gender),
-    civilian_income = as.factor(civilian_income),
-    civilian_employed = as.factor(civilian_employed),
-    population_size = as.factor(population_size),
-    time_of_encounter = as.factor(time_of_encounter),
-    off_black = as.factor(off_black),
-    off_white = as.factor(off_white),
-    off_hispanic = as.factor(off_hispanic),
-    off_other = as.factor(off_other),
-    off_split = as.factor(off_split),
-    type_of_incident = as.factor(type_of_incident),
-    civilian_behavior = as.factor(civilian_behavior),
-    civilian_searched = as.factor(civilian_searched),
-    civilian_arrested = as.factor(civilian_arrested),
-    civilian_guilty_of_illegal = as.factor(civilian_guilty_of_illegal),
-    civilian_injured = as.factor(civilian_injured),
-    excess_force = as.factor(excess_force),
-    any_force = as.factor(any_force),
-    grab_push = as.factor(grab_push),
-    hit_kick = as.factor(hit_kick),
-    point_gun = as.factor(point_gun),
-    handcuffed = as.factor(handcuffed),
-    pepper_stun = as.factor(pepper_stun),
-    at_least_grabbed = as.factor(at_least_grabbed),
-    at_least_handcuffed = as.factor(at_least_handcuffed),
-    at_least_point_gun = as.factor(at_least_point_gun),
-    at_least_kick_pepper_stun = as.factor(at_least_kick_pepper_stun),
-    force = as.factor(force)
-  ) %>%
   filter(civilian_age >= 16)
 
-save(merged_ppcs, file = 'merged_ppcs.RData')
+
 ```
 
 ```{r}
@@ -174,8 +111,7 @@ merged_ppcs %>%
 #Income
 ```{r income-full-sample}
 merged_ppcs %>%
-  summarise(mean = mean(civilian_income, na.rm = TRUE))
-  
+  summarise(mean = mean(as.numeric(civilian_income), na.rm = TRUE))
   
 ```
 ```{r income-outliers}
@@ -196,7 +132,7 @@ merged_ppcs %>%
 ```{r income-by-race}
 merged_ppcs %>%
   group_by(civilian_race) %>%
-  summarise(mean = mean(civilian_income, na.rm = TRUE))
+  summarise(mean = mean(as.numeric(civilian_income), na.rm = TRUE))
 ```
 #Population Size
 ```{r outlier-popsize}
@@ -215,12 +151,12 @@ merged_ppcs %>%
 
 ```{r pop-size-full-sample}
 merged_ppcs %>%
-  summarise(mean = mean(population_size, na.rm = TRUE))
+  summarise(mean = mean(as.numeric(population_size), na.rm = TRUE))
 ```
 ```{r pop-size-by-race}
 merged_ppcs %>%
   group_by(civilian_race) %>%
-  summarise(mean = mean(population_size, na.rm = TRUE))
+  summarise(mean = mean(as.numeric(population_size), na.rm = TRUE))
 ```
 
 #Incident Type
@@ -332,6 +268,7 @@ merged_ppcs %>%
 ```
 #Officer Race
 ```{r officer-race-full-sample}
+
 merged_ppcs %>%
   mutate(off_race = case_when(
     (off_black == 1) ~ 'black',
@@ -735,5 +672,72 @@ merged_ppcs %>%
   summarise(pepper_count = n()) %>%
   mutate(prop = pepper_count/sum(pepper_count)) %>%
   filter(pepper_stun == 1)
+```
+
+```{r}
+merged_ppcs <- merged_ppcs %>%
+  mutate(
+    at_least_grabbed = ifelse(
+      grab_push == 1 |
+      handcuffed == 1|
+      point_gun == 1 |
+      hit_kick == 1  |
+      pepper_stun == 1, 1, 0),
+    
+    at_least_handcuffed = ifelse(
+      handcuffed == 1|
+      point_gun == 1 |
+      hit_kick == 1  |
+      pepper_stun == 1, 1, 0),
+    
+    at_least_point_gun = ifelse(
+      point_gun == 1 |
+      hit_kick == 1  |
+      pepper_stun == 1, 1, 0),
+    
+    at_least_kick_pepper_stun = ifelse(
+      point_gun == 1 |
+      hit_kick == 1  |
+      pepper_stun == 1, 1, 0),
+    
+    force = ifelse(
+      any_force == 1 |
+      grab_push == 1 |
+      handcuffed == 1|
+      point_gun == 1 |
+      hit_kick == 1  |
+      pepper_stun == 1, 1, 0),
+    year = as.factor(year),
+    civilian_race = factor(civilian_race, levels = c("white", "black", "hispanic", "other")),
+    civilian_gender = as.factor(civilian_gender),
+    civilian_income = as.factor(civilian_income),
+    civilian_employed = as.factor(civilian_employed),
+    population_size = as.factor(population_size),
+    time_of_encounter = as.factor(time_of_encounter),
+    off_black = as.factor(off_black),
+    off_white = as.factor(off_white),
+    off_hispanic = as.factor(off_hispanic),
+    off_other = as.factor(off_other),
+    off_split = as.factor(off_split),
+    type_of_incident = as.factor(type_of_incident),
+    civilian_behavior = as.factor(civilian_behavior),
+    civilian_searched = as.factor(civilian_searched),
+    civilian_arrested = as.factor(civilian_arrested),
+    civilian_guilty_of_illegal = as.factor(civilian_guilty_of_illegal),
+    civilian_injured = as.factor(civilian_injured),
+    excess_force = as.factor(excess_force),
+    any_force = as.factor(any_force),
+    grab_push = as.factor(grab_push),
+    hit_kick = as.factor(hit_kick),
+    point_gun = as.factor(point_gun),
+    handcuffed = as.factor(handcuffed),
+    pepper_stun = as.factor(pepper_stun),
+    at_least_grabbed = as.factor(at_least_grabbed),
+    at_least_handcuffed = as.factor(at_least_handcuffed),
+    at_least_point_gun = as.factor(at_least_point_gun),
+    at_least_kick_pepper_stun = as.factor(at_least_kick_pepper_stun),
+    force = as.factor(force)
+  ) 
+save(merged_ppcs, file = 'merged_ppcs.RData')
 ```
 
