@@ -1,0 +1,120 @@
+---
+title: "Fryer Comparison Plots"
+author: "Brenda Fried"
+date: "7/25/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+
+load("merged_ppcs.RData")
+
+theme_set(theme_bw())
+
+
+```
+
+#CIvilian Demographics
+```{r}
+fryer_results <- c(.77, .10, .09, .04)
+merged_ppcs %>%
+  group_by(civilian_race) %>%
+  summarize(race_count = n()) %>%
+  mutate(prop = race_count/sum(race_count)) %>%
+  mutate(se = sqrt((prop*(1-prop))/sum(race_count))) %>%
+  mutate(fry_prop = fryer_results) %>%
+  ggplot(aes(x = civilian_race, y = prop, group = 1),) +
+  geom_pointrange(aes(ymin = prop - se, ymax = prop + se), color = 'red')+
+  geom_point(aes(x = civilian_race, y = fry_prop), shape = 'X', size = 3.5, color = 'blue')
+
+```
+
+```{r}
+fryer_results <- c(.50, .50, .45, .55, .54, .46, NA, NA)
+merged_ppcs %>%
+  mutate(civilian_gender = as.factor(civilian_gender)) %>%
+  group_by(civilian_race, civilian_gender) %>%
+  summarize(count = n()) %>%
+  mutate(prop = count/sum(count)) %>% 
+  ungroup() %>%
+  mutate(se = sqrt((prop * (1-prop))/count)) %>% 
+  mutate(fry_prop = fryer_results) %>%
+  ggplot() +
+  geom_pointrange(aes(x = civilian_race, y = prop, ymin = prop - se, ymax = prop + se, color = civilian_gender)) +
+  geom_point(aes(x = civilian_race, y = fry_prop), shape = 'X', size=3.5) +
+  scale_color_brewer(type = 'qual', direction = -1, palette = 'Set1', labels = c("Male", "Female")) +
+  xlab('Civilian Race') +
+  ylab('Proportion')+
+  labs(color = "Civilian Gender", title = "Proportion of Gender by Race")
+```
+
+```{r}
+fryer_results <- c(42.06, 38.98, 34.99, NA)
+merged_ppcs %>%
+  group_by(civilian_race) %>%
+  summarise(count = n(), avg_age = mean(civilian_age)) %>% 
+  mutate(fry_prop = fryer_results) %>% 
+  ggplot() +
+  geom_point(aes(x = civilian_race, y = avg_age)) +
+  geom_point(aes(x = civilian_race, y = fry_prop), shape = 'X', size = 3.5, color = 'red')
+```
+
+```{r}
+fryer_results <- c(0.72, 0.69, 0.74, NA)
+merged_ppcs %>% 
+  group_by(civilian_race, civilian_employed) %>%
+  summarise(count = n()) %>%
+  mutate(prop = count/sum(count)) %>%
+  mutate(se = sqrt((prop * (1-prop))/count)) %>%
+  filter(civilian_employed == 1) %>%
+  ungroup() %>%
+  mutate(fry_prop = fryer_results) %>%
+  ggplot(aes(x = civilian_race, y = prop)) +
+  geom_pointrange(aes(ymin = prop - se, ymax = prop + se)) +
+  geom_point(aes(x = civilian_race, y = fry_prop), shape = 'X', size = 3.5, color = 'red') + 
+  xlab('Civilian Race') + 
+  ylab('Proportion')
+```
+
+```{r}
+fryer_results <- c(2.15, 1.75, 1.89, NA)
+
+merged_ppcs %>%
+  group_by(civilian_race) %>%
+  mutate(civilian_income = as.numeric(civilian_income)) %>% 
+  summarize(count = n(), avg_income = mean(civilian_income, na.rm = TRUE)) %>% 
+  mutate(se = sd(avg_income)/sqrt(sum(count))) %>%
+  mutate(fry_prop = fryer_results) %>%
+  ggplot(aes(x = civilian_race, y = avg_income)) +
+  geom_pointrange(aes(ymin = avg_income -se, ymax = avg_income + se)) +
+  geom_point(aes(x = civilian_race, y = fry_prop), shape = 'X', size = 3.5, color = 'red')
+  
+```
+
+```{r}
+fryer_results <- c(1.31, 1.79, 1.77, NA)
+
+merged_ppcs %>%
+  group_by(civilian_race) %>%
+  mutate(population_size = as.numeric(population_size)) %>% 
+  summarize(count = n(), avg_pop = mean(population_size, na.rm = TRUE)) %>% 
+  mutate(se = sd(avg_pop)/sqrt(sum(count))) %>%
+  mutate(fry_prop = fryer_results) %>%
+  ggplot(aes(x = civilian_race, y = avg_pop)) +
+  geom_pointrange(aes(ymin = avg_pop -se, ymax = avg_pop + se)) +
+  geom_point(aes(x = civilian_race, y = fry_prop), shape = 'X', size = 3.5, color = 'red') +
+  xlab('Civilian Race') +
+  ylab('Average population') +
+  labs(title = 'Average population size by race')
+```
+
+```{r}
+
+```
+
