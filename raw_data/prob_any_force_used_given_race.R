@@ -115,9 +115,9 @@ prob_force_used <- leaflet(joint) %>%
                    options = layersControlOptions(collapsed = FALSE))
 
 saveWidget(prob_force_used, 
-           "../figures/maps/prob_force_used.html", 
+           "../figures/prob_force_used.html", 
            selfcontained = FALSE)
-webshot("../figures/maps/prob_force_used.html",
+webshot("../figures/prob_force_used.html",
         file = "../figures/prob_force_used.png",
         cliprect = "viewport")
 
