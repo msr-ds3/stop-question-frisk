@@ -36,15 +36,17 @@ incident_type <- merged_ppcs %>%
   mutate(fryer_incident = fryer_incident)
 
  incident_type_plot <- ggplot(data = incident_type) + 
-  geom_point(aes( x = type_of_incident , y= fryer_incident ), shape = "X" , size = 4, color =  "red")+
-  geom_pointrange(aes(x = type_of_incident , y =prop , ymin = prop - se , ymax = prop + se ), position = position_dodge(0.1))+
-  xlab("Type of incident" ) + ylab("Proportions") + ggtitle("Full Sample Proportion of Type of Incident") + 
-     theme(plot.title = element_text(lineheight=.8, face="bold", hjust = 0.5),
-           axis.title.x = element_text( face="bold"),
-axis.title.y = element_text( face="bold"))
+  geom_point(aes( x = type_of_incident , y= fryer_incident , colour = "red"),  shape = 4 , size = 4)+
+  geom_pointrange(aes(x = type_of_incident , y =prop , ymin = prop - se , ymax = prop + se , ), position = position_dodge(0.1),shape = 16)+
+  xlab("Type of incident" ) +
+   ylab("Proportions") + 
+   ggtitle("Full Sample Proportion of Type of Incident") + 
+    theme(plot.title = element_text(lineheight=.8, face="bold", hjust = 0.5, size = rel(2)), panel.border = element_rect( fill = NA, colour = "grey50"),
+    legend.key = element_rect(fill = "white", colour = "black")) + scale_colour_discrete(name  =" ", breaks=c("red"), labels = c("Fryer's Results"))
 
 incident_type_plot
-
+# axis.title.x = element_text( face="bold"),
+#axis.title.y = element_text( face="bold")
 #t.value = (mean(data) - 10) / (sd(data) / sqrt(length(data))) 
 #p.value = 2*pt(-abs(t.value), df=length(data)-1)
 ```
@@ -54,6 +56,11 @@ incident_type_plot
 You can also embed plots, for example:
 
 ```{r Incident type by race}
+merged_ppcs$civilian_race <- recode_factor(merged_ppcs$civilian_race,
+                                            "white" =  "White",
+                                            "black" =  "Black",
+                                            "hispanic" = "Hispanic",
+                                           "Other stop" = "Other")
 
 fryer_incident_by_race <- c(0.00 , 0.54, 0.45, 0.00 , 0.56, 0.44, 0.01 , 0.57, 0.42, NA, NA, NA)
 
@@ -72,16 +79,20 @@ incident_type_by_race <- merged_ppcs %>%
 
 
  incident_type_by_race_plot <- ggplot(incident_type_by_race) +
-    geom_point(aes( x = civilian_race , y= fryer_incident_by_race, color = type_of_incident  ), shape = "X" , size = 4,  position = position_dodge(0.4))+
+    geom_point(aes( x = civilian_race , y= fryer_incident_by_race, color = type_of_incident ), shape = 4 , size = 4,  position = position_dodge(0.4))+
     geom_pointrange(aes(x = civilian_race , y= prop, color = type_of_incident, ymin = prop - se , ymax = prop + se ), position = position_dodge(0.4)) +
    labs(color = "Type of incident")+
-    ylab("Civilian population race - proportion")+
-    xlab("Type of incident")+ ggtitle("Proportions of Type of Incident by Race") + 
-     theme(plot.title = element_text(lineheight=.8, face="bold", hjust = 0.5),
-           axis.title.x = element_text( face="bold"),
-axis.title.y = element_text( face="bold"))
+    ylab(" Proportions")+
+    xlab("Civilian Population Race")+ ggtitle("Proportions of Type of Incident by Race") + 
+     theme(plot.title = element_text(lineheight=.8, size = rel(2), face="bold", hjust = 0.5),
+    panel.border = element_rect( fill = NA, colour = "grey50"),
+    legend.key = element_rect(fill = "white", colour = "black")) 
 
 incident_type_by_race_plot
+
+#,
+#           axis.title.x = element_text( face="bold"),
+#axis.title.y = element_text( face="bold"), legend.text =  element_text( face="bold")
 ```
 
 
@@ -100,12 +111,14 @@ fryer_contact <- c(0.68, 0.32)
     mutate(fryer_contact =fryer_contact)
   
     time_of_contact_plot <- ggplot(data= time_of_contact)+
-      geom_point(aes(x=time_of_encounter, y = fryer_contact), shape = "X" , size = 4,  position = position_dodge(0.4), color = "red")+
+      geom_point(aes(x=time_of_encounter, y = fryer_contact, colour = "red"), shape = 4 , size = 4,  position = position_dodge(0.4))+
       geom_pointrange(aes(x = time_of_encounter , y= prop, ymin = prop - se , ymax = prop + se ), position = position_dodge(0.4)) + xlab("Time of contact") + ylab("Proportion") +
       ggtitle("Full Sample Proportion of Time of Contact") + 
-     theme(plot.title = element_text(lineheight=.8, face="bold", hjust = 0.5),
-           axis.title.x = element_text( face="bold"),
-axis.title.y = element_text( face="bold"))
+     theme(plot.title = element_text(lineheight=.8, size = rel(2), face="bold", hjust = 0.5),
+    panel.border = element_rect( fill = NA, colour = "grey50"),
+    legend.key = element_rect(fill = "white", colour = "black")) + scale_colour_discrete(name  =" ", breaks=c("red"), labels = c("Fryer's Results"))
+#axis.title.x = element_text( face="bold"),
+#axis.title.y = element_text( face="bold"))
   
   time_of_contact_plot 
 ```
@@ -125,14 +138,17 @@ fryer_contact_by_race <- c(0.69, 0.31, 0.62, 0.38, 0.66, 0.34, NA , NA)
       filter(is.na(fryer_contact_by_race) != TRUE)
     
     time_of_contact_by_race_plot <-  ggplot(data= time_of_contact_by_race)+
-      geom_point(aes(x=civilian_race, y = fryer_contact_by_race, color = time_of_encounter), shape = "X" , size = 4,  position = position_dodge(0.1))+
+      geom_point(aes(x=civilian_race, y = fryer_contact_by_race, color = time_of_encounter), shape = 4 , size = 4,  position = position_dodge(0.1))+
       geom_pointrange(aes(x = civilian_race , y= prop, ymin = prop - se , ymax = prop + se,  color = time_of_encounter ), position = position_dodge(0.1))+
       xlab("Civilian Race")+
       ylab("Proportion") + labs(color = "Type of encounter")+
       ggtitle("Proportions of Time of Contact by Race") + 
-     theme(plot.title = element_text(lineheight=.8, face="bold", hjust = 0.5),
-           axis.title.x = element_text( face="bold"),
-axis.title.y = element_text( face="bold"))
+     theme(plot.title = element_text(lineheight=.8, size = rel(2),face="bold", hjust = 0.5),
+    panel.border = element_rect( fill = NA, colour = "grey50"),
+    legend.key = element_rect(fill = "white", colour = "black"))
+
+#axis.title.x = element_text( face="bold"),
+#axis.title.y = element_text( face="bold"))
     
     time_of_contact_by_race_plot 
 ```
@@ -142,11 +158,11 @@ axis.title.y = element_text( face="bold"))
  fryer_off_race <- c(0.06, 0.03, 0.02, 0.88)
       off_race <- merged_ppcs %>%
       mutate(off_race = case_when(
-        (off_black == 1) ~ 'black',
-        (off_white == 1) ~ 'white',
-        (off_other == 1) ~ 'other',
-        (off_split == 1) ~ 'split',
-        (off_hispanic == 1)~ 'hispanic'
+        (off_black == 1) ~ 'Black',
+        (off_white == 1) ~ 'White',
+        (off_other == 1) ~ 'Other',
+        (off_split == 1) ~ 'Split',
+        (off_hispanic == 1)~ 'Hispanic'
       )) %>%
       filter(is.na(off_race) != TRUE) %>%
       group_by(off_race) %>%
@@ -156,14 +172,14 @@ axis.title.y = element_text( face="bold"))
         mutate(fryer_off_race = fryer_off_race) 
       
         off_race_plot <- ggplot(off_race)+
-        geom_point(aes( x = off_race , y= fryer_off_race ), shape = "X" , size = 4, color =  "red")+
-        geom_pointrange(aes(x = off_race , y= prop, ymin = prop - se , ymax = prop + se ), position = position_dodge(0.4))+ xlab("Official Race") + ylab("Proportion")+
+        geom_point(aes( x = off_race , y= fryer_off_race, colour = "red"), shape = 4 , size = 4)+
+        geom_pointrange(aes(x = off_race , y= prop, ymin = prop - se , ymax = prop  ),shape = 16, position = position_dodge(0.4))+ xlab("Official Race") + ylab("Proportion")+
       ggtitle("Full Size Proportion of Official Race") + 
-     theme(plot.title = element_text(lineheight=.8, face="bold", hjust = 0.5),
-           axis.title.x = element_text( face="bold"),
-axis.title.y = element_text( face="bold"))
+     theme(plot.title = element_text(lineheight=.8, , size = rel(2), face="bold", hjust = 0.5),panel.border = element_rect( fill = NA, colour = "grey50"),
+    legend.key = element_rect(fill = "white", colour = "black"))+
+          labs(colour = " ") + scale_colour_discrete(name  =" ", breaks=c("red"), labels = c("Fryer's Results"))
       
-      off_race_plot
+      off_race_plot 
 ```
 
 
@@ -171,11 +187,11 @@ axis.title.y = element_text( face="bold"))
 fryer_off_race_by_race <- c(0.05, 0.02, 0.02, 0.88, 0.16, 0.03, 0.04, 0.76,0.05, 0.07,0.02, 0.84, NA, NA, NA, NA)
       off_race_by_race <- merged_ppcs %>%
       mutate(off_race = case_when(
-        (off_black == 1) ~ 'black',
-        (off_white == 1) ~ 'white',
-        (off_other == 1) ~ 'other',
-        (off_split == 1) ~ 'split',
-        (off_hispanic == 1)~ 'hispanic'
+        (off_black == 1) ~ 'Black',
+        (off_white == 1) ~ 'White',
+        (off_other == 1) ~ 'Other',
+        (off_split == 1) ~ 'Split',
+        (off_hispanic == 1)~ 'Hispanic'
       )) %>%
       filter(is.na(off_race) == FALSE) %>%
       group_by(civilian_race, off_race) %>%
@@ -189,12 +205,12 @@ fryer_off_race_by_race <- c(0.05, 0.02, 0.02, 0.88, 0.16, 0.03, 0.04, 0.76,0.05,
       filter(is.na(fryer_off_race_by_race)!= TRUE)
       
   off_race_by_race_plot <- ggplot(data = off_race_by_race) +
-    geom_point(aes(x=civilian_race, y = fryer_off_race_by_race, color = off_race), shape = "X" , size = 4,  position = position_dodge(0.5))+
+    geom_point(aes(x=civilian_race, y = fryer_off_race_by_race, color = off_race), shape = 4 , size = 4,  position = position_dodge(0.5))+
     geom_pointrange(aes(x = civilian_race , y= prop, ymin = prop - se , ymax = prop + se,  color = off_race ), position = position_dodge(0.5)) + xlab("Civilian Race") + ylab("Proportion") + labs(color = "Official Race")+
       ggtitle("Proportions of Official Race by Civilian Race") + 
-     theme(plot.title = element_text(lineheight=.8, face="bold", hjust = 0.5),
-           axis.title.x = element_text( face="bold"),
-axis.title.y = element_text( face="bold"))
+    theme(plot.title = element_text(lineheight=.8, size = rel(2),face="bold", hjust = 0.5),
+    panel.border = element_rect( fill = NA, colour = "grey50"),
+    legend.key = element_rect(fill = "white", colour = "black"))
   
   off_race_by_race_plot 
 ```
