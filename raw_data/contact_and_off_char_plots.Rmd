@@ -1,0 +1,202 @@
+---
+title: "contact and official charts- panel c"
+author: "Naomi Moreira"
+date: "7/25/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+library(ggplot2)
+library(scales)
+library(dplyr)
+theme_set(theme_bw())
+load('merged_ppcs.RData')
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r Incident type full sample}
+merged_ppcs$type_of_incident <- recode_factor(merged_ppcs$type_of_incident,
+                                            "1" =  "Street stop",
+                                            "2" =  "Traffic stop",
+                                            "3" = "Other stop")
+fryer_incident <- c(0.00 , 0.55, 0.45)
+
+incident_type <- merged_ppcs %>%
+  filter(!is.na(type_of_incident)) %>%
+  group_by(type_of_incident) %>%
+  dplyr::summarize(count = n()) %>%
+  mutate(prop = count/sum(count))%>%
+  mutate(se = sqrt( prop * (1 - prop ) / mean(count)))%>%
+  mutate(fryer_incident = fryer_incident)
+
+ incident_type_plot <- ggplot(data = incident_type) + 
+  geom_point(aes( x = type_of_incident , y= fryer_incident ), shape = "X" , size = 4, color =  "red")+
+  geom_pointrange(aes(x = type_of_incident , y =prop , ymin = prop - se , ymax = prop + se ), position = position_dodge(0.1))+
+  xlab("Type of incident" ) + ylab("Proportions") + ggtitle("Full Sample Proportion of Type of Incident") + 
+     theme(plot.title = element_text(lineheight=.8, face="bold", hjust = 0.5),
+           axis.title.x = element_text( face="bold"),
+axis.title.y = element_text( face="bold"))
+
+incident_type_plot
+
+#t.value = (mean(data) - 10) / (sd(data) / sqrt(length(data))) 
+#p.value = 2*pt(-abs(t.value), df=length(data)-1)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r Incident type by race}
+
+fryer_incident_by_race <- c(0.00 , 0.54, 0.45, 0.00 , 0.56, 0.44, 0.01 , 0.57, 0.42, NA, NA, NA)
+
+incident_type_by_race <- merged_ppcs %>%
+  filter(is.na(type_of_incident) != TRUE) %>%
+  mutate(type_of_incident = as.factor(type_of_incident)) %>%
+  group_by(civilian_race, type_of_incident) %>%
+  dplyr::summarise(c = n()) %>%
+  ungroup() %>%
+  group_by(civilian_race) %>%
+  mutate(sum = sum(c)) %>%
+  mutate(prop = c/sum) %>%
+  mutate( se = sqrt( prop * (1 - prop ) / sum))%>%
+  mutate(fryer_incident_by_race = fryer_incident_by_race)%>%
+  filter(is.na(fryer_incident_by_race)!= TRUE)
+
+
+ incident_type_by_race_plot <- ggplot(incident_type_by_race) +
+    geom_point(aes( x = civilian_race , y= fryer_incident_by_race, color = type_of_incident  ), shape = "X" , size = 4,  position = position_dodge(0.4))+
+    geom_pointrange(aes(x = civilian_race , y= prop, color = type_of_incident, ymin = prop - se , ymax = prop + se ), position = position_dodge(0.4)) +
+   labs(color = "Type of incident")+
+    ylab("Civilian population race - proportion")+
+    xlab("Type of incident")+ ggtitle("Proportions of Type of Incident by Race") + 
+     theme(plot.title = element_text(lineheight=.8, face="bold", hjust = 0.5),
+           axis.title.x = element_text( face="bold"),
+axis.title.y = element_text( face="bold"))
+
+incident_type_by_race_plot
+```
+
+
+```{r time of encounter full sample}
+merged_ppcs$time_of_encounter <- recode_factor(merged_ppcs$time_of_encounter ,
+                                              "3" =  "Time of contact was Day",
+                                              "6" =  "Time of contact was Night")  
+fryer_contact <- c(0.68, 0.32)
+  time_of_contact <- merged_ppcs %>%
+    group_by(time_of_encounter) %>%
+    filter(is.na(time_of_encounter) != TRUE) %>%
+    dplyr::summarise(count = n()) %>%
+    ungroup() %>%
+    mutate(prop = count/ sum(count))%>%
+    mutate( se = sqrt( prop * (1 - prop ) / sum(count)))%>%
+    mutate(fryer_contact =fryer_contact)
+  
+    time_of_contact_plot <- ggplot(data= time_of_contact)+
+      geom_point(aes(x=time_of_encounter, y = fryer_contact), shape = "X" , size = 4,  position = position_dodge(0.4), color = "red")+
+      geom_pointrange(aes(x = time_of_encounter , y= prop, ymin = prop - se , ymax = prop + se ), position = position_dodge(0.4)) + xlab("Time of contact") + ylab("Proportion") +
+      ggtitle("Full Sample Proportion of Time of Contact") + 
+     theme(plot.title = element_text(lineheight=.8, face="bold", hjust = 0.5),
+           axis.title.x = element_text( face="bold"),
+axis.title.y = element_text( face="bold"))
+  
+  time_of_contact_plot 
+```
+
+```{r time of encounter by race}
+fryer_contact_by_race <- c(0.69, 0.31, 0.62, 0.38, 0.66, 0.34, NA , NA)
+    time_of_contact_by_race <-  merged_ppcs %>%
+      filter(is.na(time_of_encounter) != TRUE ) %>%
+      group_by(civilian_race, time_of_encounter) %>%
+      dplyr::summarize(enc_count = n()) %>% 
+      ungroup() %>%
+      group_by(civilian_race) %>%
+      mutate(sum = sum(enc_count)) %>%
+      mutate(prop = enc_count/sum)%>%
+      mutate(se = sqrt( prop * (1 - prop ) / sum )) %>%
+      mutate(fryer_contact_by_race = fryer_contact_by_race)%>%
+      filter(is.na(fryer_contact_by_race) != TRUE)
+    
+    time_of_contact_by_race_plot <-  ggplot(data= time_of_contact_by_race)+
+      geom_point(aes(x=civilian_race, y = fryer_contact_by_race, color = time_of_encounter), shape = "X" , size = 4,  position = position_dodge(0.1))+
+      geom_pointrange(aes(x = civilian_race , y= prop, ymin = prop - se , ymax = prop + se,  color = time_of_encounter ), position = position_dodge(0.1))+
+      xlab("Civilian Race")+
+      ylab("Proportion") + labs(color = "Type of encounter")+
+      ggtitle("Proportions of Time of Contact by Race") + 
+     theme(plot.title = element_text(lineheight=.8, face="bold", hjust = 0.5),
+           axis.title.x = element_text( face="bold"),
+axis.title.y = element_text( face="bold"))
+    
+    time_of_contact_by_race_plot 
+```
+
+
+```{r officer race full sample}
+ fryer_off_race <- c(0.06, 0.03, 0.02, 0.88)
+      off_race <- merged_ppcs %>%
+      mutate(off_race = case_when(
+        (off_black == 1) ~ 'black',
+        (off_white == 1) ~ 'white',
+        (off_other == 1) ~ 'other',
+        (off_split == 1) ~ 'split',
+        (off_hispanic == 1)~ 'hispanic'
+      )) %>%
+      filter(is.na(off_race) != TRUE) %>%
+      group_by(off_race) %>%
+      dplyr::summarise(count = n()) %>%
+      mutate(prop = count/sum(count))%>%
+      mutate(se = sqrt( prop * (1 - prop ) / sum(count) ))%>%
+        mutate(fryer_off_race = fryer_off_race) 
+      
+        off_race_plot <- ggplot(off_race)+
+        geom_point(aes( x = off_race , y= fryer_off_race ), shape = "X" , size = 4, color =  "red")+
+        geom_pointrange(aes(x = off_race , y= prop, ymin = prop - se , ymax = prop + se ), position = position_dodge(0.4))+ xlab("Official Race") + ylab("Proportion")+
+      ggtitle("Full Size Proportion of Official Race") + 
+     theme(plot.title = element_text(lineheight=.8, face="bold", hjust = 0.5),
+           axis.title.x = element_text( face="bold"),
+axis.title.y = element_text( face="bold"))
+      
+      off_race_plot
+```
+
+
+```{r officer race by civilian race}
+fryer_off_race_by_race <- c(0.05, 0.02, 0.02, 0.88, 0.16, 0.03, 0.04, 0.76,0.05, 0.07,0.02, 0.84, NA, NA, NA, NA)
+      off_race_by_race <- merged_ppcs %>%
+      mutate(off_race = case_when(
+        (off_black == 1) ~ 'black',
+        (off_white == 1) ~ 'white',
+        (off_other == 1) ~ 'other',
+        (off_split == 1) ~ 'split',
+        (off_hispanic == 1)~ 'hispanic'
+      )) %>%
+      filter(is.na(off_race) == FALSE) %>%
+      group_by(civilian_race, off_race) %>%
+      dplyr::summarise(offrace_count = n()) %>%
+      ungroup() %>%
+      group_by(civilian_race) %>%
+      mutate(sum = sum(offrace_count)) %>%
+      mutate(prop = offrace_count/sum) %>%
+      mutate(se = sqrt( prop * (1 - prop ) / sum ))%>%
+      mutate(fryer_off_race_by_race = fryer_off_race_by_race )%>%
+      filter(is.na(fryer_off_race_by_race)!= TRUE)
+      
+  off_race_by_race_plot <- ggplot(data = off_race_by_race) +
+    geom_point(aes(x=civilian_race, y = fryer_off_race_by_race, color = off_race), shape = "X" , size = 4,  position = position_dodge(0.5))+
+    geom_pointrange(aes(x = civilian_race , y= prop, ymin = prop - se , ymax = prop + se,  color = off_race ), position = position_dodge(0.5)) + xlab("Civilian Race") + ylab("Proportion") + labs(color = "Official Race")+
+      ggtitle("Proportions of Official Race by Civilian Race") + 
+     theme(plot.title = element_text(lineheight=.8, face="bold", hjust = 0.5),
+           axis.title.x = element_text( face="bold"),
+axis.title.y = element_text( face="bold"))
+  
+  off_race_by_race_plot 
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
