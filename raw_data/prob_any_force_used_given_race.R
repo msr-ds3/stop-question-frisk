@@ -91,7 +91,7 @@ mypal2 <- colorNumeric(
   reverse = TRUE
 )
 
-leaflet(joint) %>%
+prob_force_used <- leaflet(joint) %>%
   addTiles() %>% 
   addPolygons(fillColor = ~mypal2(joint$logHW),
               fillOpacity = 0.7,
@@ -114,10 +114,10 @@ leaflet(joint) %>%
   addLayersControl(c("Black", "Hispanic"),
                    options = layersControlOptions(collapsed = FALSE))
 
-saveWidget(per_capita_stop_rates, 
-           "../figures/maps/per_capita_stop_rates.html", 
+saveWidget(prob_force_used, 
+           "../figures/maps/prob_force_used.html", 
            selfcontained = FALSE)
-webshot("../figures/maps/per_capita_stop_rates.html",
-        file = "../figures/per_capita_stop_rates.png",
+webshot("../figures/maps/prob_force_used.html",
+        file = "../figures/prob_force_used.png",
         cliprect = "viewport")
 
