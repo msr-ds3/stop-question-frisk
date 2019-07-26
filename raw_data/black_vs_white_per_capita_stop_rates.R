@@ -90,10 +90,12 @@ per_capita_stop_rates <- leaflet(spatial_proportions) %>%
             title = "Log Stop<br>Rate Ratio")
 
 
-saveWidget(per_capita_stop_rates, "../figures/per_capita_stop_rates.html", selfcontained = FALSE)
-
-#webshot("temp.html", file = "../figures/per_capita_stop_rates.png",
-#        cliprect = "viewport")
+saveWidget(per_capita_stop_rates, 
+           "../figures/maps/per_capita_stop_rates.html", 
+           selfcontained = FALSE)
+webshot("../figures/maps/per_capita_stop_rates.html",
+        file = "../figures/per_capita_stop_rates.png",
+        cliprect = "viewport")
 
 # Map explanation: Dark red areas have high levels of discrimination against blacks
 # white areas show no  discrimination, green/blue areas are biased against whites.
