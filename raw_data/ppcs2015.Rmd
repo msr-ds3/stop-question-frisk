@@ -236,3 +236,8 @@ ppcs_2015 <- ppcs_2015 %>%
          num_face_to_face,
          face_to_face
   )
+```
+
+```{r}
+save(ppcs_2015, file = 'ppcs_2015.RData')
+```
