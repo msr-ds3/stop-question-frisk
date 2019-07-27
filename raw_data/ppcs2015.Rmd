@@ -1,0 +1,238 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+# load and set-up
+load('ppcs_2015_raw.rda')
+ppcs_2015 <- da36653.0001
+library(tidyverse)
+```
+
+
+```{r}
+#RACE
+ppcs_2015 <- ppcs_2015 %>%
+  mutate(civilian_race =  case_when((RACE == '(01) White Only' & HISP != '(1) Respondent is Hispanic') ~ 'white',
+                                    (RACE == '(02) Black Only') ~ 'black',
+                                    (HISP == '(1) Yes, respondent is Hispanic' & RACE != '(02) Black Only') ~ 'hispanic',
+                                    TRUE ~ 'other'))
+
+```
+
+
+```{r}
+#AGE                                 
+ppcs_2015 <- ppcs_2015 %>% 
+  mutate(civilian_age = AGE) 
+```
+
+
+
+
+```{r}
+#INCOME
+ppcs_2015 <- ppcs_2015 %>% 
+  mutate(civilian_income = case_when(INCOME =='(1) Less than $24,999 or NA' ~ 1, 
+                                     INCOME == '(2) $25,000 - $49,999' ~ 2,
+                                     TRUE ~ 3)) 
+
+```
+
+
+```{r}
+#GENDER
+ppcs_2015 <- ppcs_2015 %>% 
+  mutate(civilian_gender = case_when(
+    (SEX == '(1) Male') ~ 1,
+    (SEX == '(2) Female') ~ 2,
+    TRUE ~ NA_real_
+  ))
+
+```
+
+
+```{r}
+#EMPLOYED
+ppcs_2015 <- ppcs_2015 %>% 
+  mutate(civilian_employed = case_when(WORK == '(1) Yes' ~ 1,
+                                       TRUE ~ 0)) 
+```
+
+
+```{r}
+#POPULATION
+ppcs_2015 <- ppcs_2015 %>%
+  mutate(population_size = case_when(PLACE == '(1) Under 100,000/Not in a place' ~ 1, 
+                                     PLACE == '(2) 100,000-499,999' ~ 2,
+                                     PLACE == '(3) 500,000-999,999' ~ 3,
+                                     PLACE == '(4) 1 million or more' ~ 4)) 
+```
+
+
+```{r}
+#TIME OF ENCOUNTER
+ppcs_2015 <- ppcs_2015 %>% 
+  mutate(time_of_encounter = case_when(
+    (V344 == "(01) After 6 a.m. - 12 noon") ~ 3,
+    (V344 == "(02) After 12 noon - 6 p.m.") ~ 3,
+    (V344 == "(03) Don't know what time of day") ~ 3,
+    (V344 == "(04) After 6 p.m. - 12 midnight") ~ 6,
+    (V344 == "(05) After 12 midnight - 6 a.m.") ~ 6,
+    (V344 == "(06) Don't know what time of night") ~ 6,
+    TRUE ~ NA_real_))
+```
+
+
+```{r}
+#OFFICER RACE 
+ppcs_2015 <- ppcs_2015 %>%
+  mutate(off_black = case_when(((V192 == '(1) Black or African American')) ~ 1, 
+                               TRUE ~ 0)) %>%
+  mutate(off_white = case_when(((V191 == '(1) White'))~ 1, 
+                               TRUE ~ 0)) %>%
+  mutate(off_hispanic = case_when(((V197 == '(01) Yes')) ~ 1,  
+                                  TRUE ~ 0)) %>%
+  mutate(off_other = case_when((
+    V193 == '(1) American Indian or Alaska Native' |
+      V194 == '(1) Asian'|
+      V195 == '(1) Native Hawaiian or other Pacific Islander') ~ 1,
+      TRUE ~ 0))
+```
+
+
+```{r}
+#CIVILIAN BEHAVIOR
+
+ppcs_2015 <- ppcs_2015 %>%
+  mutate(civilian_behavior = case_when((V164 == '(01) Yes') | (V306 == '(01) Yes')~ 1,
+                                       (V166 == '(01) Yes')| (V308 == '(01) Yes') ~ 1,
+                                       (V168 == '(01) Yes')| (V310 == '(01) Yes') ~ 1,
+                                       (V170 == '(01) Yes')| (V312 == '(01) Yes') ~ 1,
+                                       (V172 == '(01) Yes') | (V314 == '(01) Yes') ~ 1,
+                                       (V174 == '(01) Yes') | (V316 == '(01) Yes') ~ 1,
+                                       (V176 == '(01) Yes')| (V318 == '(01) Yes') ~ 1,
+                                       TRUE ~ 0)) 
+```
+
+
+```{r}
+#ALTERNATIVE OUTCOMES
+ppcs_2015 <- ppcs_2015 %>%
+  
+  mutate(civilian_searched = case_when(
+    
+    (V183 == '(01) Yes' | V325 == 	'(01) Yes') ~ 1, 
+    TRUE ~ 0)) %>%
+  
+  mutate(civilian_arrested = case_when(
+    (V182 == '(01) Yes' | V324 == '(01) Yes') ~ 1, 
+    TRUE ~ 0)) %>%
+  
+  mutate(civilian_guilty_of_illegal = case_when(
+    (V187 == '(01) Yes' | V334 == '(01) Yes') ~ 1, 
+    TRUE ~ 0)) %>%
+  
+  mutate(civilian_injured = case_when(
+    (V152 == '(01) Yes' | V293 == '(01) Yes')~ 1,
+    TRUE ~ 0)) %>%
+  
+  mutate(excess_force = case_when(
+    (V163 == '(01) Yes' | V305 == '(01) Yes') ~1,
+    TRUE ~ 0))
+
+
+```
+
+
+```{r}
+#TYPE OF INCIDENT
+ppcs_2015 <- ppcs_2015 %>% 
+  mutate(type_of_incident = case_when(
+    (V11 == '(01) Yes') ~ 1,
+    (!is.na(V34)) ~ 1,
+    (V13 == '(01) Yes') ~ 2,
+    (V15 == '(01) Yes') ~ 2,
+    (V7 == '(01) Yes') ~ 3,
+    TRUE ~ NA_real_))
+```
+
+
+```{r}
+#OFFICER SPLIT
+ppcs_2015 <- ppcs_2015 %>%
+  mutate(off_split = 0)
+
+```
+
+```{r}
+#CONTACT + FILTER 
+ppcs_2015 <- ppcs_2015 %>%
+  mutate(contact = CHECK_ITEM_A) %>%
+  mutate(num_face_to_face = NA) %>%
+  mutate(face_to_face = NA) %>%
+  filter(contact == "(1) Yes")
+```
+
+```{r}
+#FORCE USE 
+ppcs_2015 <- ppcs_2015 %>% 
+  mutate(any_force = case_when((V160 == '(01) Yes') ~ 1,
+                                (V301 == '(01) Yes') ~ 1,
+                                TRUE ~ 0)) %>%
+  mutate(grab_push = case_when((V148 == '(01) Yes') ~ 1, 
+                               (V289 == '(01) Yes') ~ 1, TRUE ~ 0)) %>%
+  mutate(hit_kick = case_when((V152 == '(01) Yes') ~ 1,
+                              (V293 == '(01) Yes') ~ 1, TRUE ~ 0)) %>%
+  mutate(point_gun = case_when( (V158 == '(01) Yes') ~ 1,
+                                (V299 == '(01) Yes') ~ 1, TRUE ~ 0)) %>%
+  mutate(handcuffed = case_when((V150 == '(01) Yes') ~ 1,
+                                (V291 == '(01) Yes') ~ 1, TRUE ~ 0)) %>%
+  mutate(pepper_stun = case_when((V154 == '(01) Yes') ~ 1,
+                                 (V156 == '(01) Yes') ~ 1,
+                                 (V295 == '(01) Yes') ~ 1,
+                                 (V297 == '(01) Yes') ~ 1,
+                                 TRUE ~ 0))
+```
+
+
+```{r}
+#YEAR
+ppcs_2015 <- ppcs_2015 %>%
+  mutate(year = 2015) 
+```
+
+
+```{r}
+ppcs_2015 <- ppcs_2015 %>%
+  select(civilian_race,
+         civilian_age,
+         civilian_gender,
+         civilian_income,
+         civilian_employed,
+         population_size,
+         time_of_encounter,
+         off_black,
+         off_white,
+         off_hispanic,
+         off_other,
+         type_of_incident,
+         civilian_behavior,
+         civilian_searched,
+         civilian_arrested,
+         civilian_guilty_of_illegal,
+         civilian_injured,
+         excess_force,
+         off_split,
+         year,
+         any_force,
+         grab_push,
+         hit_kick,
+         point_gun,
+         handcuffed,
+         pepper_stun,
+         contact,
+         num_face_to_face,
+         face_to_face
+  )
