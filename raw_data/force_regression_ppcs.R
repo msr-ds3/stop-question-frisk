@@ -30,8 +30,8 @@ exp(coef(logit5))
 # -------------------------------------------------------------------------------
 
 in_sample_ppcs <- data.frame(actual = merged_ppcs$force, 
-                             log_odds = predict(logit, merged_ppcs)) %>%
-  mutate(pred = ifelse(log_odds > 0, 1, 0))
+                             prob = predict(logit, merged_ppcs, type = "response")) %>%
+  mutate(pred = ifelse(prob > 0.5, 1, 0))
 
 table(actual = in_sample_ppcs$actual, predicted = in_sample_ppcs$pred)
 
@@ -42,19 +42,19 @@ in_sample_ppcs %>%
 
 # precision: fraction of positive predictions that are actually true
 in_sample_ppcs %>%
-  filter(pred == 'spam') %>%
-  summarize(prec = mean(actual == 'spam'))
+  filter(pred == 1) %>%
+  summarize(prec = mean(actual == 1))
 
 # recall: fraction of true examples that we predicted to be positive
 # aka true positive rate, sensitivity
 in_sample_ppcs %>%
-  filter(actual == 'spam') %>%
-  summarize(recall = mean(pred == 'spam'))
+  filter(actual == 1) %>%
+  summarize(recall = mean(pred == 1))
 
 # false positive rate: fraction of false examples that we predicted to be positive
 in_sample_ppcs %>%
-  filter(actual == 'email') %>%
-  summarize(fpr = mean(pred == 'spam'))
+  filter(actual == 0) %>%
+  summarize(fpr = mean(pred == 1))
 
 # -------------------------------------------------------------------------------
 # -------------------------------------------------------------------------------
