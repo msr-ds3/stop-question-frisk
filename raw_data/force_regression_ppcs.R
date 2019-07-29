@@ -29,12 +29,17 @@ exp(coef(logit5))
 # -------------------------------------------------------------------------------
 # -------------------------------------------------------------------------------
 
+
+
 in_sample_ppcs <- data.frame(actual = merged_ppcs$force, 
                              prob = predict(logit, merged_ppcs, type = "response")) %>%
-  mutate(pred = ifelse(prob > 0.5, 1, 0))
+  mutate(pred = ifelse(prob > 0.03, 1, 0))
 
 table(actual = in_sample_ppcs$actual, predicted = in_sample_ppcs$pred)
 
+in_sample_ppcs %>%
+  ggplot(aes(x = prob)) +
+  geom_histogram(bins = 50)
 
 # accuracy: fraction of correct classifications
 in_sample_ppcs %>%
@@ -56,6 +61,15 @@ in_sample_ppcs %>%
   filter(actual == 0) %>%
   summarize(fpr = mean(pred == 1))
 
+### logit 2
+in_sample_ppcs <- data.frame(actual = merged_ppcs$force, 
+                             prob = predict(logit2, merged_ppcs, type = "response")) %>%
+  mutate(pred = ifelse(prob > 0.03, 1, 0))
+
+table(actual = in_sample_ppcs$actual, predicted = in_sample_ppcs$pred)
+
+
+###
 # -------------------------------------------------------------------------------
 # -------------------------------------------------------------------------------
 # out-of-sample prediction
@@ -126,11 +140,10 @@ ppcs_2015 <- ppcs_2015 %>%
   ) 
 
 out_sample_ppcs <- data.frame(actual = ppcs_2015$force, 
-                             log_odds = predict(logit, ppcs_2015)) %>%
-  mutate(pred = ifelse(log_odds > 0, 1, 0))
+                              prob = predict(logit, ppcs_2015, type = "response")) %>%
+  mutate(pred = ifelse(prob > 0.03, 1, 0))
 
 table(actual = out_sample_ppcs$actual, predicted = out_sample_ppcs$pred)
-
 
 # accuracy: fraction of correct classifications
 out_sample_ppcs %>%
@@ -138,16 +151,16 @@ out_sample_ppcs %>%
 
 # precision: fraction of positive predictions that are actually true
 out_sample_ppcs %>%
-  filter(pred == 'spam') %>%
-  summarize(prec = mean(actual == 'spam'))
+  filter(pred == 1) %>%
+  summarize(prec = mean(actual == 1))
 
 # recall: fraction of true examples that we predicted to be positive
 # aka true positive rate, sensitivity
 out_sample_ppcs %>%
-  filter(actual == 'spam') %>%
-  summarize(recall = mean(pred == 'spam'))
+  filter(actual == 1) %>%
+  summarize(recall = mean(pred == 1))
 
 # false positive rate: fraction of false examples that we predicted to be positive
 out_sample_ppcs %>%
-  filter(actual == 'email') %>%
-  summarize(fpr = mean(pred == 'spam'))
+  filter(actual == 0) %>%
+  summarize(fpr = mean(pred == 1))
