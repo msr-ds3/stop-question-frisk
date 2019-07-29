@@ -36,7 +36,6 @@ white_proportions <- precinct_race %>%
   select(precinct, prop) %>%
   ungroup()
 
-View(white_proportions)
 
 # Add precinct 121 to the data, using the value from precinct 122
 # (Precinct 121 was created in 2013, used to be part of 122)
@@ -102,15 +101,6 @@ sqf_pepsp_white$props[is.na(sqf_pepsp_white$props)] <- 0
 joint_sqf_pepsp_white <- geo_join(police_precincts, sqf_pepsp_white, "Precinct", "addrpct")
 
 
-#I think this one gives an error
-precincts <- data.frame(sort(unique(sf_data1$addrpct)))
-colnames(precincts) <- c("addrpct")
-sqf_peps_w <- left_join(precincts, sqf_pepsp_white)
-sqf_peps_w$props[is.na(sqf_peps_w$props)] <- 0
-
-joint_sqf_pepsp_w <- geo_join(police_precincts, sqf_peps_w, "Precinct", "addrpct")
-
-
 # Proportion of stopped civilians that police used baton on that were white in each precinct
 sqf_baton_white <- sf_data1 %>%
   select(addrpct, race, pf_baton) %>%
@@ -123,6 +113,7 @@ sqf_baton_white <- sf_data1 %>%
   mutate(props = total/sum(total)) %>%
   filter(race == "W") %>%
   select(addrpct, props)
+
 
 sqf_baton <- left_join(precincts, sqf_baton_white)
 sqf_baton$props[is.na(sqf_baton$props)] <- 0
