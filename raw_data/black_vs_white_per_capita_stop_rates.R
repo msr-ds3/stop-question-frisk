@@ -86,7 +86,7 @@ mypal2 <- colorNumeric(
 per_capita_stop_rates <- leaflet(spatial_proportions) %>%
   addTiles() %>% 
   addPolygons(fillColor = ~mypal(log(spatial_proportions$proportion)),
-              fillOpacity = 0.7,
+              fillOpacity = .9,
               weight = 1,
               popup = mypopup) %>%
   addProviderTiles("CartoDB.Positron") %>%
