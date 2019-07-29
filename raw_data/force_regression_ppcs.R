@@ -29,12 +29,17 @@ exp(coef(logit5))
 # -------------------------------------------------------------------------------
 # -------------------------------------------------------------------------------
 
+
+
 in_sample_ppcs <- data.frame(actual = merged_ppcs$force, 
                              prob = predict(logit, merged_ppcs, type = "response")) %>%
-  mutate(pred = ifelse(prob > 0.5, 1, 0))
+  mutate(pred = ifelse(prob > 0.03, 1, 0))
 
 table(actual = in_sample_ppcs$actual, predicted = in_sample_ppcs$pred)
 
+in_sample_ppcs %>%
+  ggplot(aes(x = prob)) +
+  geom_histogram(bins = 50)
 
 # accuracy: fraction of correct classifications
 in_sample_ppcs %>%
@@ -56,6 +61,15 @@ in_sample_ppcs %>%
   filter(actual == 0) %>%
   summarize(fpr = mean(pred == 1))
 
+### logit 2
+in_sample_ppcs <- data.frame(actual = merged_ppcs$force, 
+                             prob = predict(logit2, merged_ppcs, type = "response")) %>%
+  mutate(pred = ifelse(prob > 0.03, 1, 0))
+
+table(actual = in_sample_ppcs$actual, predicted = in_sample_ppcs$pred)
+
+
+###
 # -------------------------------------------------------------------------------
 # -------------------------------------------------------------------------------
 # out-of-sample prediction
