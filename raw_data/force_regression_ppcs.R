@@ -138,16 +138,16 @@ out_sample_ppcs %>%
 
 # precision: fraction of positive predictions that are actually true
 out_sample_ppcs %>%
-  filter(pred == 'spam') %>%
-  summarize(prec = mean(actual == 'spam'))
+  filter(pred == 1) %>%
+  summarize(prec = mean(actual == 1))
 
 # recall: fraction of true examples that we predicted to be positive
 # aka true positive rate, sensitivity
 out_sample_ppcs %>%
-  filter(actual == 'spam') %>%
-  summarize(recall = mean(pred == 'spam'))
+  filter(actual == 1) %>%
+  summarize(recall = mean(pred == 1))
 
 # false positive rate: fraction of false examples that we predicted to be positive
 out_sample_ppcs %>%
-  filter(actual == 'email') %>%
-  summarize(fpr = mean(pred == 'spam'))
+  filter(actual == 0) %>%
+  summarize(fpr = mean(pred == 1))
