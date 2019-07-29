@@ -140,11 +140,10 @@ ppcs_2015 <- ppcs_2015 %>%
   ) 
 
 out_sample_ppcs <- data.frame(actual = ppcs_2015$force, 
-                             log_odds = predict(logit, ppcs_2015)) %>%
-  mutate(pred = ifelse(log_odds > 0, 1, 0))
+                              prob = predict(logit, ppcs_2015, type = "response")) %>%
+  mutate(pred = ifelse(prob > 0.03, 1, 0))
 
 table(actual = out_sample_ppcs$actual, predicted = out_sample_ppcs$pred)
-
 
 # accuracy: fraction of correct classifications
 out_sample_ppcs %>%
