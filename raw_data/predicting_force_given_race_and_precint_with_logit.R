@@ -50,6 +50,11 @@ test_data <- data.frame(race, sex, age, inout,
 predictions <- predict(mylogit_prec, test_data, type = "response")
 test_predictions <- data.frame(test_data, predictions)
 
+
+test_predictions <- test_predictions %>%
+  spread(race, predictions) %>%
+  mutate(BoverW = Black/White)
+
 # calculate how the predicted probabilities of being subject to police force
 # compare between different races in each precinct
 discrimination <- test_predictions %>%
@@ -57,4 +62,27 @@ discrimination <- test_predictions %>%
   mutate(HgreaterW = Hispanic > White,
          BgreaterW = Black > White,
          AgreaterW = Asian > White)
+
+toy_predictions <- geo_join(police_precincts, test_predictions, "Precinct", "addrpct")
+
+mypopup <- paste0("Precinct: ", toy_predictions$Precinct, "<br>", 
+                   "B/W: ", toy_predictions$BoverW)
+
+mypal <- colorNumeric(
+  palette = "Spectral",
+  domain = c(0,2),
+  reverse = TRUE
+)
+
+leaflet(toy_predictions) %>%
+  addTiles() %>% 
+  addPolygons(fillColor = ~mypal(toy_predictions$BoverW),
+              fillOpacity = .9,
+              weight = 1,
+              popup = mypopup) %>%
+  addProviderTiles("CartoDB.Positron") %>%
+  addLegend(pal = mypal, 
+            values = c(-2,2),
+            position = "topleft",
+            title = "Predicted")
 
