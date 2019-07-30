@@ -56,10 +56,24 @@ sqf_black_prop <- sqf_race_dist %>%
   summarize(total = sum(count)) %>%
   filter(!(is.na(addrpct))) %>%
   mutate(props = total/sum(total)) %>%
-  filter(race == "B") %>%
+  filter(race == "B" | race =="P") %>%
   select(addrpct, props)
 
 joint_sqf_prop <- geo_join(police_precincts, sqf_black_prop, "Precinct", "addrpct")
+
+
+sqf_black_prop <- sf_data1 %>%
+  select(addrpct, race) %>%
+  filter(race == "B" | race == "P") %>%
+  group_by(addrpct) %>%
+  filter(!is.na(addrpct)) %>%
+  #mutate(pf_hcuff = as.factor(if_else(grepl("Y",pf_wall), 1, 0))) %>%
+  summarize(props = mean(as.numeric(as.character(pf_wall))))
+
+joint_sqf_prop <- geo_join(police_precincts, sqf_black_prop, "Precinct", "addrpct")
+
+
+
 
 # Looking at different levels of force:
 
@@ -78,18 +92,30 @@ sqf_hands_black <- sf_data1 %>%
 
 joint_sqf_hands <- geo_join(police_precincts, sqf_hands_black, "Precinct", "addrpct")
 
+
+
+sqf_hands_black <- sf_data1 %>%
+  select(addrpct, race, pf_hands) %>%
+  filter(race == "B" | race == "P") %>%
+  group_by(addrpct) %>%
+  filter(!is.na(addrpct)) %>%
+  mutate(pf_hands = as.factor(if_else(grepl("Y",pf_hands), 1, 0))) %>%
+  summarize(props = mean(as.numeric(as.character(pf_hands))))
+
+joint_sqf_hands <- geo_join(police_precincts, sqf_hands_black, "Precinct", "addrpct")
+
+
+
 # Proportion of stopped civilians that police handcuffed that were black in each precinct
+
+#Probability of being handcuffed given they are black and stopped
 sqf_cuffs_black <- sf_data1 %>%
   select(addrpct, race, pf_hcuff) %>%
-  filter(pf_hcuff == "Y") %>%
-  select(addrpct, race) %>%
-  mutate(count = 1) %>%
-  group_by(addrpct, race) %>%
-  summarize(total = sum(count)) %>%
+  filter(race == "B" | race == "P") %>%
+  group_by(addrpct) %>%
   filter(!is.na(addrpct)) %>%
-  mutate(props = total/sum(total)) %>%
-  filter(race == "B") %>%
-  select(addrpct, props)
+  mutate(pf_hcuff = as.factor(if_else(grepl("Y",pf_hcuff), 1, 0))) %>%
+  summarize(prop = mean(as.numeric(as.character(pf_hcuff))))
 
 joint_sqf_cuffs <- geo_join(police_precincts, sqf_cuffs_black, "Precinct", "addrpct")
 
@@ -108,6 +134,19 @@ sqf_wall_black <- sf_data1 %>%
 
 joint_sqf_wall <- geo_join(police_precincts, sqf_wall_black, "Precinct", "addrpct")
 
+#Probability of pushed to wall given they are black and stopped
+sqf_wall_black <- sf_data1 %>%
+  select(addrpct, race, pf_wall) %>%
+  filter(race == "B" | race == "P") %>%
+  group_by(addrpct) %>%
+  filter(!is.na(addrpct)) %>%
+  mutate(pf_wall = as.factor(if_else(grepl("Y",pf_wall), 1, 0))) %>%
+  summarize(props = mean(as.numeric(as.character(pf_wall))))
+
+joint_sqf_wall <- geo_join(police_precincts, sqf_wall_black, "Precinct", "addrpct")
+
+
+
 # Proportion of stopped civilians that police pushed to ground that were black in each precinct
 sqf_ground_black <- sf_data1 %>%
   select(addrpct, race, pf_grnd) %>%
@@ -123,6 +162,20 @@ sqf_ground_black <- sf_data1 %>%
 
 joint_sqf_grnd <- geo_join(police_precincts, sqf_ground_black, "Precinct", "addrpct")
 
+
+#Probability of pushed to ground given they are black and stopped
+sqf_ground_black <- sf_data1 %>%
+  select(addrpct, race, pf_grnd) %>%
+  filter(race == "B" | race == "P") %>%
+  group_by(addrpct) %>%
+  filter(!is.na(addrpct)) %>%
+  mutate(pf_grnd = as.factor(if_else(grepl("Y",pf_grnd), 1, 0))) %>%
+  summarize(props = mean(as.numeric(as.character(pf_grnd))))
+
+joint_sqf_grnd <- geo_join(police_precincts, sqf_ground_black, "Precinct", "addrpct")
+
+
+
 # Proportion of stopped civilians that police drew weapon against that were black in each precinct
 sqf_dwep_black <- sf_data1 %>%
   select(addrpct, race, pf_drwep) %>%
@@ -136,6 +189,16 @@ sqf_dwep_black <- sf_data1 %>%
   filter(race == "B") %>%
   select(addrpct, props)
 
+
+sqf_dwep_black <- sf_data1 %>%
+  select(addrpct, race, pf_drwep) %>%
+  filter(race == "B" | race == "P") %>%
+  group_by(addrpct) %>%
+  filter(!is.na(addrpct)) %>%
+  mutate(pf_drwep = as.factor(if_else(grepl("Y",pf_drwep), 1, 0))) %>%
+  summarize(props = mean(as.numeric(as.character(pf_drwep))))
+
+
 # Change NA's to 0
 precincts <- data.frame(sort(unique(sf_data1$addrpct)))
 colnames(precincts) <- c("addrpct")
@@ -143,6 +206,9 @@ sqf_dwep <- left_join(precincts, sqf_dwep_black)
 sqf_dwep$props[is.na(sqf_dwep$props)] <- 0
 
 joint_sqf_dwep <- geo_join(police_precincts, sqf_dwep, "Precinct", "addrpct")
+
+
+
 
 # Proportion of stopped civilians that police pointed weapon at that were black in each precinct
 sqf_pwep_black <- sf_data1 %>%
@@ -156,6 +222,16 @@ sqf_pwep_black <- sf_data1 %>%
   mutate(props = total/sum(total)) %>%
   filter(race == "B") %>%
   select(addrpct, props)
+
+
+sqf_pwep_black <- sf_data1 %>%
+  select(addrpct, race, pf_ptwep) %>%
+  filter(race == "B" | race == "P") %>%
+  group_by(addrpct) %>%
+  filter(!is.na(addrpct)) %>%
+  mutate(pf_ptwep = as.factor(if_else(grepl("Y",pf_ptwep), 1, 0))) %>%
+  summarize(props = mean(as.numeric(as.character(pf_ptwep))))
+
 
 joint_sqf_pwep <- geo_join(police_precincts, sqf_pwep_black, "Precinct", "addrpct")
 
@@ -172,11 +248,22 @@ sqf_pepsp_black <- sf_data1 %>%
   filter(race == "B") %>%
   select(addrpct, props)
 
+
+
+sqf_pepsp_black <- sf_data1 %>%
+  select(addrpct, race, pf_pepsp) %>%
+  filter(race == "B" | race == "P") %>%
+  group_by(addrpct) %>%
+  filter(!is.na(addrpct)) %>%
+  mutate(pf_pepsp = as.factor(if_else(grepl("Y",pf_pepsp), 1, 0))) %>%
+  summarize(props = mean(as.numeric(as.character(pf_pepsp))))
+
 # Change NA's to 0
 sqf_peps <- left_join(precincts, sqf_pepsp_black)
 sqf_peps$props[is.na(sqf_peps$props)] <- 0
 
 joint_sqf_pepsp <- geo_join(police_precincts, sqf_peps, "Precinct", "addrpct")
+
 
 # Proportion of stopped civilians that police used baton on that were black in each precinct
 sqf_baton_black <- sf_data1 %>%
@@ -190,6 +277,16 @@ sqf_baton_black <- sf_data1 %>%
   mutate(props = total/sum(total)) %>%
   filter(race == "B") %>%
   select(addrpct, props)
+
+
+sqf_baton_black <- sf_data1 %>%
+  select(addrpct, race, pf_baton) %>%
+  filter(race == "B" | race == "P") %>%
+  group_by(addrpct) %>%
+  filter(!is.na(addrpct)) %>%
+  mutate(pf_baton = as.factor(if_else(grepl("Y",pf_baton), 1, 0))) %>%
+  summarize(props = mean(as.numeric(as.character(pf_baton))))
+
 
 sqf_baton <- left_join(precincts, sqf_baton_black)
 sqf_baton$props[is.na(sqf_baton$props)] <- 0
@@ -266,22 +363,22 @@ leaflet(joint_sqf_hands) %>%
 
 #Map the proportion of stopped civilians handcuffed in each precinct that are black
 mypopup4 <- paste0("Precinct: ", joint_sqf_cuffs$Precinct, "<br>", 
-                   "Handcuffs Proportion Black: ", joint_sqf_cuffs$props)
+                   "Handcuffs Proportion Black: ", joint_sqf_cuffs$prop)
 
 mypal4 <- colorNumeric(
   palette = "YlOrRd",
-  domain = joint_sqf_cuffs$props
+  domain = joint_sqf_cuffs$prop
 )
 
 leaflet(joint_sqf_cuffs) %>%
   addTiles() %>% 
-  addPolygons(fillColor = ~mypal4(joint_sqf_cuffs$props),
+  addPolygons(fillColor = ~mypal4(joint_sqf_cuffs$prop),
               fillOpacity = 0.7,
               weight = 1,
               popup = mypopup4) %>%
   addProviderTiles("CartoDB.Positron") %>%
   addLegend(pal = mypal4, 
-            values = joint_sqf_cuffs$props, 
+            values = joint_sqf_cuffs$prop, 
             position = "topleft", 
             title = "Handcuffs Prop Black")
 
