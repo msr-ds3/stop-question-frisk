@@ -104,6 +104,8 @@ prob_force_used <- leaflet(joint) %>%
 
 prob_force_used
 
+
+
 saveWidget(prob_force_used, 
            "../figures/prob_force_used.html", 
            selfcontained = FALSE)
