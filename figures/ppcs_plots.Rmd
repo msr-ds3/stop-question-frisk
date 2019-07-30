@@ -122,13 +122,13 @@ ggsave("ppcs_proportion_civilians_guilty_of_illegal_items_by_race.png", plot = c
 # force graph comparing income and race
 # normalize based on count of incidents involving force over number of incidents
 
-graph_ppcs$civilian_income <- recode_factor(graph_ppcs$civilian_income,
+merged_ppcs$civilian_income <- recode_factor(graph_ppcs$civilian_income,
                                             "1" = '< $20,000',
                                             "2" = '$20,000 - $50,000',
                                             "3" = '> $50,000'
                                             )
 
-graph_ppcs$civilian_race <- recode_factor(graph_ppcs$civilian_race,
+merged_ppcs$civilian_race <- recode_factor(graph_ppcs$civilian_race,
                                             "white" = 'White',
                                             "black" = 'Black',
                                             "hispanic" = "Hispanic",
@@ -146,7 +146,7 @@ graph_ppcs$civilian_race <- recode_factor(graph_ppcs$civilian_race,
 #   ylab("Number of Interactions Involving Force") +
 #   labs(fill = "Civilian Race") 
 
-force_income_race_plot <- graph_ppcs %>%
+force_income_race_plot <- merged_ppcs %>%
   filter(!is.na(civilian_income)) %>%
   group_by(civilian_income, civilian_race) %>%
   mutate(incident_count = n()) %>%
