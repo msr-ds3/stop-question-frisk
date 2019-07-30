@@ -208,7 +208,7 @@ mypopup <- paste0("Precinct: ", joint_low$addrpct, "<br>",
 
 mypal <- colorNumeric(
   palette = "Spectral",
-  domain = c(-1,2.5),
+  domain = c(-2.5,2.5),
   reverse = TRUE
 )
 
@@ -222,7 +222,7 @@ prob_low_force <- leaflet(joint_low) %>%
               popup = mypopup) %>%
   addProviderTiles("CartoDB.Positron") %>%
   addLegend(pal = mypal, 
-            values = c(-1,2.5), 
+            values = c(-2.5,2.5), 
             position = "topleft", 
             title = "Subject to Low-Intensity<br>Force
             Black vs White")
@@ -249,7 +249,7 @@ prob_high_force <- leaflet(joint_high) %>%
               weight = 1,
               popup = mypopuphigh) %>%
   addProviderTiles("CartoDB.Positron") %>%
-  addLegend(pal = mypal, 
+  addLegend(pal = mypalhigh, 
             values = c(-5,5), 
             position = "topleft", 
             title = "Subject to High-Intensity<br>Force

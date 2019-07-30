@@ -82,7 +82,7 @@ prob_force_used_b_over_w <- leaflet(joint) %>%
   addPolygons(fillColor = ~mypal1(joint$prop_w_force_used),
               fillOpacity = 1,
               weight = 1,
-              popup = mypopup) %>%
+              popup = mypopup)
   addProviderTiles("CartoDB.Positron") %>%
   addLegend(pal = mypal, 
             values = c(0, 2), 
@@ -90,7 +90,7 @@ prob_force_used_b_over_w <- leaflet(joint) %>%
             title = "Probability of <br> any force used <br>
             Black over White") 
 
-prob_force_used_b_over_w
+
 
 mypopup1 <- paste0("Precinct: ", joint_black$addrpct, "<br>", 
                   "Black/White Prop w/ Force Used: ", joint_black$prop_w_force_used)
