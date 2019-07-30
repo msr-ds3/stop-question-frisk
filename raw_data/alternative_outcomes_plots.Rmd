@@ -45,7 +45,6 @@ merged_ppcs %>%
   ggtitle("Proportions of Civilians Guilty of Carrying Illegal Items by Race") +
   scale_y_log10()
   
-  
 
 
   
@@ -90,7 +89,7 @@ merged_ppcs %>%
 ```{r}
 fryers_prop <- c(0.01, 0.02, 0.02, NA)
 
-merged_ppcs %>% 
+excess_force_plot <- merged_ppcs %>% 
   group_by(civilian_race, excess_force) %>%
   summarize(count_excess_force = n()) %>%
   mutate(prop = count_excess_force/ sum(count_excess_force)) %>% 
@@ -103,6 +102,9 @@ merged_ppcs %>%
    geom_pointrange(aes(ymin = prop - se, ymax = prop + se)) +
   geom_point(aes(x = civilian_race, y = fry_prop), shape = "X", size = 3.5, color = "red") +
   ggtitle("Proportions of Civilians Perceiving Excess Force by Race")
+
+ggsave("ppcs_proportion_civilians_perceiving_excess_force_by_race.png", plot = excess_force_plot,
+       width = 10, height = 6)
 ```
 
 ```{r}

@@ -81,17 +81,17 @@ mypal2 <- colorNumeric(
 
 prob_force_used <- leaflet(joint) %>%
   addTiles() %>% 
-  addPolygons(fillColor = ~mypal2(joint$logHW),
-              fillOpacity = 0.7,
-              weight = 1,
-              popup = mypopup2,
-              group = "Hispanic") %>%
-  addProviderTiles("CartoDB.Positron") %>%
   addPolygons(fillColor = ~mypal(joint$logBW),
               fillOpacity = 0.7,
               weight = 1,
               popup = mypopup,
               group = "Black") %>%
+  addProviderTiles("CartoDB.Positron") %>%
+  addPolygons(fillColor = ~mypal2(joint$logHW),
+              fillOpacity = 0.7,
+              weight = 1,
+              popup = mypopup2,
+              group = "Hispanic") %>%
   addProviderTiles("CartoDB.Positron") %>%
   addLegend(pal = mypal, 
             values = c(-1,1), 
@@ -99,10 +99,12 @@ prob_force_used <- leaflet(joint) %>%
             title = "Log Odds of Being<br>
             Subject to Force<br>
             vs White Baseline") %>%
-  addLayersControl(c("Hispanic", "Black"),
+  addLayersControl(c("Black", "Hispanic"),
                    options = layersControlOptions(collapsed = FALSE))
 
 prob_force_used
+
+
 
 saveWidget(prob_force_used, 
            "../figures/prob_force_used.html", 
