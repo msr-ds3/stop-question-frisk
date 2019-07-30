@@ -73,7 +73,7 @@ mypopup <- paste0("Precinct: ", spatial_proportions$Precinct, "<br>",
 
 mypal <- colorNumeric(
   palette = "Spectral",
-  domain = c(-log(150), log(150)),
+  domain = c(-log10(150), log10(150)),
   reverse = TRUE
 )
 
@@ -85,8 +85,8 @@ mypal2 <- colorNumeric(
 
 per_capita_stop_rates <- leaflet(spatial_proportions) %>%
   addTiles() %>% 
-  addPolygons(fillColor = ~mypal(log(spatial_proportions$proportion)),
-              fillOpacity = .5,
+  addPolygons(fillColor = ~mypal(log10(spatial_proportions$proportion)),
+              fillOpacity = .9,
               weight = 1,
               popup = mypopup) %>%
   addProviderTiles("CartoDB.Positron") %>%
