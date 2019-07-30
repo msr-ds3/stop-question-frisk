@@ -164,3 +164,42 @@ out_sample_ppcs %>%
 out_sample_ppcs %>%
   filter(actual == 0) %>%
   summarize(fpr = mean(pred == 1))
+
+#########################################
+# G R A P H 
+#########################################
+
+
+in_sample_ppcs <- data.frame(actual = merged_ppcs$force, 
+                             prob = predict(logit, merged_ppcs, type = "response")) %>%
+  mutate(pred = ifelse(prob > 0.03, 1, 0))
+
+
+in_sample_ppcs2 <- data.frame(actual = merged_ppcs$force, 
+                             prob = predict(logit2, merged_ppcs, type = "response")) %>%
+  mutate(pred = ifelse(prob > 0.03, 1, 0))
+
+
+in_sample_ppcs3 <- data.frame(actual = merged_ppcs$force, 
+                             prob = predict(logit3, merged_ppcs, type = "response")) %>%
+  mutate(pred = ifelse(prob > 0.03, 1, 0))
+
+
+in_sample_ppcs4 <- data.frame(actual = merged_ppcs$force, 
+                             prob = predict(logit4, merged_ppcs, type = "response")) %>%
+  mutate(pred = ifelse(prob > 0.03, 1, 0))
+
+
+in_sample_ppcs5 <- data.frame(actual = merged_ppcs$force, 
+                             prob = predict(logit5, merged_ppcs, type = "response")) %>%
+  mutate(pred = ifelse(prob > 0.03, 1, 0))
+
+accuracy <- rep(0,5)
+in_sample_data <- c(in_sample_ppcs, in_sample_ppcs2,
+                    in_sample_ppcs3, in_sample_ppcs4,
+                    in_sample_ppcs5)
+for(i in 1:5){
+  dfr <- in_sample_ppcs %>%
+    summarize(acc = mean(pred == actual))
+  accuracy[i] <- dfr[,1]
+}
