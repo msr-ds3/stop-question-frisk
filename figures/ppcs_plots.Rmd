@@ -3,9 +3,11 @@ title: "PPCS Graphs"
 output: html_notebook
 ---
 
+
 ```{r load}
 load("merged_ppcs.RData")
 library(tidyverse)
+library(ROCR)
 
 ```
 
@@ -202,4 +204,29 @@ control_graph
 ggsave("ppcs_model_coef.png",control_graph,
        width = 5, height = 4)
 
+```
+
+```{r roc curve} 
+predict <- prediction(in_sample_ppcs$prob, merged_ppcs$force)
+performance <- performance(predict, measure = 'tpr', x.measure = 'fpr')
+plot(performance, main="ROC", type = "b") 
+performance(predict, 'auc')
+
+ 
+
+roc_lr <- data.frame(fpr=unlist(performance@x.values), tpr=unlist(performance@y.values))
+roc_lr$method <- "Logistic regression"
+roc_lr$base <- "Baseline"
+roc_plot <- roc_lr %>%
+  ggplot(data=., aes(x=fpr, y=tpr, linetype=method, color=method)) + 
+  geom_line() +
+  geom_abline(linetype=2) +
+  xlab("False Positive Rate")+
+  ylab("True Positive Rate")+
+  scale_x_continuous(labels=percent, lim=c(0,1)) +
+  scale_y_continuous(labels=percent, lim=c(0,1)) +
+  theme(legend.position=c(0.7,0.2), legend.title=element_blank())
+
+ggsave("ppcs_roc_curve.png", roc_plot,
+       width = 4, height = 4)
 ```
