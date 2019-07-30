@@ -106,7 +106,7 @@ mypopup <- paste0("Precinct: ", joint_prop_low_white$addrpct, "<br>",
 
 mypal <- colorNumeric(
   palette = "YlOrRd",
-  domain = seq(0, .55, .01)
+  domain = c(0, .55)
 )
 
 #Low Black
@@ -115,7 +115,7 @@ mypopup2 <- paste0("Precinct: ", joint_prop_low_black$addrpct, "<br>",
 
 mypal2 <- colorNumeric(
   palette = "YlOrRd",
-  domain = seq(0, .55, .01)
+  domain = c(0,.55)
 )
 
 #High White
@@ -124,7 +124,7 @@ mypopup3 <- paste0("Precinct: ", joint_prop_high_white$addrpct, "<br>",
 
 mypal3 <- colorNumeric(
   palette = "YlOrRd",
-  domain = seq(0, .055, .001)
+  domain = c(0,.06)
 )
 
 #High Black
@@ -133,7 +133,7 @@ mypopup4 <- paste0("Precinct: ", joint_prop_high_black$addrpct, "<br>",
 
 mypal4 <- colorNumeric(
   palette = "YlOrRd",
-  domain = seq(0, .055, .001)
+  domain = c(0,.06)
 )
 
 
@@ -144,13 +144,13 @@ leafletmaplow <- leaflet() %>%
   addProviderTiles("CartoDB.Positron") %>%
   addPolygons(data=joint_prop_low_white,
               fillColor = ~mypal(joint_prop_low_white$prob),
-              weight = 2,
+              weight = 1,
               opacity = 1,
               fillOpacity = 0.7,
               popup = mypopup, group="Low-White") %>%
   addPolygons(data=joint_prop_low_black,
               fillColor = ~mypal2(joint_prop_low_black$prob),
-              weight = 2,
+              weight = 1,
               opacity = 1,
               fillOpacity = 0.7,
               popup = mypopup2, group="Low-Black") %>%
@@ -167,16 +167,15 @@ leafletmaplow
 #Leaflet Map for High Intensity Force
 leafletmaphigh <- leaflet() %>% 
   addProviderTiles("CartoDB.Positron") %>%
-
   addPolygons(data=joint_prop_high_white,
               fillColor = ~mypal3(joint_prop_high_white$prob),
-              weight = 2,
+              weight = 1,
               opacity = 1,
               fillOpacity = 0.7,
               popup = mypopup3, group="High-White") %>%
   addPolygons(data=joint_prop_high_black,
               fillColor = ~mypal4(joint_prop_high_black$prob),
-              weight = 2,
+              weight = 1,
               opacity = 1,
               fillOpacity = 0.7,
               popup = mypopup4, group="High-Black") %>%
