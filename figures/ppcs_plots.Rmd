@@ -1,0 +1,209 @@
+---
+title: "PPCS Graphs"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r load}
+load("merged_ppcs.RData")
+library(tidyverse)
+
+```
+
+
+```{r number of incidents}
+# number of observations per year
+
+ppcs_year_plot <- merged_ppcs %>%
+  group_by(year) %>%
+  summarize(count = n()) %>%
+  ungroup() %>%
+  ggplot(aes(x = year, y = count, group = 1)) + 
+  geom_point() + 
+  geom_line() + 
+  xlab("Year") + 
+  ylab("Number of Incidents") + 
+  scale_y_continuous(labels = comma) +
+  theme( axis.text.x = element_text(size=10, angle = 40, vjust=.5) )
+
+ggsave("ppcs_number_of_observations_per_year.png", plot = ppcs_year_plot, 
+       width = 5, height = 4)
+```
+
+```{r full sample type of incident}
+merged_ppcs$type_of_incident <- recode_factor(merged_ppcs$type_of_incident,
+                                            "1" =  "Street stop",
+                                            "2" =  "Traffic stop",
+                                            "3" = "Other stop")
+fryer_incident <- c(0.00 , 0.55, 0.45)
+
+ 
+
+incident_type <- merged_ppcs %>%
+  filter(!is.na(type_of_incident)) %>%
+  group_by(type_of_incident) %>%
+  dplyr::summarize(count = n()) %>%
+  mutate(prop = count/sum(count))%>%
+  mutate(se = sqrt( prop * (1 - prop ) / mean(count)))%>%
+  mutate(fryer_incident = fryer_incident)
+
+ incident_type_plot <- ggplot(data = incident_type) + 
+  geom_point(aes( x = type_of_incident , y= fryer_incident , colour = "red"),  shape = 4 , size = 4)+
+  geom_pointrange(aes(x = type_of_incident , y =prop , ymin = prop - se , ymax = prop + se , ), position = position_dodge(0.1),shape = 16)+
+  xlab("Type of Incident" ) +
+   ylab("Proportion") + 
+   ggtitle("Proportions of Type of Incident") + 
+    theme(plot.title = element_text(lineheight=.8, face="bold", hjust = 0.5), panel.border = element_rect( fill = NA, colour = "grey50"),
+    legend.key = element_rect(fill = "white", colour = "black")) + scale_colour_discrete(name  =" ", breaks=c("red"), labels = c("Fryer's Results")) +
+   theme( axis.text.x = element_text(size=10, angle = 40, vjust=.5) )
+ 
+ ggsave("ppcs_incident_type.png", plot = incident_type_plot, 
+       width = 4, height = 4)
+```
+
+```{r time of contact}
+merged_ppcs$time_of_encounter <- recode_factor(merged_ppcs$time_of_encounter ,
+                                              "3" =  "Day",
+                                              "6" =  "Night")
+fryer_contact <- c(0.68, 0.32)
+  time_of_contact <- merged_ppcs %>%
+    group_by(time_of_encounter) %>%
+    filter(is.na(time_of_encounter) != TRUE) %>%
+    dplyr::summarise(count = n()) %>%
+    ungroup() %>%
+    mutate(prop = count/ sum(count))%>%
+    mutate( se = sqrt( prop * (1 - prop ) / sum(count)))%>%
+    mutate(fryer_contact =fryer_contact)
+ 
+    time_of_contact_plot <- ggplot(data= time_of_contact)+
+      geom_point(aes(x=time_of_encounter, y = fryer_contact, colour = "red"), shape = 4 , size = 4,  position = position_dodge(0.4))+
+      geom_pointrange(aes(x = time_of_encounter , y= prop, ymin = prop - se , ymax = prop + se ), position = position_dodge(0.4)) + xlab("Time of Contact") + ylab("Proportion") +
+      ggtitle("Proportions of Time of Contact") +
+     theme(plot.title = element_text(lineheight=.8, face="bold", hjust = 0.5),
+    panel.border = element_rect( fill = NA, colour = "grey50"),
+    legend.key = element_rect(fill = "white", colour = "black")) + scale_colour_discrete(name  =" ", breaks=c("red"), labels = c("Fryer's Results")) +
+      theme( axis.text.x = element_text(size=10, angle = 40, vjust=.5) )
+    
+ggsave("ppcs_time_of_incident.png", plot = time_of_contact_plot, 
+       width = 4, height = 4)
+```
+
+```{r illegals items by race}
+fryers_prop <- c(0.16, 0.10, 0.13, NA)
+
+merged_ppcs$civilian_race <- recode_factor(merged_ppcs$civilian_race ,
+              "white" =  "White",
+              "black" =  "Black",
+              "hispanic" = "Hispanic",
+              "other" = "Other"
+                    )
+
+civilians_guilty_of_illegal_plot <- merged_ppcs %>% 
+  group_by(civilian_race, civilian_guilty_of_illegal) %>%
+  summarize(count_of_guilty_civilian= n()) %>%
+  mutate(prop = count_of_guilty_civilian / sum(count_of_guilty_civilian)) %>% 
+  mutate(se = sqrt((prop*(1 - prop)) / sum(count_of_guilty_civilian))) %>% 
+  filter(civilian_guilty_of_illegal == 1) %>% 
+  ungroup() %>%
+  mutate(fry_prop = fryers_prop) %>%
+  ggplot(aes(x = civilian_race, y = prop)) + 
+  labs(x = "Civilian Race", y = "Proportion") +
+  geom_point(aes(x = civilian_race, y = fry_prop), shape = "X", size = 3.5, color = "red") +
+   geom_pointrange(aes(ymin = prop - se, ymax = prop + se)) +
+  ggtitle("Proportions of Civilians Guilty of Carrying Illegal Items by Race") +
+  scale_y_log10()
+  
+ggsave("ppcs_proportion_civilians_guilty_of_illegal_items_by_race.png", plot = civilians_guilty_of_illegal_plot,
+       width = 4, height = 4)
+```
+
+```{r force graph income and race}
+# force graph comparing income and race
+# normalize based on count of incidents involving force over number of incidents
+
+graph_ppcs$civilian_income <- recode_factor(graph_ppcs$civilian_income,
+                                            "1" = '< $20,000',
+                                            "2" = '$20,000 - $50,000',
+                                            "3" = '> $50,000'
+                                            )
+
+graph_ppcs$civilian_race <- recode_factor(graph_ppcs$civilian_race,
+                                            "white" = 'White',
+                                            "black" = 'Black',
+                                            "hispanic" = "Hispanic",
+                                            "other" = 'Other'
+                                            )
+
+# graph_ppcs %>%
+#   filter(!is.na(civilian_income)) %>%
+#   group_by(civilian_income) %>%
+#   filter(force == 1) %>%
+#   ggplot() +
+#   geom_bar(aes(x = civilian_income, fill = civilian_race), color = "white", position = "dodge") +
+#   coord_flip() +
+#   xlab("Civilian Income") + 
+#   ylab("Number of Interactions Involving Force") +
+#   labs(fill = "Civilian Race") 
+
+force_income_race_plot <- graph_ppcs %>%
+  filter(!is.na(civilian_income)) %>%
+  group_by(civilian_income, civilian_race) %>%
+  mutate(incident_count = n()) %>%
+  filter(force == 1) %>%
+  summarize(force_count = n(), incident_count = mean(incident_count)) %>%
+  mutate(prop = force_count / incident_count) %>%
+  ggplot() +
+  geom_col(aes(x = civilian_income, y = prop, fill = civilian_race), color = "white", position = "dodge") +
+  coord_flip() +
+  xlab("Civilian Income") + 
+  ylab("Proportion of Interactions Involving Force") +
+  labs(fill = "Civilian Race") +
+  scale_fill_manual(values = c("slateblue1","coral", "springgreen3","steelblue3" ))
+
+force_income_race_plot
+
+ggsave("ppcs_force_income_race.png", plot = force_income_race_plot, 
+       width = 5, height = 4)
+```
+
+```{r coefficients graph}
+coef <- c(1,3.496, 2.697, 1.130,1,2.809, 2.056, 0.97)
+identity <- c(rep("Fryer",4),rep("DS3",4))
+race <- c("White","Black","Hispanic","Other",
+          "White","Black","Hispanic","Other")
+race <- as.factor(race)
+
+
+no_controls <- tibble(race,coef,identity)
+
+no_control_graph <- no_controls %>% 
+  ggplot(aes(x = race, y = coef, color = identity, group = identity)) + 
+  geom_point() +
+  geom_line() +
+  xlab("Race") + 
+  ylab("Odds of Being Involved in a\nForce-Related Incident") +
+  labs(color = "")
+
+coef2 <- c(1,2.769,1.818,0.758,1,2.270,1.762,0.792)
+
+controls <- tibble(race,coef2,identity)
+
+control_graph <- controls %>% 
+  ggplot(aes(x = race, y = coef2, color = identity, group = identity)) + 
+  geom_point() +
+  geom_line() +
+  xlab("Race") + 
+  ylab("Odds of Being Involved in a\nForce-Related Incident") +
+  labs(color = "") + 
+  theme( axis.text.x = element_text(size=10, angle = 40, vjust=.5) )
+
+no_control_graph
+control_graph
+
+ggsave("ppcs_model_coef.png",control_graph,
+       width = 5, height = 4)
+
+```
