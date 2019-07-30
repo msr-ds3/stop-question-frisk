@@ -5,8 +5,7 @@ police_precincts <- readOGR(content(r,'text'), 'OGRGeoJSON', verbose = F)
 
 precinct_map <- leaflet(police_precincts) %>%
   addTiles() %>%
-  addPolygons(fillOpacity = .1, weight = 1)  %>% 
-  addProviderTiles("CartoDB.Positron")
+  addPolygons(fillOpacity = .5, fillColor = "Yellow", weight = 2)
 
 precinct_map
 
@@ -21,5 +20,4 @@ plot(nyc_blocks)
 
 leaflet(nyc_blocks) %>%
     addTiles() %>%
-    addPolygons(fillOpacity = .1, weight = 1)  %>% 
-    addProviderTiles("CartoDB.Positron")
+    addPolygons(fillOpacity = .5, fillColor = "Yellow", weight = 1)
