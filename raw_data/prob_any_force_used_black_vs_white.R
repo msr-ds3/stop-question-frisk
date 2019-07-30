@@ -42,12 +42,17 @@ force_used <- sqf_data %>%
   group_by(addrpct, race) %>%
   summarize(prop_w_force_used = mean(any_force_used))
 
+force_used
+
+force_used_black <- force_used %>% filter(race == "Black")
+
+force_used_white <- force_used %>% filter(race == "White")
+
+
 comparing_races <- force_used %>%
-  spread(race, prop_w_force_used) %>%
-  mutate(B_over_W = Black/White) %>%
-  mutate(logBW = log(B_over_W)) %>%
-  mutate(H_over_W = Hispanic/White) %>%
-  mutate(logHW = log(H_over_W))
+  spread(race, prop_w_force_used) %>% 
+  mutate(B_over_W = (Black/White)) 
+
 
 
 ########## MAP THE RESULTS ##########
@@ -57,6 +62,8 @@ r <- GET('http://services5.arcgis.com/GfwWNkhOj9bNBqoJ/arcgis/rest/services/nypp
 police_precincts <- readOGR(content(r,'text'), 'OGRGeoJSON', verbose = F)
 
 # Join the precinct shape data with the data about the precincts
+joint_black <- geo_join(police_precincts, force_used_black, "Precinct", "addrpct")
+joint_white <- geo_join(police_precincts, force_used_white, "Precinct", "addrpct")
 joint <- geo_join(police_precincts, comparing_races, "Precinct", "addrpct")
 
 
@@ -64,14 +71,57 @@ mypopup <- paste0("Precinct: ", joint$addrpct, "<br>",
                   "Black/White Prop w/ Force Used: ", joint$B_over_W)
 
 mypal <- colorNumeric(
+  palette = "YlOrRd",
+  domain = c(-1,2),
+  reverse = TRUE
+)
+
+
+prob_force_used_b_over_w <- leaflet(joint) %>%
+  addTiles() %>% 
+  addPolygons(fillColor = ~mypal1(joint$prop_w_force_used),
+              fillOpacity = 1,
+              weight = 1,
+              popup = mypopup) %>%
+  addProviderTiles("CartoDB.Positron") %>%
+  addLegend(pal = mypal, 
+            values = c(0, 2), 
+            position = "topleft", 
+            title = "Probability of <br> any force used <br>
+            Black over White") 
+
+prob_force_used_b_over_w
+
+mypopup1 <- paste0("Precinct: ", joint_black$addrpct, "<br>", 
+                  "Black/White Prop w/ Force Used: ", joint_black$prop_w_force_used)
+
+mypal1 <- colorNumeric(
   palette = "Spectral",
   domain = c(-1,1),
   reverse = TRUE
 )
 
 
-mypopup2 <- paste0("Precinct: ", joint$addrpct, "<br>", 
-                  "Hispanic/White Prop w/ Force Used: ", joint$H_over_W)
+prob_force_used_black <- leaflet(joint_black) %>%
+  addTiles() %>% 
+  addPolygons(fillColor = ~mypal1(joint_black$prop_w_force_used),
+              fillOpacity = 1,
+              weight = 1,
+              popup = mypopup1,
+              group = "Black") %>%
+  addProviderTiles("CartoDB.Positron") %>%
+  addLegend(pal = mypal1, 
+            values = c(-1, 1), 
+            position = "topleft", 
+            title = "Probability of <br> any force used <br>
+            given Black") 
+
+prob_force_used_black
+
+
+
+mypopup2 <- paste0("Precinct: ", joint_white$addrpct, "<br>", 
+                   "Black/White Prop w/ Force Used: ", joint_white$prop_w_force_used)
 
 mypal2 <- colorNumeric(
   palette = "Spectral",
@@ -79,30 +129,22 @@ mypal2 <- colorNumeric(
   reverse = TRUE
 )
 
-options(digits = 5)
 
-prob_force_used <- leaflet(joint) %>%
+prob_force_used_white <- leaflet(joint_white) %>%
   addTiles() %>% 
-  addPolygons(fillColor = ~mypal(joint$logBW),
-              fillOpacity = 0.7,
+  addPolygons(fillColor = ~mypal(joint_white$prop_w_force_used),
+              fillOpacity = 1,
               weight = 1,
-              popup = mypopup) %>%
+              popup = mypopup2,
+              group = "Black") %>%
   addProviderTiles("CartoDB.Positron") %>%
-  addLegend(#pal = mypal, 
-            values = c(-1,1), 
+  addLegend(pal = mypal2, 
+            values = c(-0,1), 
             position = "topleft", 
-            colors = rev(c("#d7191c",
-              "#fdae61",
-              "#ffffbf",
-              "#abdda4",
-              "#2b83ba")),
-            labels = signif(exp(seq(log(0.3678794), log(2.718282), length.out = 5)), 3),
-            title = "Log Odds of Being<br>
-            Subject to Force<br>
-            vs White Baseline")
+            title = "Probability of any force used <br>
+            given White") 
 
-prob_force_used
-
+prob_force_used_white
 
 
 saveWidget(prob_force_used, 
