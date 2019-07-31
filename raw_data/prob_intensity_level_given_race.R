@@ -63,7 +63,7 @@ prob_low_black <- prob_low_intensity_given_race  %>% filter(race == "Black")
 prob_high_white <- prob_high_intensity_given_race  %>% filter(race == "White")
 prob_high_black <- prob_high_intensity_given_race  %>% filter(race == "Black")
 
-View(prob_low_intensity_given_race)
+View(prob_low_white)
 
 comparing_low_intensity <- prob_low_intensity_given_race %>%
   spread(race, prob) %>% 
@@ -112,22 +112,22 @@ comparing_high <- prob_high_intensity_given_race %>%
   mutate(discrimination = Black > White)
 
 
+View(comparing_high)
+
 ####### Visual Comparison of Blacks and Whites #######
 
 #Feature with Radio buttons on map
 
 #Low White
 mypopup <- paste0("Precinct: ", joint_prop_low_white$addrpct, "<br>", 
-                  "White Low Intensity Prop: ", joint_prop_low_white$prob)
+                  "White Low Intensity Prop: ", round(joint_prop_low_white$prob,2))
 
 mypal <- colorNumeric(
-  palette = "YlOrRd",
-  domain = c(0, .55)
-)
+  palette = "YlOrRd", domain=c(0,.55))
 
 #Low Black
 mypopup2 <- paste0("Precinct: ", joint_prop_low_black$addrpct, "<br>", 
-                   "Black Low Intensity Prop: ", joint_prop_low_black$prob)
+                   "Black Low Intensity Prop: ", round(joint_prop_low_black$prob,2))
 
 mypal2 <- colorNumeric(
   palette = "YlOrRd",
@@ -136,7 +136,7 @@ mypal2 <- colorNumeric(
 
 #High White
 mypopup3 <- paste0("Precinct: ", joint_prop_high_white$addrpct, "<br>", 
-                  "White High Intensity Prop: ", joint_prop_high_white$prob)
+                  "White High Intensity Prop: ", round(joint_prop_high_white$prob, 2))
 
 mypal3 <- colorNumeric(
   palette = "YlOrRd",
@@ -145,7 +145,7 @@ mypal3 <- colorNumeric(
 
 #High Black
 mypopup4 <- paste0("Precinct: ", joint_prop_high_black$addrpct, "<br>", 
-                   "Black High Intensity Prop: ", joint_prop_high_black$prob)
+                   "Black High Intensity Prop: ", round(joint_prop_high_black$prob, 2))
 
 mypal4 <- colorNumeric(
   palette = "YlOrRd",
@@ -166,7 +166,6 @@ leafletmaplow <- leaflet() %>%
   addPolygons(data=joint_prop_low_black,
               fillColor = ~mypal2(joint_prop_low_black$prob),
               weight = 1,
-              opacity = 1,
               fillOpacity = 0.7,
               popup = mypopup2, group="Low-Black") %>%
   addLegend(position = "topleft", 
@@ -204,12 +203,12 @@ leafletmaphigh
 
 
 
-mypopup <- paste0("Precinct: ", joint_low$addrpct, "<br>", 
-                  "Black/White Prop w/ Force Used: ", joint_low$B_over_W)
+mypopup5 <- paste0("Precinct: ", joint_low$addrpct, "<br>", 
+                  "Black/White Prop w/ Low intensity: ", round(joint_low$B_over_W,2))
 
-mypal <- colorNumeric(
+mypal5 <- colorNumeric(
   palette = "Spectral",
-  domain = c(-2.5,2.5),
+  domain = c(-1,1), #c(-2.5,2.5),
   reverse = TRUE
 )
 
@@ -217,13 +216,14 @@ mypal <- colorNumeric(
 
 prob_low_force <- leaflet(joint_low) %>%
   addTiles() %>% 
-  addPolygons(fillColor = ~mypal(joint_low$B_over_W),
+  addPolygons(fillColor = ~mypal5(log10(joint_low$B_over_W)),
               fillOpacity = 0.7,
               weight = 1,
-              popup = mypopup) %>%
+              popup = mypopup5) %>%
   addProviderTiles("CartoDB.Positron") %>%
-  addLegend(pal = mypal, 
-            values = c(-2.5,2.5), 
+  addLegend(pal = mypal5, 
+            values = c(-1,1), #c(-2.5,2.5), 
+            labFormat = labelFormat(transform = function(x) signif(10^x, 1)),
             position = "topleft", 
             title = "Subject to Low-Intensity<br>Force
             Black vs White")
@@ -233,11 +233,11 @@ prob_low_force
 
 
 mypopuphigh <- paste0("Precinct: ", joint_high$addrpct, "<br>", 
-                  "Black/White Prop w/ Force Used: ", joint_high$B_over_W)
+                  "Black/White Prop w/ High Intensity: ", round(joint_high$B_over_W, 2))
 
 mypalhigh <- colorNumeric(
   palette = "Spectral",
-  domain = c(-5,5),
+  domain = c(-1,1), #c(-5,5),
   reverse = TRUE
 )
 
@@ -245,21 +245,20 @@ mypalhigh <- colorNumeric(
 
 prob_high_force <- leaflet(joint_high) %>%
   addTiles() %>% 
-  addPolygons(fillColor = ~mypalhigh(joint_high$B_over_W),
+  addPolygons(fillColor = ~mypalhigh(log10(joint_high$B_over_W)),
               fillOpacity = 0.7,
               weight = 1,
               popup = mypopuphigh) %>%
   addProviderTiles("CartoDB.Positron") %>%
   addLegend(pal = mypalhigh, 
-            values = c(-5,5), 
+            values = c(-1,1), #log10(joint_high$B_over_W), #c(-5,5),
+            labFormat = labelFormat(transform = function(x) signif(10^x, 1)),
             position = "topleft", 
             title = "Subject to High-Intensity<br>Force
             Black vs White")
 
 prob_high_force
 
-
-View(comparing_high_intensity)
 
 #Saving interactive leaflet map
 saveWidget(leafletmaphigh, "high-intensity.html", selfcontained = FALSE)
