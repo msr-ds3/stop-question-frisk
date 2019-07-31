@@ -48,8 +48,8 @@ sqf_race_dist <- sf_data1 %>%
 joint <- left_join(census_race_dist, sqf_race_dist) %>%
   mutate(stop_rate = sqf_count/census_count)
 
-white_rates <- joint %>% filter(race == "White")
-black_rates <- joint %>% filter(race == "Black")
+white_rates <- joint %>% filter(race == "White") %>% filter(precinct != 22)
+black_rates <- joint %>% filter(race == "Black") %>% filter(precinct != 22)
 
 
 # get police precinct shape data
@@ -70,7 +70,7 @@ mypopupB <- paste0("Precinct: ", black_precinct_rates$Precinct, "<br>",
 
 mypal <- colorNumeric(
   palette = "Spectral",
-  domain = c(log(1/50), log(50)),
+  domain = c(-log10(35), log10(35)),
   reverse = TRUE
 )
 
@@ -82,9 +82,9 @@ white_stop_rates <- leaflet(white_precinct_rates) %>%
               popup = mypopupW) %>%
   addProviderTiles("CartoDB.Positron") %>%
   addLegend(pal = mypal, 
-            values = log10(white_precinct_rates$stop_rate),
+            values = c(-1.5,1.5),
+            labFormat = labelFormat(transform = function(x) signif(10^x, 1)),
             position = "topleft",
-            labels = white_precinct_rates$stop_rate,
             title = "White<br>Stop Rate")
 
 white_stop_rates
@@ -97,17 +97,10 @@ black_stop_rates <- leaflet(black_precinct_rates) %>%
               popup = mypopupB) %>%
   addProviderTiles("CartoDB.Positron") %>%
   addLegend(pal = mypal, 
-            values = log10(black_precinct_rates$stop_rate),
+            values = c(-1.5,1.5),
+            labFormat = labelFormat(transform = function(x) signif(10^x, 1)),
             position = "topleft",
-            labels = black_precinct_rates$stop_rate,
             title = "Black<br>Stop Rate")
 
 black_stop_rates
 
-saveWidget(per_capita_stop_rates, 
-           "../figures/per_capita_stop_rates.html", 
-           selfcontained = FALSE)
-webshot("../figures/per_capita_stop_rates.html",
-        file = "../figures/per_capita_stop_rates.png",
-        cliprect = "viewport")
-  
