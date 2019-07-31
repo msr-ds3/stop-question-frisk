@@ -69,17 +69,11 @@ spatial_proportions <- geo_join(police_precincts, proportions, "Precinct", "prec
 #Map the results:
 
 mypopup <- paste0("Precinct: ", spatial_proportions$Precinct, "<br>", 
-                  "Ratio Black to White Stop Rates: ", spatial_proportions$proportion)
+                  "Ratio Black to White Stop Rates: ", round(spatial_proportions$proportion, 2))
 
 mypal <- colorNumeric(
   palette = "Spectral",
   domain = c(-log10(150), log10(150)),
-  reverse = TRUE
-)
-
-mypal2 <- colorNumeric(
-  palette = "Spectral",
-  domain = c(-150, 150),
   reverse = TRUE
 )
 
@@ -90,14 +84,16 @@ per_capita_stop_rates <- leaflet(spatial_proportions) %>%
               weight = 1,
               popup = mypopup) %>%
   addProviderTiles("CartoDB.Positron") %>%
-  addLegend(pal = mypal2, 
-            values = exp(c(-log(150), log(150), length.out = 5)),
+  addLegend(pal = mypal, 
+            values = log10(spatial_proportions$proportion),
+            #labFormat = mylabformat,
+            labFormat = labelFormat(transform = function(x) signif(10^x, 1)),
             position = "topleft",
-            title = "Log Stop<br>Rate Ratio")
+            title = "Stop Rate<br>Ratio")
 
 per_capita_stop_rates
 
-saveWidget(per_capita_stop_rates, 
+    saveWidget(per_capita_stop_rates, 
            "../figures/per_capita_stop_rates.html", 
            selfcontained = FALSE)
 webshot("../figures/per_capita_stop_rates.html",
