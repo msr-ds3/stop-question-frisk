@@ -42,18 +42,22 @@ force_used <- sqf_data %>%
   group_by(addrpct, race) %>%
   summarize(prop_w_force_used = mean(any_force_used))
 
-force_used
 
-force_used_black <- force_used %>% filter(race == "Black")
 
-force_used_white <- force_used %>% filter(race == "White")
+force_used_black <- force_used %>% filter(race == "Black") 
+
+force_used_white <- force_used %>% filter(race == "White") 
+
 
 
 comparing_races <- force_used %>%
   spread(race, prop_w_force_used) %>% 
-  mutate(B_over_W = (Black/White)) 
+  mutate(B_over_W = (Black/White))
 
 
+comparing_Hispanic_White <- force_used %>%
+  spread(race, prop_w_force_used) %>% 
+  mutate(H_over_W = Hispanic/White)
 
 ########## MAP THE RESULTS ##########
 
@@ -64,39 +68,75 @@ police_precincts <- readOGR(content(r,'text'), 'OGRGeoJSON', verbose = F)
 # Join the precinct shape data with the data about the precincts
 joint_black <- geo_join(police_precincts, force_used_black, "Precinct", "addrpct")
 joint_white <- geo_join(police_precincts, force_used_white, "Precinct", "addrpct")
-joint <- geo_join(police_precincts, comparing_races, "Precinct", "addrpct")
+joint_bw <- geo_join(police_precincts, comparing_races, "Precinct", "addrpct")
 
+joint_hw <- geo_join(police_precincts, comparing_Hispanic_White, "Precinct", "addrpct")
 
-mypopup <- paste0("Precinct: ", joint$addrpct, "<br>", 
-                  "Black/White Prop w/ Force Used: ", joint$B_over_W)
+mypopup <- paste0("Precinct: ", joint_bw$addrpct, "<br>", 
+                  "Black/White Prop w/ Force Used: ", joint_bw$B_over_W)
 
 mypal <- colorNumeric(
-  palette = "YlOrRd",
-  domain = c(-1,2),
+  palette = "Spectral",
+  domain = c(-.5,.5),
   reverse = TRUE
 )
 
 
-prob_force_used_b_over_w <- leaflet(joint) %>%
+
+prob_force_used_b_over_w <- leaflet(joint_bw) %>%
   addTiles() %>% 
-  addPolygons(fillColor = ~mypal1(joint$prop_w_force_used),
+  addPolygons(fillColor = ~mypal(log10(joint_bw$B_over_W)),
               fillOpacity = 1,
               weight = 1,
-              popup = mypopup)
+              popup = mypopup) %>%
   addProviderTiles("CartoDB.Positron") %>%
   addLegend(pal = mypal, 
-            values = c(0, 2), 
+            values = c(-.5,.5), 
             position = "topleft", 
-            title = "Probability of <br> any force used <br>
-            Black over White") 
+            labFormat = labelFormat(transform = function(x) signif(10^x, 1)),
+            #title = "Probability of <br> any force used <br>Black over White"
+            ) 
+
+prob_force_used_b_over_w
+
+
+
+
+mypopuphw <- paste0("Precinct: ", joint_hw$addrpct, "<br>", 
+                  "Hispanic/White Prop w/ Force Used: ", joint_hw$H_over_W)
+
+mypalhw <- colorNumeric(
+  palette = "Spectral",
+  domain = c(-.5,.5),
+  reverse = TRUE
+)
+
+
+
+prob_force_used_h_over_w <- leaflet(joint_hw) %>%
+  addTiles() %>% 
+  addPolygons(fillColor = ~mypalhw(log10(joint_hw$H_over_W)),
+              fillOpacity = 1,
+              weight = 1,
+              popup = mypopuphw) %>%
+  addProviderTiles("CartoDB.Positron") %>%
+  addLegend(pal = mypal, 
+            values = c(-.5,.5), 
+            position = "topleft", 
+            labFormat = labelFormat(transform = function(x) signif(10^x, 1)),
+            #title = "Probability of <br> any force used <br>Black over White"
+  ) 
+
+prob_force_used_h_over_w
+
 
 
 
 mypopup1 <- paste0("Precinct: ", joint_black$addrpct, "<br>", 
-                  "Black/White Prop w/ Force Used: ", joint_black$prop_w_force_used)
+                  "Hispanic/White Prop w/ Force Used: ", joint_black$prop_w_force_used)
 
 mypal1 <- colorNumeric(
-  palette = "Spectral",
+  palette = "YlOrRd",
   domain = c(-1,1),
   reverse = TRUE
 )
@@ -108,13 +148,13 @@ prob_force_used_black <- leaflet(joint_black) %>%
               fillOpacity = 1,
               weight = 1,
               popup = mypopup1,
-              group = "Black") %>%
+              ) %>%
   addProviderTiles("CartoDB.Positron") %>%
   addLegend(pal = mypal1, 
             values = c(-1, 1), 
             position = "topleft", 
-            title = "Probability of <br> any force used <br>
-            given Black") 
+            #title = "Probability of <br> any force used <br>given Black"
+            ) 
 
 prob_force_used_black
 
@@ -124,7 +164,7 @@ mypopup2 <- paste0("Precinct: ", joint_white$addrpct, "<br>",
                    "Black/White Prop w/ Force Used: ", joint_white$prop_w_force_used)
 
 mypal2 <- colorNumeric(
-  palette = "Spectral",
+  palette = "YlOrRd",
   domain = c(-1,1),
   reverse = TRUE
 )
@@ -136,13 +176,14 @@ prob_force_used_white <- leaflet(joint_white) %>%
               fillOpacity = 1,
               weight = 1,
               popup = mypopup2,
-              group = "Black") %>%
+              ) %>%
   addProviderTiles("CartoDB.Positron") %>%
   addLegend(pal = mypal2, 
-            values = c(-0,1), 
+            values = c(-1,1), 
             position = "topleft", 
-            title = "Probability of any force used <br>
-            given White") 
+            # title = "Probability of any force used <br>
+            # given White"
+            ) 
 
 prob_force_used_white
 
