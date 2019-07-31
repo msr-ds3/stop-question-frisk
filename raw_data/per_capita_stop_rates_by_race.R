@@ -70,19 +70,19 @@ mypopupB <- paste0("Precinct: ", black_precinct_rates$Precinct, "<br>",
 
 mypal <- colorNumeric(
   palette = "Spectral",
-  domain = c(log(1/600), log(600)),
+  domain = c(log(1/50), log(50)),
   reverse = TRUE
 )
 
 white_stop_rates <- leaflet(white_precinct_rates) %>%
   addTiles() %>% 
-  addPolygons(fillColor = ~mypal(log(white_precinct_rates$stop_rate)),
+  addPolygons(fillColor = ~mypal(log10(white_precinct_rates$stop_rate)),
               fillOpacity = .9,
               weight = 1,
               popup = mypopupW) %>%
   addProviderTiles("CartoDB.Positron") %>%
   addLegend(pal = mypal, 
-            values = log(white_precinct_rates$stop_rate),
+            values = log10(white_precinct_rates$stop_rate),
             position = "topleft",
             labels = white_precinct_rates$stop_rate,
             title = "White<br>Stop Rate")
@@ -91,13 +91,13 @@ white_stop_rates
 
 black_stop_rates <- leaflet(black_precinct_rates) %>%
   addTiles() %>% 
-  addPolygons(fillColor = ~mypal(log(black_precinct_rates$stop_rate)),
+  addPolygons(fillColor = ~mypal(log10(black_precinct_rates$stop_rate)),
               fillOpacity = .9,
               weight = 1,
               popup = mypopupB) %>%
   addProviderTiles("CartoDB.Positron") %>%
   addLegend(pal = mypal, 
-            values = log(black_precinct_rates$stop_rate),
+            values = log10(black_precinct_rates$stop_rate),
             position = "topleft",
             labels = black_precinct_rates$stop_rate,
             title = "Black<br>Stop Rate")
