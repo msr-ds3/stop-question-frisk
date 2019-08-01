@@ -1,0 +1,56 @@
+---
+title: "Merged PPCS Dataset"
+author: "Brenda Fried"
+date: "8/1/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load Libraries
+```{r}
+library(tidyverse)
+```
+
+# Load All PPCS years
+```{r merge-data}
+load('ppcs_1999.RData')
+load('ppcs_1996.RData')
+load('ppcs_2008.RData')
+load('ppcs_2005.RData')
+load('ppcs_2002.RData')
+load('ppcs_2011.RData')
+```
+
+```{r bind-into-dataframe}
+#bind all the years into one data frame
+merged_ppcs <- rbind(ppcs_1996, ppcs_1999, ppcs_2008, ppcs_2002, ppcs_2005, ppcs_2011)
+```
+```{r filter-age}
+#filter out missing age
+merged_ppcs <- merged_ppcs %>% 
+  mutate(civilian_age = ifelse(civilian_age == 'missing/ni/ou', NA_real_, civilian_age)) %>%
+  mutate(civilian_age = as.numeric(civilian_age))
+```
+
+# Filter face to face contacts with a police officer
+```{r contact}
+
+#face-to-face
+yes <- c('Yes','(1) Yes', 1 )
+
+merged_ppcs <- merged_ppcs %>%
+  filter(face_to_face %in% yes | (num_face_to_face > 0 & num_face_to_face < 998))
+
+#age 16+
+merged_ppcs <- merged_ppcs %>%
+  filter(civilian_age >= 16)
+```
+
+```{r}
+save(merged_ppcs, file= "merged_ppcs.RData")
+```
+
+
