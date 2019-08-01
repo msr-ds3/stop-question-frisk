@@ -2,9 +2,11 @@
 title: "ppcs_2005"
 output: html_document
 ---
+```{r GlobalOptions}
+
+```
 
 ```{r setup, include=FALSE}
-options(knitr.duplicate.label = 'allow')
 ```
 
 ## R Markdown
@@ -17,7 +19,10 @@ When you click the **Knit** button a document will be generated that includes bo
 library(tidyverse)
 library(foreign)
 library(here)
+```
 
+
+```{r 2005 }
 # Loading in the dataset
 
 ppcs2005 <- read.spss(here("raw_data", "20020-0001-Data.sav"), to.data.frame=TRUE)
@@ -242,7 +247,7 @@ ppcs_2005 <- ppcs2005 %>%
 
 
 ```{r rdata file}
-save(ppcs_2005, file = 'ppcs_2005.RData')
+save(ppcs_2005, file = 'clean_data/ppcs_2005.RData')
 sessionInfo()
 ```
 ## Including Plots
