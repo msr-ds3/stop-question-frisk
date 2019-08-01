@@ -1,7 +1,22 @@
+---
+title: "Load Census Race Data"
+author: "Etta Rapp"
+date: "8/1/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
 library(pacman)
 library(here)
 library(tidyverse)
 library(tidycensus)
+
+```
+
+
+```{r load data}
 
 # Set up census data
 census_api_key('5365371ad843ba3249f2e88162f10edcfe529d87', install = TRUE, overwrite = TRUE)
@@ -18,6 +33,10 @@ counties = c("Richmond", "Kings", "New York", "Queens", "Bronx")
 census <- get_decennial(geography = "block", variables = vars, state = "NY", 
                         county = counties, year = 2010, tigris_use_cache = TRUE)
 
+```
+
+```{r format data}
+
 # set digits so converting geoid's to numbers will retain all sigfigs
 options(digits = 15)
 
@@ -32,6 +51,10 @@ census$variable <- recode(census$variable, P003004 = "American_Indian_and_Alaska
                           P005003 = "White_other", P005004 = "Black_or_African_American_other",
                           P005011 = "White_Hispanic_Latino", P005012 = "Black_or_African_American_Hispanic_Latino")
 
+```
+
+```{r convert to precinct level}
+
 # load file to map block-level data to precinct level
 precinct_block_key <- read_csv(here("clean_data", "precinct_blocks_key.csv"))
 
@@ -43,4 +66,13 @@ precinct_race <- precinct_populations %>% ungroup() %>%
   group_by(precinct, variable) %>%
   summarize(total = sum(value))
 
+```
+
+```{r save output}
+
 save(precinct_race, file = here("clean_data", "census_race_data.RData"))
+
+sessionInfo()
+
+```
+
