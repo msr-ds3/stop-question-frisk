@@ -1,25 +1,22 @@
+library(pacman)
+library(here)
 library(tidyverse)
-library(tidycensus)
-library(totalcensus)
 library(sf)
 library(tmap)
 library(tmaptools)
 library(tigris)
 library(leaflet)
 library(sp)
-library(ggmap)
 library(maptools)
 library(broom)
-library(httr)
-library(rgdal)
 library(htmlwidgets)
 library(webshot)
 
 # Load stop and frisk data for 2003-2013
-load("sqf_03_13.RData")
+load(here("clean_data", "sqf_03_13.RData"))
 
 # Load census data with race distributions on the precinct level
-load("census_race_data.RData")
+load(here("clean_data", "census_race_data.RData"))
 
 census_race_dist <- precinct_race %>% filter(!is.na(precinct)) %>%
   mutate(variable = recode_factor(variable,"Two_Or_More_Races" = "Other", 
@@ -60,6 +57,7 @@ proportions <- stop_rates %>%
   select(precinct, proportion)
 
 # get police precinct shape data
+load(here("load_precinct_shapefiles.R"))
 r <- GET('http://services5.arcgis.com/GfwWNkhOj9bNBqoJ/arcgis/rest/services/nypp/FeatureServer/0/query?where=1=1&outFields=*&outSR=4326&f=geojson')
 police_precincts <- readOGR(content(r,'text'), 'OGRGeoJSON', verbose = F)
 

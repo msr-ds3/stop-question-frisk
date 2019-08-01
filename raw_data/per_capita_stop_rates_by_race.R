@@ -1,25 +1,19 @@
+library(pacman)
+library(here)
 library(tidyverse)
-library(tidycensus)
-library(totalcensus)
-library(sf)
-library(tmap)
-library(tmaptools)
-library(tigris)
 library(leaflet)
-library(sp)
-library(ggmap)
+library(tigris)
+library(tmap)
 library(maptools)
-library(broom)
-library(httr)
-library(rgdal)
-library(htmlwidgets)
-library(webshot)
+library(tmaptools)
+library(sp)
+
 
 # Load stop and frisk data for 2003-2013
-load("sqf_03_13.RData")
+load(here("clean_data", "sqf_03_13.RData"))
 
 # Load census data with race distributions on the precinct level
-load("census_race_data.RData")
+load(here("clean_data", "census_race_data.RData"))
 
 census_race_dist <- precinct_race %>% filter(!is.na(precinct)) %>%
   mutate(variable = recode_factor(variable,"Two_Or_More_Races" = "Other", 
@@ -103,3 +97,4 @@ black_stop_rates <- leaflet(black_precinct_rates) %>%
 
 black_stop_rates
 
+sessionInfo()
