@@ -1,6 +1,8 @@
 ---
 title: "Clean PPCS 2015"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
 
 ```{r load-and-set-up}
@@ -224,7 +226,7 @@ ppcs_2015 <- ppcs_2015 %>%
 ```
 
 ```{r save}
-save(ppcs_2015, file = 'ppcs_2015.RData')
+save(ppcs_2015, file = 'clean_data/ppcs_2015.RData')
 ```
 
 ```{r file dump}
