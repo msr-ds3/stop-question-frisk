@@ -69,9 +69,8 @@ mypopupB <- paste0("Precinct: ", black_precinct_rates$Precinct, "<br>",
                    "Stop Rate: ", black_precinct_rates$stop_rate)
 
 mypal <- colorNumeric(
-  palette = "Spectral",
-  domain = c(-log10(35), log10(35)),
-  reverse = TRUE
+  palette = "YlOrRd",
+  domain = c(-log10(35), log10(35))
 )
 
 white_stop_rates <- leaflet(white_precinct_rates) %>%
