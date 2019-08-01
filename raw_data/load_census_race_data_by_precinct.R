@@ -1,17 +1,7 @@
+library(pacman)
+library(here)
 library(tidyverse)
 library(tidycensus)
-library(totalcensus)
-library(sf)
-library(tmap)
-library(tmaptools)
-library(tigris)
-library(leaflet)
-library(sp)
-library(ggmap)
-library(maptools)
-library(broom)
-library(httr)
-library(rgdal)
 
 # Set up census data
 census_api_key('5365371ad843ba3249f2e88162f10edcfe529d87', install = TRUE, overwrite = TRUE)
@@ -43,7 +33,7 @@ census$variable <- recode(census$variable, P003004 = "American_Indian_and_Alaska
                           P005011 = "White_Hispanic_Latino", P005012 = "Black_or_African_American_Hispanic_Latino")
 
 # load file to map block-level data to precinct level
-precinct_block_key <- read_csv("precinct_blocks_key.csv")
+precinct_block_key <- read_csv(here("clean_data", "precinct_blocks_key.csv"))
 
 # add precinct numbers to census data
 precinct_populations <- left_join(census, precinct_block_key)
@@ -53,4 +43,4 @@ precinct_race <- precinct_populations %>% ungroup() %>%
   group_by(precinct, variable) %>%
   summarize(total = sum(value))
 
-save(precinct_race, file = "census_race_data.RData")
+save(precinct_race, file = here("clean_data", "census_race_data.RData"))
