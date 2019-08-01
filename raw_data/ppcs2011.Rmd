@@ -16,7 +16,7 @@ ppcs_2011 <- da34276.0001
 
 ```{r}
 #filter out the face to face contacts 
-ppcs_2011 <- ppcs_2011 %>% filter(!is.na(V31)) # better screening condition?
+# ppcs_2011 <- ppcs_2011 %>% filter(!is.na(V31)) # better screening condition?
 #nrow(ppcs_2011)
 
 ```
@@ -127,7 +127,7 @@ ppcs_2011 <- ppcs_2011 %>%
                                      (V197 == '(1) Yes')) ~ 1,  
                                     TRUE ~ 0)) %>%
   mutate(off_other = case_when(
-    V70 == '(1) American Indian or Alaska Native' | 
+    (V70 == '(1) American Indian or Alaska Native' | 
       V77 == '(1) American Indian or Alaska Native' |  
       V71 == '(1) Asian'|
     V78 == '(1) Asian' | 
@@ -138,7 +138,7 @@ ppcs_2011 <- ppcs_2011 %>%
       V194 == '(1) Asian'| 
       V201 == '(1) Asian'| 
       V195 == '(1) Native Hawaiian or other Pacific Islander' | 
-      V202 == '(1) Native Hawaiian or other Pacific Islander' |
+      V202 == '(1) Native Hawaiian or other Pacific Islander')~ 1,
        TRUE ~ 0))
 ```
 
