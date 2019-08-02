@@ -3,16 +3,16 @@ library(tidyverse)
 library(here)
 
 # loading in the dataset
-ppcs2002 <- sas_ascii_reader(here("raw_data", "ppcs_2002.txt"),here("raw_data", "ppcs_2002_setup.sas"))
+ppcs_2002 <- sas_ascii_reader(here("raw_data", "04273-0001-Setup.txt"),here("raw_data", "04273-0001-Setup.sas"))
 
 # filtering setup
-ppcs2002 <- ppcs2002 %>%
+ppcs_2002 <- ppcs_2002 %>%
   mutate(face_to_face = FACE_TO_FACE_CONTACT) %>%
   mutate(contact = NA_real_) %>%
   mutate(num_face_to_face = NA_real_)
 
 # civilian_race column
-ppcs2002 <- ppcs2002 %>% 
+ppcs_2002 <- ppcs_2002 %>% 
   mutate(civilian_race = case_when(
     (RACE_OF_RESPONDENT == "White" & HISPANIC_ORIGIN_OF_RESPONDENT == "No") ~ "white", # white and not hispanic
     (RACE_OF_RESPONDENT == "Black") ~ "black", # black and black-hispanic
@@ -21,17 +21,17 @@ ppcs2002 <- ppcs2002 %>%
   ))
 
 # civilian_age
-ppcs2002 <- ppcs2002 %>% 
+ppcs_2002 <- ppcs_2002 %>% 
   mutate(civilian_age = AGE_OF_RESPONDENT)
 
 # civilian_gender
-ppcs2002 <- ppcs2002 %>%
+ppcs_2002 <- ppcs_2002 %>%
   mutate(civilian_gender = case_when((SEX_OF_RESPONDENT == "Male") ~ 1,
                                      (SEX_OF_RESPONDENT == "Female") ~ 2
   ))
 
 # civilian_income
-  ppcs2002 <- ppcs2002 %>%
+  ppcs_2002 <- ppcs_2002 %>%
     mutate(civilian_income = case_when(
       (INCOME == "Less than $20,000 or na") ~ 1,  
       (INCOME == "$20,000-$49,999") ~ 2, 
@@ -39,13 +39,13 @@ ppcs2002 <- ppcs2002 %>%
       ))
 
 # civilian_employed
-ppcs2002 <- ppcs2002 %>%
+ppcs_2002 <- ppcs_2002 %>%
   mutate(civilian_employed = case_when(
     (HAD_JOB_OR_WORKED_AT_A_BUSINESS_LAST_WEEK == "Yes") ~ 1,
     TRUE ~ 0))
 
 # population_size
-ppcs2002 <- ppcs2002 %>%
+ppcs_2002 <- ppcs_2002 %>%
   mutate(population_size = case_when((SIZE_OF_JURISDICTION_WHERE_RESPONDENT_RESIDED == "Under 100,000/not in a place") ~ 1,
                                      (SIZE_OF_JURISDICTION_WHERE_RESPONDENT_RESIDED == "100,000-499,999") ~ 2,
                                      (SIZE_OF_JURISDICTION_WHERE_RESPONDENT_RESIDED == "500,000-999,999") ~ 3,
@@ -53,7 +53,7 @@ ppcs2002 <- ppcs2002 %>%
   ))
 
 # time_of_encounter
-ppcs2002 <- ppcs2002 %>%
+ppcs_2002 <- ppcs_2002 %>%
   mutate(time_of_encounter = case_when(
     TRAFFIC_STOP_AT_NIGHT == "Yes" ~ 6,
     TRAFFIC_STOP_AT_NIGHT == "No" ~ 3,
@@ -61,7 +61,7 @@ ppcs2002 <- ppcs2002 %>%
   ))
 
 # officer_race
-ppcs2002 <- ppcs2002 %>%
+ppcs_2002 <- ppcs_2002 %>%
   mutate(off_black = case_when((RACE_OF_OFFICER_BLACK == "Yes" | RACE_OF_OFFICERS == "Mostly black") ~ 1,
                                TRUE ~ 0
   )) %>%
@@ -77,13 +77,13 @@ ppcs2002 <- ppcs2002 %>%
   mutate(off_hispanic = 0)
 
 # type_of_incident
-ppcs2002 <- ppcs2002 %>%
+ppcs_2002 <- ppcs_2002 %>%
   mutate(type_of_incident = case_when((TRAFFIC_STOP == "Yes") ~ 2,
                                       (TRAFFIC_ACCIDENT == "Yes" | REPORTED_CRIME_OR_PROBLEM_TO_POLICE == "Yes" | POLICE_PROVIDED_ASSISTANCE_OR_SERVICE == "Yes" | SUSPECTED_OF_SOMETHING_BY_POLICE == "Yes" | POLICE_INVESTIGATING_CRIME == "Yes") ~ 3
   ))
 
 # civilian_behavior
-ppcs2002 <- ppcs2002 %>%
+ppcs_2002 <- ppcs_2002 %>%
   mutate(civilian_behavior = case_when((DISOBEYED_OR_INTERFERED_WITH_POLICE == "Yes") ~ 1,
                                        (TRIED_TO_GET_AWAY_FROM_POLICE == "Yes") ~ 1,
                                        (PUSHED_GRABBED_OR_HIT_OFFICER == "Yes") ~ 1,
@@ -96,7 +96,7 @@ ppcs2002 <- ppcs2002 %>%
   ))
 
 # alt_outcomes
-ppcs2002 <- ppcs2002 %>%
+ppcs_2002 <- ppcs_2002 %>%
   mutate(civilian_searched = case_when((SEARCH_OF_DRIVER_OR_VEHICLE %in% c("Yes")) ~ 1,
                                        TRUE ~ 0)) %>%
   mutate(civilian_searched = case_when((SEARCH_OCCURRED_BEFORE_ARREST %in% c("Yes")) ~ 1,
@@ -117,7 +117,7 @@ ppcs2002 <- ppcs2002 %>%
                                       TRUE ~ 0))
 
 # force
-ppcs2002 <- ppcs2002 %>%
+ppcs_2002 <- ppcs_2002 %>%
   mutate(any_force = case_when(
     (POLICE_USED_OR_THREATENED_FORCE == "Yes") ~ 1,
     TRUE ~ 0
@@ -143,12 +143,12 @@ ppcs2002 <- ppcs2002 %>%
   ))
 
 # year 
-ppcs2002 <- ppcs2002 %>%
+ppcs_2002 <- ppcs_2002 %>%
   mutate(year = 2002)
 
 
 # final dataframe
-ppcs2002 <- ppcs2002 %>%
+ppcs_2002 <- ppcs_2002 %>%
   select(civilian_race,
          civilian_age,
          civilian_gender,
@@ -180,6 +180,6 @@ ppcs2002 <- ppcs2002 %>%
          pepper_stun
   )
 
-save(ppcs2002, file = 'ppcs_2002.Rdata')
+save(ppcs_2002, file = 'ppcs_2002.Rdata')
 
 sessionInfo()
