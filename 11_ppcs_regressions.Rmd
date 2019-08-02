@@ -91,13 +91,9 @@ ggplot(data=roc_eval, aes(x=fpr, y=tpr)) +
         plot.title = element_text(hjust = 0.5,size=25, color = "#374687",face = "bold"),
         legend.title = element_text(color = "#0d693e", face = "bold", size = 18 ),
         legend.text = element_text(size = 15 ))+
-  ggsave("ppcs_roc_curve.png",  width = 12, height = 10, dpi = 150, units = "in", device='png')
+  ggsave("figures/ppcs_roc_curve.png",  width = 12, height = 10, dpi = 150, units = "in", device='png')
 
 table(actual = ppcs_perf_data$actual, predicted = ppcs_perf_data$pred)
-
-merged_ppcs %>%
-  ggplot(aes(x = prob)) +
-  geom_histogram(bins = 50)
 
 ```
 
@@ -161,7 +157,7 @@ ggplot(data=roc_eval, aes(x=fpr, y=tpr)) +
         plot.title = element_text(hjust = 0.5,size=25, color = "#374687",face = "bold"),
         legend.title = element_text(color = "#0d693e", face = "bold", size = 18 ),
         legend.text = element_text(size = 15 ))+
-  ggsave("ppcs_roc_curve_no_race.png",  width = 12, height = 10, dpi = 150, units = "in", device='png')
+  ggsave("figures/ppcs_roc_curve_no_race.png",  width = 12, height = 10, dpi = 150, units = "in", device='png')
 ```
 
 
