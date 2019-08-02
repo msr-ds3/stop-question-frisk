@@ -2,12 +2,6 @@
 title: "ppcs_2005"
 output: html_document
 ---
-```{r GlobalOptions}
-
-```
-
-```{r setup, include=FALSE}
-```
 
 ## R Markdown
 
@@ -25,13 +19,13 @@ library(here)
 ```{r 2005 }
 # Loading in the dataset
 
-ppcs2005 <- read.spss(here("raw_data", "20020-0001-Data.sav"), to.data.frame=TRUE)
+ppcs_2005 <- read.spss(here("raw_data", "20020-0001-Data.sav"), to.data.frame=TRUE)
 ```
 
 
 ```{r 2005 }
 #Renaming columns to see the people who had some sort of contact with the police
-ppcs2005 <- ppcs2005 %>%
+ppcs_2005 <- ppcs_2005 %>%
   mutate(face_to_face = V10) %>%
   mutate(contact = NA_real_) %>%
   mutate(num_face_to_face = NA_real_)
@@ -40,7 +34,7 @@ ppcs2005 <- ppcs2005 %>%
 
 ```{r }
 # Civilian_race
-ppcs2005 <- ppcs2005 %>% 
+ppcs_2005 <- ppcs_2005 %>% 
   mutate(civilian_race = case_when(
     (V5 == "White only" & V6 == "No") ~ "white", # white and not hispanic
     (V5 == "Black only") ~ "black", # black and black-hispanic
@@ -52,7 +46,7 @@ ppcs2005 <- ppcs2005 %>%
 
 ```{r cars}
 # Civilian_age
-ppcs2005 <- ppcs2005 %>% 
+ppcs_2005 <- ppcs_2005 %>% 
   mutate(civilian_age = V4)
 
 ```
@@ -60,7 +54,7 @@ ppcs2005 <- ppcs2005 %>%
 
 ```{r }
 # Civilian_gender
-ppcs2005 <- ppcs2005 %>%
+ppcs_2005 <- ppcs_2005 %>%
   mutate(civilian_gender = case_when((V3 == "Male") ~ 1,
                                      (V3 == "Female") ~ 2
   ))
@@ -70,7 +64,7 @@ ppcs2005 <- ppcs2005 %>%
 
 ```{r }
 # Civilian_income
-ppcs2005 <- ppcs2005 %>%
+ppcs_2005 <- ppcs_2005 %>%
   mutate(civilian_income = case_when((INCOME == "Less than $20,000 or na") ~ 1,
                                      (INCOME == "$20,000-$49,000") ~ 2,
                                      (INCOME == "$50,000 or more") ~ 3
@@ -82,7 +76,7 @@ ppcs2005 <- ppcs2005 %>%
 
 ```{r }
 # Civilian_employed
-ppcs2005 <- ppcs2005 %>%
+ppcs_2005 <- ppcs_2005 %>%
   mutate(civilian_employed = case_when(
                               (WORK == "Yes") ~ 1,
                               TRUE ~ 0))
@@ -92,7 +86,7 @@ ppcs2005 <- ppcs2005 %>%
 
 ```{r }
 # Population_size
-ppcs2005 <- ppcs2005 %>%
+ppcs_2005 <- ppcs_2005 %>%
   mutate(population_size = case_when((PLACE == "Under 100,000/not in a place") ~ 1,
                                      (PLACE == "100,000-499,999") ~ 2,
                                      (PLACE == "500,000-999,999") ~ 3,
@@ -105,7 +99,7 @@ ppcs2005 <- ppcs2005 %>%
 
 ```{r }
 # Time_of_encounter
-ppcs2005 <- ppcs2005 %>%
+ppcs_2005 <- ppcs_2005 %>%
   mutate(time_of_encounter = case_when(
                               V48 == "Yes" ~ 6,
                               V48 == "No" ~ 3,
@@ -116,7 +110,7 @@ ppcs2005 <- ppcs2005 %>%
 
 ```{r }
 # Officer_race
-ppcs2005 <- ppcs2005 %>%
+ppcs_2005 <- ppcs_2005 %>%
   mutate(off_black = case_when((V46 == "Black" | V47 == "All Black" | V47 == "Mostly Black") ~ 1,
                                TRUE ~ 0
     )) %>%
@@ -135,7 +129,7 @@ ppcs2005 <- ppcs2005 %>%
 
 ```{r}
 # Type_of_incident
-ppcs2005 <- ppcs2005 %>%
+ppcs_2005 <- ppcs_2005 %>%
   mutate(type_of_incident = case_when((V27 == "Yes") ~ 2, 
                                       (V29 == "Yes") ~ 3,
                                       (V30 == "Yes") ~ 3,
@@ -148,14 +142,14 @@ ppcs2005 <- ppcs2005 %>%
 
 ```{r there-is-not-civilian-behavior}
 # Civilian_behavior
-ppcs2005 <- ppcs2005 %>%
+ppcs_2005 <- ppcs_2005 %>%
   mutate(civilian_behavior = 0)
 ```
 
 
 ```{r}
 # Alternative_outcomes
-ppcs2005 <- ppcs2005 %>%
+ppcs_2005 <- ppcs_2005 %>%
   mutate(civilian_searched = case_when((V75 == "Yes" | V83 == "Yes") ~ 1,
                                        TRUE ~ 0)) %>%
   mutate(civilian_arrested = case_when((V61 == "Yes" | V82 == "Yes") ~ 1,
@@ -171,7 +165,7 @@ ppcs2005 <- ppcs2005 %>%
 
 ```{r}
 #Use of force 
-ppcs2005 <- ppcs2005 %>%
+ppcs_2005 <- ppcs_2005 %>%
   mutate(any_force = case_when(
     # (V12 == "Yes") ~ 1,
     (V14 == "Yes") ~ 1,
@@ -204,7 +198,7 @@ ppcs2005 <- ppcs2005 %>%
 
 ```{r }
 #add year column
-ppcs2005 <- ppcs2005 %>%
+ppcs_2005 <- ppcs_2005 %>%
   mutate(year = 2005)
 
 ```
@@ -212,7 +206,7 @@ ppcs2005 <- ppcs2005 %>%
 
 ```{r }
 # final dataframe
-ppcs_2005 <- ppcs2005 %>%
+ppcs_2005 <- ppcs_2005 %>%
   select(civilian_race,
          civilian_age,
          civilian_gender,
