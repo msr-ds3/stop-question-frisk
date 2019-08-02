@@ -282,7 +282,7 @@ ppcs_1996 <- ppcs_1996 %>%
 
 #Save Data
 ```{r}
-save(ppcs_1996, file='ppcs_1996.RData')
+save(ppcs_1996, file='clean_data/ppcs_1996.RData')
 sessionInfo()
 ```
 
