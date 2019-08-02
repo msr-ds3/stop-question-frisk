@@ -274,7 +274,7 @@ ppcs_1999 <- ppcs_1999 %>%
 ppcs_1999 <- ppcs_1999 %>%
   mutate(year = 1999)
 
-save(ppcs_1999, file = 'ppcs_1999.RData')
+save(ppcs_1999, file = 'clean_data/ppcs_1999.RData')
 
 sessionInfo()
 
