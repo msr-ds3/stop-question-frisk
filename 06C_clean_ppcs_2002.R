@@ -3,7 +3,7 @@ library(tidyverse)
 library(here)
 
 # loading in the dataset
-ppcs_2002 <- sas_ascii_reader(here("raw_data", "04273-0001-Setup.txt"),here("raw_data", "04273-0001-Setup.sas"))
+ppcs_2002 <- sas_ascii_reader(here("raw_data", "04273-0001-Data.txt"), here("raw_data", "04273-0001-Setup.sas"))
 
 # filtering setup
 ppcs_2002 <- ppcs_2002 %>%
@@ -180,6 +180,6 @@ ppcs_2002 <- ppcs_2002 %>%
          pepper_stun
   )
 
-save(ppcs_2002, file = 'ppcs_2002.Rdata')
+save(ppcs_2002, file = 'clean_data/ppcs_2002.RData')
 
 sessionInfo()
