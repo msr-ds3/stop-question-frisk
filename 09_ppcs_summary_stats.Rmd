@@ -306,51 +306,6 @@ merged_ppcs %>%
 ```
 
 #Check use of force
--check 2011 -seems like there was no use of force
-```{r}
-#check for outliers
-merged_ppcs %>%
-  group_by(year) %>%
-  mutate(count = n()) %>%
-  ungroup() %>%
-  group_by(year, force) %>%
-  mutate(force_count = n()) %>% 
-  mutate(prop = force_count/count) %>% 
-  ggplot(aes(x = year, y = prop)) +
-  geom_point() +
-  facet_wrap(~ force)
-```
-
-```{r force-full-sample}
-merged_ppcs %>%
-  group_by(force) %>%
-  summarise(count = n()) %>%
-  mutate(prop = count/sum(count))
-```
-
-```{r}
-merged_ppcs %>%
-  group_by(force) %>%
-  mutate(count = n()) %>%
-  ungroup() %>%
-  group_by(civilian_race, force) %>%
-  summarise(force_count = n()) %>%
-  mutate(prop = force_count/sum(force_count)) %>%
-  filter(force == 1)
-```
-
-```{r check-for-outliers-any_force}
-merged_ppcs %>%
-  group_by(year) %>%
-  mutate(count = n()) %>%
-  ungroup() %>%
-  group_by(year, any_force) %>%
-  mutate(any_force_count = n()) %>% 
-  mutate(prop = any_force_count/count) %>% 
-  ggplot(aes(x = year, y = prop)) +
-  geom_point() +
-  facet_wrap(~ any_force)
-```
 
 ```{r any-force-full-sample} 
 merged_ppcs %>%
@@ -368,19 +323,6 @@ merged_ppcs %>%
   summarise(any_force_count = n()) %>%
   mutate(prop = any_force_count/sum(any_force_count)) %>%
   filter(any_force == 1)
-```
-
-```{r check-for-outliers-grab-push}
-merged_ppcs %>%
-  group_by(year) %>%
-  mutate(count = n()) %>%
-  ungroup() %>%
-  group_by(year, grab_push) %>%
-  mutate(grab_push_count = n()) %>% 
-  mutate(prop = grab_push_count/count) %>% 
-  ggplot(aes(x = year, y = prop)) +
-  geom_point() +
-  facet_wrap(~ grab_push)
 ```
 
 ```{r grab-push-full-sample}
@@ -402,18 +344,6 @@ merged_ppcs %>%
 ```
 
 #hit and kick
-```{r check-for-outliers-hit-kick}
-merged_ppcs %>%
-  group_by(year) %>%
-  mutate(count = n()) %>%
-  ungroup() %>%
-  group_by(year, hit_kick) %>%
-  mutate(hit_kick_count = n()) %>% 
-  mutate(prop = hit_kick_count/count) %>% 
-  ggplot(aes(x = year, y = prop)) +
-  geom_point() +
-  facet_wrap(~ hit_kick)
-```
 
 ```{r hit-kick-full-sample}
 merged_ppcs %>%
@@ -434,18 +364,6 @@ merged_ppcs %>%
 ```
 
 #point gun
-```{r check-for-outliers-point-gun}
-merged_ppcs %>%
-  group_by(year) %>%
-  mutate(count = n()) %>%
-  ungroup() %>%
-  group_by(year, point_gun) %>%
-  mutate(point_gun_count = n()) %>% 
-  mutate(prop = point_gun_count/count) %>% 
-  ggplot(aes(x = year, y = prop)) +
-  geom_point() +
-  facet_wrap(~ point_gun)
-```
 
 ```{r point-gun-full-sample}
 merged_ppcs %>%
@@ -569,7 +487,7 @@ merged_ppcs <- merged_ppcs %>%
     at_least_kick_pepper_stun = as.factor(at_least_kick_pepper_stun),
     force = as.factor(force)
   ) 
-save(merged_ppcs, file = 'merged_ppcs.RData')
+save(merged_ppcs, file = 'clean_data/merged_ppcs.RData')
 sessionInfo()
 ```
 
