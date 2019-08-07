@@ -20,21 +20,6 @@ load(here("clean_data", "census_race_data.RData"))
 # Load precinct shapefiles
 load(here('clean_data', 'precinct_shape_file.RData'))
 
-# Rename race variables for clarity and so that they are grouped as
-# Fryer grouped them. Summarize the population of each race in each precinct.
-census_race_dist <- precinct_race %>% filter(!is.na(precinct)) %>%
-  mutate(variable = recode_factor(variable,"Two_Or_More_Races" = "Other", 
-                                  "American_Indian_and_Alaska_Native" = "Other",
-                                  "Native_Hawaiian_and_Pacific_Islander" = "Other",
-                                  "Black_or_African_American_Hispanic_Latino" = "Black",
-                                  "Black_or_African_American_other" = "Black",
-                                  "White_other" = "White",
-                                  "White_Hispanic_Latino" = "Hispanic")) %>%
-  rename("race" = "variable", "census_count" = "total") %>%
-  group_by(precinct, race) %>%
-  summarize(census_count = sum(census_count)) %>%
-  ungroup()
-
 # Rename and summarize SQF data similarly
 sqf_race_dist <- sf_data1 %>% 
   select(addrpct, race) %>%
