@@ -183,3 +183,18 @@ civilian_behavior <- data.frame(WhiteMean = "", Black = exp(coef(model_civ_behv)
 
 
 
+#model with precinct and year levels added as controls
+model_full_control <- glm(any_force_used ~ race + sex + age + I(age^2) + inout + daytime + ac_incid + ac_time +
+                            offunif + typeofid + othpers + cs_bulge + cs_cloth + cs_casng + cs_lkout +
+                            cs_descr + cs_drgtr + cs_furtv + cs_vcrim +
+                            cs_objcs + cs_other + wepnfnd + pct + year,
+                          data = log_data,
+                          family = "binomial")
+
+#create a data frame with the odds ratios of each race relative to the white mean from the full control model
+full_control <- data.frame(Model = "+ Precinct, Year", WhiteMean = "", Black = exp(coef(model_full_control))[2],
+                           Hispanic = exp(coef(model_full_control))[3],
+                           Asian = exp(coef(model_full_control))[4],
+                           Others = exp(coef(model_full_control))[5])
+
+
