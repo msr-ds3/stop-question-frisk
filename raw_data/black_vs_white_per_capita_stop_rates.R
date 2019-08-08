@@ -18,6 +18,9 @@ load(here("clean_data", "sqf_03_13.RData"))
 # Load census data with race distributions on the precinct level
 load(here("clean_data", "census_race_data.RData"))
 
+# Load precinct shapefiles
+load(here('clean_data', 'precinct_shape_file.RData'))
+
 census_race_dist <- precinct_race %>% filter(!is.na(precinct)) %>%
   mutate(variable = recode_factor(variable,"Two_Or_More_Races" = "Other", 
                                   "American_Indian_and_Alaska_Native" = "Other",
@@ -56,11 +59,6 @@ proportions <- stop_rates %>%
   mutate(proportion = Black/White) %>%
   select(precinct, proportion)
 
-# get police precinct shape data
-load(here("load_precinct_shapefiles.R"))
-r <- GET('http://services5.arcgis.com/GfwWNkhOj9bNBqoJ/arcgis/rest/services/nypp/FeatureServer/0/query?where=1=1&outFields=*&outSR=4326&f=geojson')
-police_precincts <- readOGR(content(r,'text'), 'OGRGeoJSON', verbose = F)
-
 # Join stop rate ratios with precinct shape data
 spatial_proportions <- geo_join(police_precincts, proportions, "Precinct", "precinct")
 
@@ -91,12 +89,15 @@ per_capita_stop_rates <- leaflet(spatial_proportions) %>%
 
 per_capita_stop_rates
 
-    saveWidget(per_capita_stop_rates, 
+saveWidget(per_capita_stop_rates, 
            "../figures/per_capita_stop_rates.html", 
            selfcontained = FALSE)
 webshot("../figures/per_capita_stop_rates.html",
         file = "../figures/per_capita_stop_rates.png",
         cliprect = "viewport")
+
+
+sessionInfo()
 
 # Map explanation: Dark red areas have high levels of discrimination against blacks
 # white areas show no  discrimination, green/blue areas are biased against whites.
