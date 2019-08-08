@@ -231,3 +231,8 @@ fryer_civilian_demographics <- data.frame(WhiteMean = "", Black = 1.480, Hispani
                                           Asian = 1.010,
                                           Others = 1.346)
 
+
+#Fryer's model with encounter characteristics added as control
+fryer_encounter_characteristics <- data.frame(WhiteMean = "", Black = 1.655, Hispanic = 1.641,
+                                              Asian = 1.059,
+                                              Others = 1.452)
