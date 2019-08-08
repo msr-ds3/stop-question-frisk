@@ -198,3 +198,13 @@ full_control <- data.frame(Model = "+ Precinct, Year", WhiteMean = "", Black = e
                            Others = exp(coef(model_full_control))[5])
 
 
+
+
+#creating a dataframe with our results
+our_results <- bind_rows(no_control, civilian_demographics, encounter_characteristics,
+                         civilian_demographics, full_control) %>%
+  mutate(Black = round(Black, 3),
+         Hispanic = round(Hispanic,3), Asian = round(Asian, 3), Others = round(Others, 3))
+
+
+
