@@ -241,3 +241,9 @@ fryer_encounter_characteristics <- data.frame(WhiteMean = "", Black = 1.655, His
 fryer_civilian_behavior <- data.frame(WhiteMean = "", Black = 1.462, Hispanic = 1.516,
                                       Asian = 1.051,
                                       Others = 1.372)
+
+
+#Fryer's model with full control added as control
+fryer_full_control <- data.frame(WhiteMean = "", Black = 1.178, Hispanic = 1.122, Asian = 0.953,
+                                 Others = 1.060)
+
