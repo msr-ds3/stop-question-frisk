@@ -220,4 +220,9 @@ dev.off()
 
 
 
+#Fryer's no control model
+fryer_no_control <- data.frame(WhiteMean = as.character(0.153),Black = 1.534, Hispanic = 1.582, Asian = 1.044,
+                               Others = 1.392)
+
+
 
