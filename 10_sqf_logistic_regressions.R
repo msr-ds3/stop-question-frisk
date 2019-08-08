@@ -226,3 +226,8 @@ fryer_no_control <- data.frame(WhiteMean = as.character(0.153),Black = 1.534, Hi
 
 
 
+#Fryer's model with civilian demographics added as control
+fryer_civilian_demographics <- data.frame(WhiteMean = "", Black = 1.480, Hispanic = 1.517,
+                                          Asian = 1.010,
+                                          Others = 1.346)
+
