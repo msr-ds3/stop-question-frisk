@@ -252,7 +252,15 @@ fryer_full_control <- data.frame(WhiteMean = "", Black = 1.178, Hispanic = 1.122
 fryer_results <- bind_rows(fryer_no_control, fryer_civilian_demographics, fryer_civilian_behavior,
                            fryer_encounter_characteristics, fryer_full_control)
 
+
+#assigning new row names to the "fryer_results " data frame
+rownames(fryer_results ) <- c("(a)", "(b)",
+                           "(c)",
+                           "(d)", "(e)")
+
 #outputting the "fryer_results" data frame as a table in a pdf file
 pdf("fryer_results.pdf", height=11, width=10)
-grid.table(our_results)
+grid.table(fryer_results )
 dev.off()
+
+
