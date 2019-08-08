@@ -12,22 +12,24 @@ knitr::opts_chunk$set(echo = TRUE)
 # Load Libraries
 ```{r}
 library(tidyverse)
+library(here)
 ```
 
 # Load All PPCS years
 ```{r merge-data}
-load('ppcs_1999.RData')
-load('ppcs_1996.RData')
-load('ppcs_2008.RData')
-load('ppcs_2005.RData')
-load('ppcs_2002.RData')
-load('ppcs_2011.RData')
+load(here('clean_data', 'ppcs_1999.RData'))
+load(here('clean_data', 'ppcs_1996.RData'))
+load(here('clean_data','ppcs_2008.RData'))
+load(here('clean_data','ppcs_2005.RData'))
+load(here('clean_data','ppcs_2002.RData'))
+load(here('clean_data', 'ppcs_2011.RData'))
 ```
 
 ```{r bind-into-dataframe}
 #bind all the years into one data frame
 merged_ppcs <- rbind(ppcs_1996, ppcs_1999, ppcs_2008, ppcs_2002, ppcs_2005, ppcs_2011)
 ```
+
 ```{r filter-age}
 #filter out missing age
 merged_ppcs <- merged_ppcs %>% 
@@ -50,7 +52,7 @@ merged_ppcs <- merged_ppcs %>%
 ```
 
 ```{r}
-save(merged_ppcs, file= "merged_ppcs.RData")
+save(merged_ppcs, file= "clean_data/merged_ppcs.RData")
 ```
 
 

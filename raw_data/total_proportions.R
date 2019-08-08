@@ -21,6 +21,8 @@ load("sqf_03_13.RData")
 # Load census data with race distributions on the precinct level
 load("census_race_data.RData")
 
+# Load precinct shapefiles
+load(here('clean_data', 'precinct_shape_file.RData'))
 
 total_pop <- precinct_race %>% group_by(precinct) %>% summarize(total_p = sum(total))
 
@@ -35,10 +37,6 @@ total_proportion <- left_join(total_pop, total_sqf_pop, by = c("precinct"="pct")
 total_props <- total_proportion %>% 
   mutate(props = (total_p/total_pop)) %>% na.omit(total_props$precinct)
 
-
-# read in police precinct shape data
-r <- GET('http://services5.arcgis.com/GfwWNkhOj9bNBqoJ/arcgis/rest/services/nypp/FeatureServer/0/query?where=1=1&outFields=*&outSR=4326&f=geojson')
-police_precincts <- readOGR(content(r,'text'), 'OGRGeoJSON', verbose = F)
 
 # Join the precinct shape data with the data about the precincts
 joint_prop_total <- geo_join(police_precincts, total_props, "Precinct", "precinct")
