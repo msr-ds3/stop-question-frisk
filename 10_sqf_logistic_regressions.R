@@ -165,3 +165,21 @@ encounter_characteristics <- data.frame(Model = "+ Encounter Characteristics", W
 
 
 
+#model with civilian behavior added as control
+model_civ_behv <- glm(any_force_used ~ race + sex + I(age^2) + inout + daytime + ac_incid + ac_time +
+                        offunif + typeofid + othpers + cs_bulge + cs_cloth + cs_casng + cs_lkout +
+                        cs_descr + cs_drgtr + cs_furtv + cs_vcrim +
+                        cs_objcs + cs_other + wepnfnd,
+                      data = log_data,
+                      family = "binomial")
+
+#create a data frame with the odds ratios of each race relative to the white mean from the civilian behavior model
+civilian_behavior <- data.frame(WhiteMean = "", Black = exp(coef(model_civ_behv))[2],
+                                Hispanic = exp(coef(model_civ_behv))[3],
+                                Asian = exp(coef(model_civ_behv))[4],
+                                Others = exp(coef(model_civ_behv))[5])
+
+
+
+
+
