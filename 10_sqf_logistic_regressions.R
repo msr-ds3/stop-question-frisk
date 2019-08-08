@@ -174,7 +174,7 @@ model_civ_behv <- glm(any_force_used ~ race + sex + I(age^2) + inout + daytime +
                       family = "binomial")
 
 #create a data frame with the odds ratios of each race relative to the white mean from the civilian behavior model
-civilian_behavior <- data.frame(WhiteMean = "", Black = exp(coef(model_civ_behv))[2],
+civilian_behavior <- data.frame(Model = "+ Civilian Behavior", WhiteMean = "", Black = exp(coef(model_civ_behv))[2],
                                 Hispanic = exp(coef(model_civ_behv))[3],
                                 Asian = exp(coef(model_civ_behv))[4],
                                 Others = exp(coef(model_civ_behv))[5])
@@ -202,7 +202,7 @@ full_control <- data.frame(Model = "+ Precinct, Year", WhiteMean = "", Black = e
 
 #creating a dataframe with our results
 our_results <- bind_rows(no_control, civilian_demographics, encounter_characteristics,
-                         civilian_demographics, full_control) %>%
+                         civilian_behavior, full_control) %>%
   mutate(Black = round(Black, 3),
          Hispanic = round(Hispanic,3), Asian = round(Asian, 3), Others = round(Others, 3))
 
@@ -221,36 +221,36 @@ dev.off()
 
 
 #Fryer's no control model
-fryer_no_control <- data.frame(WhiteMean = as.character(0.153),Black = 1.534, Hispanic = 1.582, Asian = 1.044,
+fryer_no_control <- data.frame(Model = "No Control", WhiteMean = as.character(0.153),Black = 1.534, Hispanic = 1.582, Asian = 1.044,
                                Others = 1.392)
 
 
 
 #Fryer's model with civilian demographics added as control
-fryer_civilian_demographics <- data.frame(WhiteMean = "", Black = 1.480, Hispanic = 1.517,
+fryer_civilian_demographics <- data.frame(Model = "+ Civilian Demographics", WhiteMean = "", Black = 1.480, Hispanic = 1.517,
                                           Asian = 1.010,
                                           Others = 1.346)
 
 
 #Fryer's model with encounter characteristics added as control
-fryer_encounter_characteristics <- data.frame(WhiteMean = "", Black = 1.655, Hispanic = 1.641,
+fryer_encounter_characteristics <- data.frame(Model = "+ Encounter Characteristics", WhiteMean = "", Black = 1.655, Hispanic = 1.641,
                                               Asian = 1.059,
                                               Others = 1.452)
 
 #Fryer's model with civilian behavior added as control
-fryer_civilian_behavior <- data.frame(WhiteMean = "", Black = 1.462, Hispanic = 1.516,
+fryer_civilian_behavior <- data.frame(Model = "+ Civilian Behavior", WhiteMean = "", Black = 1.462, Hispanic = 1.516,
                                       Asian = 1.051,
                                       Others = 1.372)
 
 
 #Fryer's model with full control added as control
-fryer_full_control <- data.frame(WhiteMean = "", Black = 1.178, Hispanic = 1.122, Asian = 0.953,
+fryer_full_control <- data.frame(Model = "+ Precinct, Year", WhiteMean = "", Black = 1.178, Hispanic = 1.122, Asian = 0.953,
                                  Others = 1.060)
 
 
 #creating a dataframe with Fryer's results
-fryer_results <- bind_rows(fryer_no_control, fryer_civilian_demographics, fryer_civilian_behavior,
-                           fryer_encounter_characteristics, fryer_full_control)
+fryer_results <- bind_rows(fryer_no_control, fryer_civilian_demographics,
+                           fryer_encounter_characteristics,fryer_civilian_behavior, fryer_full_control)
 
 
 #assigning new row names to the "fryer_results " data frame
