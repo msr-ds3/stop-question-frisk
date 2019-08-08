@@ -128,3 +128,20 @@ no_control <- data.frame(Model= "No Control", WhiteMean = as.character(white_mea
 
 
 
+
+#model with civilian demographics added as control
+model_civilian_demo <- glm(any_force_used ~ race + sex + age + I(age^2),
+                           data = log_data,
+                           family = "binomial")
+
+#create a data frame with the odds ratios of each race relative to the white mean from the civilian demographics model
+civilian_demographics <- data.frame(Model = "+ Civilian Demographics", WhiteMean = "",
+                                    Black = exp(coef(model_civilian_demo))[2], Hispanic = exp(coef(model_civilian_demo))[3],
+                                    Asian = exp(coef(model_civilian_demo))[4], Others = exp(coef(model_civilian_demo))[5])
+
+
+
+
+
+
+
