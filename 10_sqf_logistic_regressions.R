@@ -247,3 +247,8 @@ fryer_civilian_behavior <- data.frame(WhiteMean = "", Black = 1.462, Hispanic = 
 fryer_full_control <- data.frame(WhiteMean = "", Black = 1.178, Hispanic = 1.122, Asian = 0.953,
                                  Others = 1.060)
 
+
+#creating a dataframe with Fryer's results
+fryer_results <- bind_rows(fryer_no_control, fryer_civilian_demographics, fryer_civilian_behavior,
+                           fryer_encounter_characteristics, fryer_full_control)
+
