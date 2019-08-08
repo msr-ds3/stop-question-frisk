@@ -213,3 +213,11 @@ rownames(our_results) <- c("(a)", "(b)",
                            "(d)", "(e)")
 
 
+#outputting the data frame as a table in a pdf file
+pdf("our_result.pdf", height=11, width=10)
+grid.table(our_results)
+dev.off()
+
+
+
+
