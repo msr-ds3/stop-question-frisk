@@ -213,7 +213,7 @@ rownames(our_results) <- c("(a)", "(b)",
                            "(d)", "(e)")
 
 
-#outputting the data frame as a table in a pdf file
+#outputting the "our_results" data frame as a table in a pdf file
 pdf("our_result.pdf", height=11, width=10)
 grid.table(our_results)
 dev.off()
@@ -252,3 +252,7 @@ fryer_full_control <- data.frame(WhiteMean = "", Black = 1.178, Hispanic = 1.122
 fryer_results <- bind_rows(fryer_no_control, fryer_civilian_demographics, fryer_civilian_behavior,
                            fryer_encounter_characteristics, fryer_full_control)
 
+#outputting the "fryer_results" data frame as a table in a pdf file
+pdf("fryer_results.pdf", height=11, width=10)
+grid.table(our_results)
+dev.off()
