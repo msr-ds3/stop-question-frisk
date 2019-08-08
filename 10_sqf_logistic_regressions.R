@@ -107,3 +107,24 @@ log_data <- sf_data1 %>%
               pf_grnd == "Y" |
               pf_ptwep == "Y" ) ~ NA_real_,
            TRUE ~ 0))
+
+
+#model with no control: race as the only predictor and Use of force as the outcome
+model_no_cntrl <- glm(any_force_used ~ race,
+                      data = log_data,
+                      family = "binomial")
+
+#create a new data frame where the observations are only for the white population
+log_w <- log_data %>%
+  filter(race == "White")
+
+#calculate the white mean to 3 decimal points
+white_mean <- round(mean(log_w$any_force_used == 1),3)
+
+#create a data frame with the odds ratios of each race relative to the white mean from the no control model
+no_control <- data.frame(Model= "No Control", WhiteMean = as.character(white_mean),
+                         Black = exp(coef(model_no_cntrl))[2], Hispanic = exp(coef(model_no_cntrl))[3],
+                         Asian = exp(coef(model_no_cntrl))[4], Others = exp(coef(model_no_cntrl))[5])
+
+
+
