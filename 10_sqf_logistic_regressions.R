@@ -207,4 +207,9 @@ our_results <- bind_rows(no_control, civilian_demographics, encounter_characteri
          Hispanic = round(Hispanic,3), Asian = round(Asian, 3), Others = round(Others, 3))
 
 
+#assigning new row names to the "our_results" data frame
+rownames(our_results) <- c("(a)", "(b)",
+                           "(c)",
+                           "(d)", "(e)")
+
 
