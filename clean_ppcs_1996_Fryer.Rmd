@@ -1,0 +1,23 @@
+---
+title: "ppcs_1999_Fryer"
+author: "Brenda Fried"
+date: "9/3/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load-libraries}
+library(tidyverse)
+library(asciiSetupReader)
+library(foreign)
+library(dplyr)
+library(here)
+```
+
+``` {r load-data}
+ppcs_1999 <- read_ascii_setup(here('raw_data','03151-0001-Data.txt'),here('raw_data', '03151-0001-Setup.sas'))
+ppcs_1999 <- ppcs_1999[, !duplicated(colnames(ppcs_1999))]
+```
