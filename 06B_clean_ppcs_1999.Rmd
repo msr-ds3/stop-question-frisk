@@ -227,7 +227,7 @@ ppcs_1999 <- ppcs_1999 %>%
   )) %>%
   mutate(pepper_stun = case_when(
     (SPRAYED_WITH_CHEMICAL_PEPPER_SPRAY_VEH ==  'Sprayed with chemical/pepper spray' ) ~ 1,
-    (SPRAYED_WITH_CHEMICAL_PEPPER_SPRAY_OTHER == ' Sprayed with chemical/pepper spray') ~ 1,
+    (SPRAYED_WITH_CHEMICAL_PEPPER_SPRAY_OTHER == 'Sprayed with chemical/pepper spray') ~ 1,
     TRUE ~ 0
   ))
 ```
