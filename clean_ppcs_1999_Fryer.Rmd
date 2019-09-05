@@ -345,7 +345,7 @@ ppcs_1999_F <- ppcs_1999_F %>%
 ```
 
 ```{r}
-#civilian arrested - traffic stop
+#civilian arrested - other stop
 ppcs_1999_F <- ppcs_1999_F %>%
   mutate(civilian_arrested_o = case_when(
     (ARRESTED_USE_OR_THREATEN_FORCE == 'Yes') ~ 1,
