@@ -77,9 +77,10 @@ ppcs_2002_F <- ppcs_2002_F %>%
 # population_size
 ppcs_2002_F <- ppcs_2002_F %>%
     mutate(population_size = case_when(
-      (SIZE_OF_JURISDICTION_WHERE_RESPONDENT_RESIDED == "Under 100,000/not in a place") ~ 1,                                                (SIZE_OF_JURISDICTION_WHERE_RESPONDENT_RESIDED == "100,000-499,999") ~ 2,
-                                       (SIZE_OF_JURISDICTION_WHERE_RESPONDENT_RESIDED == "500,000-999,999") ~ 3,
-                                       (SIZE_OF_JURISDICTION_WHERE_RESPONDENT_RESIDED == "1 million or more") ~ 4
+      (SIZE_OF_JURISDICTION_WHERE_RESPONDENT_RESIDED == "Under 100,000/not in a place") ~ 1,
+      (SIZE_OF_JURISDICTION_WHERE_RESPONDENT_RESIDED == "100,000-499,999") ~ 2,
+      (SIZE_OF_JURISDICTION_WHERE_RESPONDENT_RESIDED == "500,000-999,999") ~ 3,
+      (SIZE_OF_JURISDICTION_WHERE_RESPONDENT_RESIDED == "1 million or more") ~ 4
   ))
 ```
 
@@ -94,7 +95,6 @@ ppcs_2002_F <- ppcs_2002_F %>%
 ```
 
 ```{r}
-#Interesting: theres is another column called POLICE_USED_OR_THREATENED_OTHER_FORCE which isn't used. In 1999 used both for traffic and other
 # police used force
 ppcs_2002_F <- ppcs_2002_F %>%
   mutate(police_used_force = case_when(
@@ -195,7 +195,7 @@ ppcs_2002_F <- ppcs_2002_F %>%
 
 #disobey - counted twice because the question is argue or disobey officer?
 ppcs_2002_F <- ppcs_2002_F %>%
-  mutate(civilian_disobey = ifelse(TRAFFIC_STOP_OTHER_TYPE_OF_COMPLAINT_FILED == 'Yes', 1, NA))
+  mutate(civilian_disobey = ifelse(DISOBEYED_OR_INTERFERED_WITH_POLICE == 'Yes', 1, NA))
 
 #other behavior
 ppcs_2002_F <- ppcs_2002_F %>%
