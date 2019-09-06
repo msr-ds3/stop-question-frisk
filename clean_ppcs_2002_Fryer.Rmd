@@ -1,0 +1,354 @@
+---
+title: "ppcs 2002 Fryer"
+author: "Brenda Fried"
+date: "9/5/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(asciiSetupReader)
+library(tidyverse)
+library(here)
+
+# loading in the dataset
+ppcs_2002_F <- read_ascii_setup(here("raw_data", "04273-0001-Data.txt"), here("raw_data", "04273-0001-Setup.sas"))
+```
+
+```{r}
+#had contact
+ppcs_2002_F <- ppcs_2002_F %>%
+  mutate(had_contact = case_when(
+    (ANY_POLICE_CONTACT_IN_LAST_12_MONTHS == 'Yes' & FACE_TO_FACE_CONTACT == 'Yes') ~ 1,
+    (ANY_POLICE_CONTACT_IN_LAST_12_MONTHS == 'No' | (ANY_POLICE_CONTACT_IN_LAST_12_MONTHS == 'Yes' & FACE_TO_FACE_CONTACT == 'No')) ~ 0,
+    (ANY_POLICE_CONTACT_IN_LAST_12_MONTHS == 'Out of Universe/Missing') ~ NA_real_
+  ))
+```
+
+```{r}
+# civilian race
+ppcs_2002_F <- ppcs_2002_F %>% 
+  mutate(civilian_race = case_when(
+    (RACE_OF_RESPONDENT == "White" & HISPANIC_ORIGIN_OF_RESPONDENT != "Yes") ~ "white",
+    (RACE_OF_RESPONDENT == "Black") ~ "black", 
+    (HISPANIC_ORIGIN_OF_RESPONDENT == "Yes" & RACE_OF_RESPONDENT != "Black") ~ "hispanic",
+    (RACE_OF_RESPONDENT == "Other" &  HISPANIC_ORIGIN_OF_RESPONDENT != "Yes") ~ "other"
+  ))
+```
+
+```{r}
+# civilian_age
+ppcs_2002_F <- ppcs_2002_F %>% 
+  mutate(civilian_age = AGE_OF_RESPONDENT)
+```
+
+```{r}
+# civilian_gender
+ppcs_2002_F <- ppcs_2002_F %>%
+  mutate(civilian_gender = case_when((SEX_OF_RESPONDENT == "Male") ~ 1,
+                                     (SEX_OF_RESPONDENT == "Female") ~ 0
+  ))
+```
+
+```{r}
+# civilian_income
+  ppcs_2002_F <- ppcs_2002_F %>%
+    mutate(civilian_income = case_when(
+      (INCOME == "Less than $20,000 or na") ~ 1,  
+      (INCOME == "$20,000-$49,999") ~ 2, 
+      (INCOME == "$50,000 or more") ~ 3
+      ))
+
+```
+
+```{r}
+# civilian_employed
+ppcs_2002_F <- ppcs_2002_F %>%
+  mutate(civilian_employed = case_when(
+    (HAD_JOB_OR_WORKED_AT_A_BUSINESS_LAST_WEEK == "Yes") ~ 1,
+    (HAD_JOB_OR_WORKED_AT_A_BUSINESS_LAST_WEEK == "No") ~ 0
+  ))
+```
+
+```{r}
+# population_size
+ppcs_2002_F <- ppcs_2002_F %>%
+    mutate(population_size = case_when(
+      (SIZE_OF_JURISDICTION_WHERE_RESPONDENT_RESIDED == "Under 100,000/not in a place") ~ 1,                                                (SIZE_OF_JURISDICTION_WHERE_RESPONDENT_RESIDED == "100,000-499,999") ~ 2,
+                                       (SIZE_OF_JURISDICTION_WHERE_RESPONDENT_RESIDED == "500,000-999,999") ~ 3,
+                                       (SIZE_OF_JURISDICTION_WHERE_RESPONDENT_RESIDED == "1 million or more") ~ 4
+  ))
+```
+
+```{r}
+# type of incident
+ppcs_2002_F <- ppcs_2002_F %>%
+  mutate(type_of_incident = case_when(
+    (TRAFFIC_ACCIDENT == "Yes" | TRAFFIC_STOP == "Yes") ~2,
+    (TRAFFIC_ACCIDENT == "No" & TRAFFIC_STOP == "No") ~ 3,
+    (TRAFFIC_ACCIDENT == "Out of universe/missing" &  had_contact == 1) ~ NA_real_
+  ))
+```
+
+```{r}
+#Interesting: theres is another column called POLICE_USED_OR_THREATENED_OTHER_FORCE which isn't used. In 1999 used both for traffic and other
+# police used force
+ppcs_2002_F <- ppcs_2002_F %>%
+  mutate(police_used_force = case_when(
+    (POLICE_USED_OR_THREATENED_FORCE == 'Yes') ~ 1,
+    (POLICE_USED_OR_THREATENED_FORCE == 'No') ~0
+  ))
+```
+
+```{r}
+# Officer use of force
+
+ppcs_2002_F <- ppcs_2002_F %>%
+  mutate(other_force = case_when(
+    (POLICE_USED_OR_THREATENED_OTHER_FORCE == "Yes") ~ 1,
+  )) %>%
+  mutate(grab_push = case_when(
+    (PUSHED_OR_GRABBED_BY_POLICE == 'Yes') ~ 1,
+  )) %>%
+  mutate(hit_kick = case_when(
+    (KICKED_OR_HIT_BY_POLICE == 'Yes') ~ 1,
+  )) %>%
+  mutate(point_gun = case_when(
+    (POLICE_POINTED_GUN == 'Yes') ~ 1,
+  )) %>%
+  mutate(pepper_stun = NA)
+
+```
+
+```{r}
+# any force
+ppcs_2002_tmp <- ppcs_2002_F %>%
+  select(other_force, grab_push, hit_kick, point_gun, pepper_stun)
+
+ppcs_2002_F <- ppcs_2002_F %>%
+  mutate(force_sum = rowSums(ppcs_2002_tmp)) %>%
+  mutate(any_force = ifelse((force_sum > 0) & (had_contact == 1), 1, 0))
+```
+
+```{r}
+# civilian injured
+ppcs_2002_F <- ppcs_2002_F %>%
+  mutate(civilian_injured = case_when(
+    (INJURED_FROM_FORCE == 'Yes') ~ 1,
+    (INJURED_FROM_FORCE == 'No') ~ 0,
+    (INJURED_FROM_FORCE == NA & police_used_force == 0) ~ 0
+  ))
+```
+
+```{r}
+#civilian arrested
+ppcs_2002_F <- ppcs_2002_F %>%
+  mutate(civilian_arrested = case_when(
+    (ARRESTED_DURING_CONTACT == 'Yes') ~ 1,
+    (ARRESTED_DURING_CONTACT == 'No') ~ 0
+  ))
+```
+
+```{r}
+# civilian is handcuffed
+ppcs_2002_F <- ppcs_2002_F %>%
+  mutate(civilian_is_handcuffed = case_when(
+    (HANDCUFFED_DURING_CONTACT == 'Yes') ~ 1,
+    (HANDCUFFED_DURING_CONTACT == 'No') ~ 0,
+    (HANDCUFFED_DURING_CONTACT == 'Out of universe/missing' & police_used_force == 0 )~ 0
+  ))
+# officer handcuffed
+ppcs_2002_F <- ppcs_2002_F %>%
+  mutate(officer_handcuffed = case_when(
+    (civilian_is_handcuffed == 1 & civilian_arrested != 1 ) ~ 1,
+    ((civilian_is_handcuffed == 1 & civilian_arrested == 1 ) | civilian_is_handcuffed == 0) ~ 0,
+  ))
+```
+
+```{r}
+# civilian perceived excess force
+ppcs_2002_F <- ppcs_2002_F %>%
+  mutate(excessive_force = case_when(
+    (POLICE_USED_OR_THREATENED_EXCESSIVE_FORCE == 'Yes') ~ 1,
+    (POLICE_USED_OR_THREATENED_EXCESSIVE_FORCE == 'No') ~ 0,
+    (POLICE_USED_OR_THREATENED_EXCESSIVE_FORCE == 'Out of universe/missing' & police_used_force == 0 ) ~ 0
+  ))
+```
+
+```{r}
+#civilian behavior
+#comment from Fryer: q is argue with, curse at, insult, or verbally threaten, i'm double counting;
+#threatened
+ppcs_2002_F <- ppcs_2002_F %>%
+  mutate(civilian_threatened = ifelse(ARGUED_CURSED_INSULTED_OR_THREATENED_POLICE == 'Yes', 1, NA))
+
+#physical
+ppcs_2002_F <- ppcs_2002_F %>%
+  mutate(civilian_physical = ifelse(PUSHED_GRABBED_OR_HIT_OFFICER == 'Yes', 1, NA))
+
+#argued
+ppcs_2002_F <- ppcs_2002_F %>%
+  mutate(civilian_argued = ifelse(ARGUED_CURSED_INSULTED_OR_THREATENED_POLICE == 'Yes', 1, NA))
+
+#disobey - counted twice because the question is argue or disobey officer?
+ppcs_2002_F <- ppcs_2002_F %>%
+  mutate(civilian_disobey = ifelse(TRAFFIC_STOP_OTHER_TYPE_OF_COMPLAINT_FILED == 'Yes', 1, NA))
+
+#other behavior
+ppcs_2002_F <- ppcs_2002_F %>%
+  mutate(civilian_other_behavior = ifelse(OTHER_PHYSICAL_BEHAVIOR_AGAINST_POLICE == 'Yes', 1, NA))
+
+#escape
+ppcs_2002_F <- ppcs_2002_F %>%
+  mutate(civilian_escape = ifelse(TRIED_TO_GET_AWAY_FROM_POLICE == 'Yes', 1, NA))
+
+#resist 
+ppcs_2002_F <- ppcs_2002_F %>%
+  mutate(civilian_resist = ifelse(RESISTED_BEING_HANDCUFFED_ARRESTED_OR_SEARCHED == 'Yes', 1, NA))
+
+#complained
+ppcs_2002_F <- ppcs_2002_F %>%
+  mutate(civilian_complained = NA)
+```
+
+```{r}
+#any behavior
+ppcs_2002_tmp <- ppcs_2002_F %>%
+  select(civilian_threatened, civilian_physical, civilian_argued, civilian_disobey, civilian_other_behavior, civilian_escape, civilian_resist)
+
+ppcs_2002_F <- ppcs_2002_F %>%
+  mutate(behav_sum = rowSums(ppcs_2002_tmp)) %>%
+  mutate(any_behavior = ifelse((behav_sum > 0) & (had_contact == 1), 1, 0))
+
+###go back to this###
+# foreach var in sthreatened sphysical sargued sdisobey sotherbehavior sescape sresist {;
+# replace `var' = 0 if mi(`var') & anysbehav==1;
+# replace `var' = 0 if mi(`var') & V32=="6";
+# }; 
+```
+
+```{r}
+#time of encounter
+ppcs_2002_F <- ppcs_2002_F %>%
+  mutate(time_of_encounter = case_when(
+    (TRAFFIC_STOP_AT_NIGHT == 'No') ~ 1, #traffic stops only;
+    (TRAFFIC_STOP_AT_NIGHT == 'Yes') ~ 0
+  ))
+```
+
+```{r}
+#number of officers
+ppcs_2002_F <- ppcs_2002_F %>%
+  mutate(num_officers = ifelse(NUMBER_OF_OFFICERS == "Out of Universe/Missing", NA_real_, NUMBER_OF_OFFICERS)) %>%
+  mutate(num_officers = as.numeric(num_officers))
+```
+
+```{r}
+ppcs_2002_F <- ppcs_2002_F %>%
+  mutate(off_race = case_when(
+    (RACE_OF_OFFICER_BLACK == "Yes" & num_officers == 1) ~ "black",
+    (RACE_OF_OFFICER_WHITE == "Yes" & num_officers == 1) ~ "white",
+    (RACE_OF_OFFICER_OTHER_RACE == "Yes" & num_officers == 1) ~ "other",
+    (num_officers %in% seq(2, 30) & RACE_OF_OFFICER_WHITE == "Yes" & RACE_OF_OFFICER_BLACK != "Yes" & RACE_OF_OFFICER_OTHER_RACE != "Yes") ~ "white",
+    (num_officers %in% seq(2, 30) & RACE_OF_OFFICER_WHITE != "Yes" & RACE_OF_OFFICER_BLACK == "Yes" & RACE_OF_OFFICER_OTHER_RACE != "Yes") ~ "black",
+    (num_officers %in% seq(2, 30) & RACE_OF_OFFICER_WHITE != "Yes" & RACE_OF_OFFICER_BLACK != "Yes" & RACE_OF_OFFICER_OTHER_RACE == "Yes") ~ "other",
+    (num_officers %in% seq(2, 30) & RACE_OF_OFFICERS == 'Mostly white') ~ "white",
+    (num_officers %in% seq(2, 30) & RACE_OF_OFFICERS == 'Mostly black') ~ "black",
+    (num_officers %in% seq(2, 30) & RACE_OF_OFFICERS == 'Mostly some other race') ~ "other",
+    (num_officers %in% seq(2, 30) & RACE_OF_OFFICERS == 'Equal number of each race') ~ "split"
+  ))
+```
+
+```{r}
+#civilian searched
+#i.e. vehicle searched or civilian searched;
+ppcs_2002_F <- ppcs_2002_F %>%
+  mutate(civilian_searched = case_when(
+    (SEARCH_OF_VEHICLE == "Yes" | SEARCH_OF_DRIVER == "Yes" | OTHER_CONTACT_PERSONAL_SEARCH == 'Yes') ~ 1,
+    (
+     (SEARCH_OF_DRIVER == "No" & (SEARCH_OF_VEHICLE == "No" | SEARCH_OF_VEHICLE == "Do not know")) | 
+     (SEARCH_OF_VEHICLE == "No" & (SEARCH_OF_DRIVER == "No" | SEARCH_OF_DRIVER == "Do not know")) |
+     (OTHER_CONTACT_PERSONAL_SEARCH == 'No')
+    ) ~ 0
+  ))
+
+```
+
+```{r}
+#civilian guilty of carrying illegal drugs, alcohol,weapons
+ppcs_2002_F <- ppcs_2002_F %>%
+  mutate(civilian_guilty_of_illegal = case_when(
+    (ILLEGAL_WEAPON_S_FOUND == 'Yes' | 
+     ILLEGAL_DRUGS_FOUND == 'Yes'   |
+     OPEN_CONTAINER_OF_ALCOHOL_FOUND == 'Yes' |
+     OTHER_CRIMINAL_EVIDENCE_FOUND == 'Yes' |
+     OTHER_CONTACT_ILLEGAL_WEAPON_S_FOUND == 'Yes' |
+     OTHER_CONTACT_ILLEGAL_DRUGS_FOUND == 'Yes'|
+     OTHER_CONTACT_OPEN_CONTAINER_OF_ALCOHOL_FOUND == 'Yes' |
+     OTHER_CONTACT_OTHER_CRIMINAL_EVIDENCE_FOUND == 'Yes') ~ 1,
+    
+    (NO_EVIDENCE_FOUND == 'Yes' | OTHER_CONTACT_NO_CRIMINAL_EVIDENCE_FOUND == 'Yes') ~ 0
+  ))
+
+```
+
+```{r}
+#fired gun
+ppcs_2002_F <- ppcs_2002_F %>%
+  mutate(off_fired_gun = NA)
+
+ppcs_2002_F <- ppcs_2002_F %>%
+  mutate(off_shot_suspect  = NA)
+```
+
+```{r}
+#year
+ppcs_2002_F <- ppcs_2002_F %>%
+  mutate(year  = 2002)
+```
+
+```{r}
+ppcs_2002_F <- ppcs_2002_F %>%
+  select(
+    had_contact,
+    civilian_race,
+    civilian_age,
+    civilian_gender,
+    civilian_employed,
+    civilian_income,
+    population_size,
+    type_of_incident,
+    time_of_encounter,
+    police_used_force,
+    other_force,
+    grab_push,
+    hit_kick,
+    point_gun,
+    pepper_stun,
+    any_force,
+    civilian_is_handcuffed,
+    officer_handcuffed,
+    off_fired_gun,
+    off_shot_suspect,
+    off_race,
+    civilian_threatened,
+    civilian_physical, 
+    civilian_argued,
+    civilian_disobey,
+    civilian_resist,
+    civilian_other_behavior,
+    civilian_complained,
+    civilian_escape,
+    any_behavior,
+    civilian_injured,
+    excessive_force,
+    civilian_searched,
+    civilian_arrested,
+    civilian_guilty_of_illegal,
+    year
+  )
+```
+
