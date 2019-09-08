@@ -129,7 +129,7 @@ ppcs_2002_tmp <- ppcs_2002_F %>%
   select(other_force, grab_push, hit_kick, point_gun, pepper_stun)
 
 ppcs_2002_F <- ppcs_2002_F %>%
-  mutate(force_sum = rowSums(ppcs_2002_tmp)) %>%
+  mutate(force_sum = rowSums(ppcs_2002_tmp, na.rm = TRUE)) %>%
   mutate(any_force = ifelse((force_sum > 0) & (had_contact == 1), 1, 0))
 ```
 
@@ -220,7 +220,7 @@ ppcs_2002_tmp <- ppcs_2002_F %>%
   select(civilian_threatened, civilian_physical, civilian_argued, civilian_disobey, civilian_other_behavior, civilian_escape, civilian_resist)
 
 ppcs_2002_F <- ppcs_2002_F %>%
-  mutate(behav_sum = rowSums(ppcs_2002_tmp)) %>%
+  mutate(behav_sum = rowSums(ppcs_2002_tmp, na.rm = TRUE)) %>%
   mutate(any_behavior = ifelse((behav_sum > 0) & (had_contact == 1), 1, 0))
 
 ###go back to this###

@@ -19,7 +19,7 @@ library(here)
 
 ``` {r load-data}
 ppcs_1999_F <- read_ascii_setup(here('raw_data','03151-0001-Data.txt'),here('raw_data', '03151-0001-Setup.sas'))
-ppcs_1999_F <- ppcs_1999[, !duplicated(colnames(ppcs_1999))]
+ppcs_1999_F <- ppcs_1999_F[, !duplicated(colnames(ppcs_1999_F))]
 ```
 
 ```{r}
@@ -46,7 +46,7 @@ ppcs_1999_F <- ppcs_1999_F %>%
 
 ```{r}
 #Civilian Age
-ppcs_1999 <- ppcs_1999 %>% 
+ppcs_1999_F <- ppcs_1999_F %>% 
   mutate(civilian_age = RESPONDENT_S_AGE)
 ```
 
@@ -73,7 +73,7 @@ ppcs_1999_F <- ppcs_1999_F %>%
 #civilian income
 
 # They did not factor
-ppcs_1999 <- ppcs_1999 %>%
+ppcs_1999_F <- ppcs_1999_F %>%
   mutate(civilian_income = case_when(
     (INCOME == 'Less than $20,000 or NA')~1,
     (INCOME == '$20,000-49,999')~2,
@@ -83,7 +83,7 @@ ppcs_1999 <- ppcs_1999 %>%
 
 ```{r}
 #Population-size
-ppcs_1999 <- ppcs_1999 %>%
+ppcs_1999_F <- ppcs_1999_F %>%
   mutate(population_size = case_when(
     (PLACE_SIZE == 'Under 100,000/not a place') ~ 1,
     (PLACE_SIZE == '100,000-499,999') ~ 2,
@@ -206,7 +206,7 @@ ppcs_1999_tmp <- ppcs_1999_F %>%
   select(other_force_t, grab_push_t, hit_kick_t, point_gun_t, pepper_stun_t)
 
 ppcs_1999_F <- ppcs_1999_F %>%
-  mutate(force_sum_t = rowSums(ppcs_1999_tmp)) %>%
+  mutate(force_sum_t = rowSums(ppcs_1999_tmp, na.rm = TRUE)) %>%
   mutate(any_force_t = ifelse((force_sum_t > 0) & (had_contact == 1), 1, 0))
 ```
 
@@ -292,7 +292,7 @@ ppcs_1999_tmp <- ppcs_1999_F %>%
   select(civilian_threatened_t, civilian_physical_t, civilian_argued_t, civilian_disobey_t, civilian_other_behavior_t, civilian_escape_t, civilian_resist_t)
 
 ppcs_1999_F <- ppcs_1999_F %>%
-  mutate(behav_sum_t = rowSums(ppcs_1999_tmp)) %>%
+  mutate(behav_sum_t = rowSums(ppcs_1999_tmp, na.rm = TRUE)) %>%
   mutate(any_behavior_t = ifelse((behav_sum_t > 0) & (had_contact == 1), 1, 0))
 ```
 
@@ -400,7 +400,7 @@ ppcs_1999_tmp <- ppcs_1999_F %>%
   select(other_force_o, grab_push_o, hit_kick_o, point_gun_o, pepper_stun_o)
 
 ppcs_1999_F <- ppcs_1999_F %>%
-  mutate(force_sum_o = rowSums(ppcs_1999_tmp)) %>%
+  mutate(force_sum_o = rowSums(ppcs_1999_tmp, na.rm = TRUE)) %>%
   mutate(any_force_o = ifelse((force_sum_o > 0) & (had_contact == 1), 1, 0))
 
 
@@ -491,7 +491,7 @@ ppcs_1999_tmp <- ppcs_1999_F %>%
   select(civilian_threatened_o, civilian_physical_o, civilian_argued_o, civilian_disobey_o, civilian_other_behavior_o, civilian_escape_o, civilian_resist_o)
 
 ppcs_1999_F <- ppcs_1999_F %>%
-  mutate(behav_sum_o = rowSums(ppcs_1999_tmp)) %>%
+  mutate(behav_sum_o = rowSums(ppcs_1999_tmp, na.rm = TRUE)) %>%
   mutate(any_behavior_o = ifelse((behav_sum_o > 0) & (had_contact == 1), 1, 0))
 ```
 
