@@ -1,0 +1,184 @@
+---
+title: "ppcs 2005 Fryer"
+author: "Brenda Fried"
+date: "9/6/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(foreign)
+library(here)
+```
+
+```{r}
+# Loading in the dataset
+
+ppcs_2005_F <- read.spss(here("raw_data", "20020-0001-Data.sav"), to.data.frame=TRUE)
+```
+
+```{r}
+ppcs_2005_F <- ppcs_2005_F %>%
+  mutate(had_contact = case_when(
+    (V10 == 'Yes') ~ 1,
+    (V10 == 'No') ~ 0
+  ))
+```
+
+```{r}
+#Civilian race
+
+#Comments from Fryer's code:
+#if you are any mix of black and something else you are black;
+#hispanic if you are anything but black and hispanic
+#white is only white non-hispanic;
+#other is any non-white non-black non-hispanic
+
+b <- c("Black only", "White-black", "Black-ai/an", "Black-Asian", "White-Black-ai", "Black-ha/pi")
+o <- c("Asian only", "Ha/pi only", "White-ai/an", "Ai/an only", "White-Asian", "White-Hawaiian", "Asian-ha/pi", "White-ai-Asian", "4 or 5 races", "2 or 3 races", "White-Asian-ha", "Ai-Asian")
+
+ppcs_2005_F <- ppcs_2005_F %>% 
+  mutate(civilian_race = case_when(
+    (V5 %in% b) ~ "black", 
+    (V6 == "Yes" & !(V5 %in% b)) ~ "hispanic", 
+    (V5 == "White only" & V6 != "Yes") ~ "white", 
+    (V5 %in% o & V6 != "Yes") ~ "other",
+  ))
+```
+
+```{r}
+# Civilian_age
+ppcs_2005_F <- ppcs_2005_F %>% 
+  mutate(civilian_age = V4)
+
+```
+
+```{r}
+# Civilian_gender
+ppcs_2005_F <- ppcs_2005_F %>%
+  mutate(civilian_gender = case_when((V3 == "Male") ~ 1,
+                                     (V3 == "Female") ~ 0
+  ))
+
+```
+
+```{r}
+#civilian employed
+ppcs_2005_F <- ppcs_2005_F %>%
+  mutate(civilian_employed = case_when(
+                              (WORK == "Yes") ~ 1,
+                              (WORK == "No") ~ 0 
+         ))
+```
+
+```{r}
+#civilian income
+ppcs_2005_F <- ppcs_2005_F %>%
+  mutate(civilian_income = case_when((INCOME == "Less than $20,000 or na") ~ 1,
+                                     (INCOME == "$20,000-$49,000") ~ 2,
+                                     (INCOME == "$50,000 or more") ~ 3
+    
+  ))
+```
+
+```{r}
+# population size
+ppcs_2005_F <- ppcs_2005_F %>%
+  mutate(population_size = case_when((PLACE == "Under 100,000/not in a place") ~ 1,
+                                     (PLACE == "100,000-499,999") ~ 2,
+                                     (PLACE == "500,000-999,999") ~ 3,
+                                     (PLACE == "1 million or more") ~ 4,
+    
+  ))
+```
+
+```{r}
+#police used force
+ppcs_2005_F <- ppcs_2005_F %>%
+  mutate(police_used_force = case_when(
+    (V12 == 'Yes' & V13 == 'No') | (V12 == 'Yes' & V13 == 'Yes' & V14 == 'Yes') ~ 1,
+    (V12 == 'No') ~ 0
+  ))
+```
+
+```{r}
+#other use of force
+ppcs_2005_F <- ppcs_2005_F %>%
+  mutate(hit_kick = ifelse(V18 == 'Kick or hit', 1, NA)) %>%
+  mutate(grab_push = ifelse(V17 == 'Push or grab', 1, NA)) %>%
+  mutate(point_gun = ifelse(V20 == 'Point gun', 1, NA)) %>%
+  mutate(pepper_stun = ifelse(V19 == 'Use pepper spray', 1, NA)) %>%
+  mutate(other_force = ifelse(V21 == 'Use other force', 1, NA)) 
+
+ppcs_2005_tmp <- ppcs_2005_F %>%
+  select(other_force, grab_push, hit_kick, point_gun, pepper_stun)
+
+ppcs_2005_F <- ppcs_2005_F %>%
+  mutate(force_sum = rowSums(ppcs_2005_tmp, na.rm = TRUE)) %>%
+  mutate(any_force = ifelse((force_sum > 0) & (had_contact == 1), 1, 0))
+
+## This is to replace NA's with 0 - takes too long to run. come up with other solution.
+# replace_0 <- function(x) {
+#   ifelse(ppcs_2005_F$any_force == 1 & is.na(x), 0 , x)
+# }
+# 
+# replace_0 <- Vectorize(replace_0)
+# 
+# columns <- c(colnames(ppcs_2005_tmp))
+# 
+# df <- ppcs_2005_F %>%
+#   mutate_at(vars(columns), replace_0)
+
+```
+
+```{r}
+#civilian arrested
+
+ppcs_2005_F <- ppcs_2005_F %>%
+  mutate(civilian_arrested = case_when(
+    (V61 == 'Yes' | V82 == 'Yes') ~ 1,
+    (V61 == 'No' | V82 == 'No') ~ 0,
+  ))
+```
+
+```{r}
+#civilian is handcuffed
+
+ppcs_2005_F <- ppcs_2005_F %>%
+  mutate(civilian_is_handcuffed = case_when(
+    (V60 == 'Yes' | V81 == 'Yes') ~ 1,
+    (V60 == 'No' | V81 == 'No') ~ 0,
+    (police_used_force == 0 & is.na(V60) & is.na(V81)) ~ 0
+  ))
+
+ppcs_2005_F <- ppcs_2005_F %>%
+  mutate(officer_handcuffed = case_when(
+    (civilian_is_handcuffed == 1 & civilian_arrested != 1) ~ 1,
+    ((civilian_is_handcuffed == 1 & civilian_arrested == 1) | civilian_is_hancuffed == 0) ~ 0
+  )) %>% 
+  mutate(officer_handcuffed = case_when(
+    (police_used_force == 0 & is.na(officer_handcuffed)) ~ 0
+  ))
+
+```
+
+```{r}
+#typeof incident
+ppcs_2005_F <- ppcs_2005_F %>%
+  mutate(type_of_incident = case_when(
+    (V25 == 'Yes' | V27 == 'Yes') ~ "traffic",
+    (V25 == 'No' | V27 == 'No') ~ "other"
+  )) %>%
+  mutate(type_of_incident = case_when(
+    (is.na(type_of_incident) & !(is.na(police_used_force))) ~ "missing"
+  ))
+```
+
+```{r}
+#officer race
+```
+
