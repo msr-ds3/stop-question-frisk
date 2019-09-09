@@ -158,7 +158,7 @@ ppcs_2005_F <- ppcs_2005_F %>%
 ppcs_2005_F <- ppcs_2005_F %>%
   mutate(officer_handcuffed = case_when(
     (civilian_is_handcuffed == 1 & civilian_arrested != 1) ~ 1,
-    ((civilian_is_handcuffed == 1 & civilian_arrested == 1) | civilian_is_hancuffed == 0) ~ 0
+    ((civilian_is_handcuffed == 1 & civilian_arrested == 1) | civilian_is_handcuffed == 0) ~ 0
   )) %>% 
   mutate(officer_handcuffed = case_when(
     (police_used_force == 0 & is.na(officer_handcuffed)) ~ 0
@@ -167,18 +167,114 @@ ppcs_2005_F <- ppcs_2005_F %>%
 ```
 
 ```{r}
-#typeof incident
+#type of incident
 ppcs_2005_F <- ppcs_2005_F %>%
   mutate(type_of_incident = case_when(
     (V25 == 'Yes' | V27 == 'Yes') ~ "traffic",
-    (V25 == 'No' | V27 == 'No') ~ "other"
-  )) %>%
-  mutate(type_of_incident = case_when(
-    (is.na(type_of_incident) & !(is.na(police_used_force))) ~ "missing"
+    (V25 == 'No' | V27 == 'No') ~ "other",
+    ((is.na(V25) | is.na(V27)) & !(is.na(police_used_force))) ~ "missing"
   ))
 ```
 
 ```{r}
 #officer race
+ppcs_2005_F <- ppcs_2005_F %>%
+  mutate(off_race = case_when(
+    (V45 == '1 officer' & V46 == 'White') ~ 'white',
+    (V45 == '1 officer' & V46 == 'Black') ~ 'black',
+    (V45 == '1 officer' & V46 == 'Other') ~ 'other',
+    (V45 == 'More than 1 officer' & (V47 == 'All White' | V47 == 'Mostly White')) ~ 'white',
+    (V45 == 'More than 1 officer' & (V47 == 'All Black' | V47 == 'Mostly Black')) ~ 'black',
+    (V45 == 'More than 1 officer' & (V47 == 'All some other race' | V47 == 'Mostly some other race')) ~ 'other',
+    (V47 == 'Equally mixed') ~ 'split'
+  ))
+```
+
+```{r}
+#time of encounter
+ppcs_2005_F <- ppcs_2005_F %>%
+  mutate(time_of_encounter = case_when(
+    (V48 == 'No') ~ 1, #traffic stops only (Fryer)
+    (V48 == 'Yes') ~ 0
+  ))
+```
+
+```{r}
+#civilian searched
+ppcs_2005_F <- ppcs_2005_F %>%
+  mutate(civilian_searched = case_when(
+    (V55 == 'Yes' | V75 == 'Yes')~ 1,
+    (V55 == 'No' | V75 == 'No')~ 0
+  ))
+```
+
+```{r}
+#civilian guilty of carrying drugs or illegal items
+ppcs_2005_F <- ppcs_2005_F %>%
+  mutate(civilian_guilty_of_illegal = case_when(
+    (V56 == 'Yes' | V78 == 'Yes')~ 1,
+    (V56 == 'No' | V78 == 'No')~ 0
+  ))
+```
+
+```{r}
+#civilian perceived excessive force
+ppcs_2005_F <- ppcs_2005_F %>%
+  mutate(excessive_force = case_when(
+    (V69 == 'Yes' | V72 == 'Yes')~ 1,
+    (V69 == 'No' | V72 == 'No')~ 0,
+    (police_used_force == 0 & (is.na(V69)|is.na(V72))) ~ 0
+  ))
+```
+
+```{r}
+#civilian injured
+ppcs_2005_F <- ppcs_2005_F %>%
+  mutate(civilian_injured = case_when(
+    (V71 == 'Yes' | V74 == 'Yes') ~ 1,
+    (V71 == 'No' | V74 == 'No') ~ 0,
+    (police_used_force == 0 & (is.na(V71) | is.na(V74))) ~ 0
+  ))
+```
+
+```{r}
+#civilian_behavior - no info.
+ppcs_2005_F <- ppcs_2005_F %>%
+  mutate(civilian_threatened = NA) %>%
+  mutate(civilian_disobey = NA) %>%
+  mutate(civilian_physical = NA) %>%
+  mutate(civilian_argued = NA) %>%
+  mutate(civilian_other_behavior = NA) %>%
+  mutate(civilian_escape = NA) %>%
+  mutate(civilian_resist = NA) %>%
+  mutate(civilian_complained = NA)
+```
+
+```{r}
+#fired gun
+#shot suspect
+ppcs_2005_F <- ppcs_2005_F %>%
+  mutate(fired_gun = NA) %>%
+  mutate(shot_suspect = NA)
+```
+
+```{r}
+#year
+ppcs_2005_F <- ppcs_2005_F %>%
+  mutate(year = 2005)
+```
+
+```{r}
+#Note from Fryer:
+# /* Note: Civilian behavior is not asked in this year.  Injury is still only asked of those who have force used against them,
+#  - but that I recode to zero for those who don't have use of force against them, 
+# because they can't ahve been injured if there was no use of force. Weapons/searching car is asked for traffic stops even if you
+# did not have force used against you, whereas weapons/searching individual is asked for other stops only if you 
+# experienced a use of force against you. Same for sarrested, ssearched, sdrugs. Daytime is only asked in traffic stops.
+# */;
+```
+
+```{r}
+
 ```
 
