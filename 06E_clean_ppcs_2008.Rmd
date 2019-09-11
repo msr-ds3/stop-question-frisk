@@ -21,24 +21,11 @@ ppcs_2008 <- ppcs_2008 %>%
   mutate(face_to_face = V2) %>%
   mutate(contact = NA_real_) %>%
   mutate(num_face_to_face = NA_real_)
-# create the civilian race column
-# black includes black and black hispanic
-# hispanic includes white hispanic and any other combination
-# other is anything else
-
-#white includes:
-# 1 
-# black includes:
-# 2 and 2 in RACEHISP
-# hispanic includes:
-# HISP = 1
-# other includes:
-# 3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20
 ```
 
 ```{r}
 #Civilian Race
-ppcs_2008_revised <- ppcs_2008 %>% 
+ppcs_2008 <- ppcs_2008 %>% 
   mutate(civilian_race = case_when(
     (RACE == 1 & HISP == 2) ~ "white",
     (RACE == 2 ) ~ "black",
@@ -47,32 +34,32 @@ ppcs_2008_revised <- ppcs_2008 %>%
   ))
 
 #check the race distribution
-summary(ppcs_2008_revised$civilian_race)
+summary(ppcs_2008$civilian_race)
 ```
 
 ```{r}
 #Civilian Age
-ppcs_2008_revised <- ppcs_2008_revised %>%
+ppcs_2008 <- ppcs_2008 %>%
   mutate( civilian_age = AGE)
 ```
 
 ```{r}
 #Civilian Gender
-ppcs_2008_revised <- ppcs_2008_revised %>%
+ppcs_2008 <- ppcs_2008 %>%
   mutate(civilian_gender = SEX)
 ```
 
 ```{r}
 #Civilian Income
 # missing column in 2008
-ppcs_2008_revised <- ppcs_2008_revised %>%
+ppcs_2008 <- ppcs_2008 %>%
   mutate(civilian_income = NA)
 ```
 
 ```{r}
 #Civilian Employed
 #since civilian employed (according to appendix) is coded as only 1(yes) or 0(otherwise),
-ppcs_2008_revised <- ppcs_2008_revised %>%
+ppcs_2008 <- ppcs_2008 %>%
   mutate(civilian_employed = ifelse(WORK != 1, 0, 1))
 ```
 
@@ -80,7 +67,7 @@ ppcs_2008_revised <- ppcs_2008_revised %>%
 #Population Size
 # missing column in 2008, make all 1,
 
-ppcs_2008_revised <- ppcs_2008_revised %>%
+ppcs_2008 <- ppcs_2008 %>%
   mutate(population_size = NA)
 ```
 
@@ -89,7 +76,7 @@ ppcs_2008_revised <- ppcs_2008_revised %>%
 #Time of encounter: appendix does not include 0, 8, 9 so will make those NA
 day <- c(1:3)
 night <- c(4:6)
-ppcs_2008_revised <- ppcs_2008_revised %>% 
+ppcs_2008 <- ppcs_2008 %>% 
   mutate(time_of_encounter = case_when(
     (V4 %in% day) ~ 3,
     (V4 %in% night) ~ 6,
@@ -97,7 +84,7 @@ ppcs_2008_revised <- ppcs_2008_revised %>%
   )) %>%
   mutate(time_of_encounter = as.factor(time_of_encounter))
 
-summary(ppcs_2008_revised$time_of_encounter)
+summary(ppcs_2008$time_of_encounter)
 ```
 
 ```{r}
@@ -110,7 +97,7 @@ summary(ppcs_2008_revised$time_of_encounter)
 #officer race black:
 # includes:
 # multiple officers (V24B) black, mostly black, equally mixed
-ppcs_2008_revised <- ppcs_2008_revised %>%
+ppcs_2008 <- ppcs_2008 %>%
   mutate(off_black = case_when(
     (V24B == 2 | V24B == 5 | V24A == 2 ) ~ 1,
     TRUE ~ 0
@@ -119,7 +106,7 @@ ppcs_2008_revised <- ppcs_2008_revised %>%
 #officer race white:
 #includes:
 #multiple officers (V24B) white, mostly white, equally mixed
-ppcs_2008_revised <- ppcs_2008_revised %>%
+ppcs_2008 <- ppcs_2008 %>%
   mutate(off_white = case_when(
     (V24B == 1 | V24B == 4 | V24A == 1 ) ~ 1,
     TRUE ~ 0
@@ -128,7 +115,7 @@ ppcs_2008_revised <- ppcs_2008_revised %>%
 #officer race other
 #includes:
 #multiple officers (V24B) 
-ppcs_2008_revised <- ppcs_2008_revised %>%
+ppcs_2008 <- ppcs_2008 %>%
   mutate(off_other = case_when(
     (V24B == 3 | V24B == 6 | V24A == 3 ) ~ 1,
     TRUE ~ 0
@@ -137,7 +124,7 @@ ppcs_2008_revised <- ppcs_2008_revised %>%
 
 ```{r}
 #Officer Split Race
-ppcs_2008_revised <- ppcs_2008_revised %>%
+ppcs_2008 <- ppcs_2008 %>%
   mutate(off_split = case_when(
     (V24B == 7)~ 1,
     TRUE ~ 0
@@ -146,14 +133,14 @@ ppcs_2008_revised <- ppcs_2008_revised %>%
 
 ```{r}
 #Officer Hispanic Race
-ppcs_2008_revised <- ppcs_2008_revised %>%
+ppcs_2008 <- ppcs_2008 %>%
   mutate(off_hispanic = 0)
 
 ```
 
 ```{r}
 #Type of Incident
-ppcs_2008_revised <- ppcs_2008_revised %>%
+ppcs_2008 <- ppcs_2008 %>%
   mutate(type_of_incident = case_when(
     (REASON %in% 2:3) ~ 2,
     (REASON %in% c(1, 4:7)) ~ 3,
@@ -166,7 +153,7 @@ ppcs_2008_revised <- ppcs_2008_revised %>%
 #Civilian Behavior
 # 1 if any of the columns are 1
 # 0 if all are 0
-ppcs_2008_revised <- ppcs_2008_revised %>%
+ppcs_2008 <- ppcs_2008 %>%
   mutate(civilian_behavior = case_when(
     (V12A == 1 | V12B == 1 | V12C == 1 | V12D == 1 | V11 == 1 | V12E == 1) ~ 1,
     TRUE ~ 0
@@ -177,30 +164,30 @@ ppcs_2008_revised <- ppcs_2008_revised %>%
 ```{r}
 #Alternative Outcomes
 # searched 1 if yes and 0 otherwise
-ppcs_2008_revised <- ppcs_2008_revised %>% 
+ppcs_2008 <- ppcs_2008 %>% 
   mutate(civilian_searched = ifelse(SEARCH == 1, 1, 0 ))
 
 #arrested
-ppcs_2008_revised <- ppcs_2008_revised %>% 
+ppcs_2008 <- ppcs_2008 %>% 
   mutate(civilian_arrested = ifelse(V9 == 1, 1, 0 ))
 
 #found 
-ppcs_2008_revised <- ppcs_2008_revised %>%
+ppcs_2008 <- ppcs_2008 %>%
   mutate(civilian_guilty_of_illegal = ifelse(FOUND == 1, 1, 0 ))
 
 #injured
-ppcs_2008_revised <- ppcs_2008_revised %>%
+ppcs_2008 <- ppcs_2008 %>%
   mutate(civilian_injured = ifelse(V8 == 1, 1, 0))
 
 #excessive force
-ppcs_2008_revised <- ppcs_2008_revised %>%
+ppcs_2008 <- ppcs_2008 %>%
   mutate(excess_force = ifelse(V7 == 1, 1, 0))
 
 ```
 
 ```{r}
 #Force Use
-ppcs_2008_revised <- ppcs_2008_revised %>%
+ppcs_2008 <- ppcs_2008 %>%
   mutate(any_force = case_when(
     (V5 == 1) ~ 1,
     TRUE ~ 0
@@ -231,7 +218,7 @@ ppcs_2008_revised <- ppcs_2008_revised %>%
 
 ```{r}
 #Cleaned and selected columns
-ppcs_2008 <- ppcs_2008_revised %>%
+ppcs_2008 <- ppcs_2008 %>%
   select(civilian_race, 
          civilian_age, 
          civilian_gender, 
