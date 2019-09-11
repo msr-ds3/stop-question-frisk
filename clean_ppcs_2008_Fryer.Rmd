@@ -51,7 +51,7 @@ ppcs_2008_F <- ppcs_2008_F %>%
 ppcs_2008_F <- ppcs_2008_F %>%
   mutate(civilian_gender = case_when(
     (SEX == 1) ~ 1,
-    (SEX == 2) ~ 2
+    (SEX == 2) ~ 0
   ))
 ```
 
@@ -135,6 +135,14 @@ ppcs_2008_F <- ppcs_2008_F %>%
 #    if it's NA and police_used_force == 0 
 #    replace with 0
 
+ppcs_2008_F <- ppcs_2008_F %>%
+  mutate(hit_kick = ifelse(is.na(hit_kick) & police_used_force == 0, 0, hit_kick)) %>%
+  mutate(grab_push = ifelse(is.na(grab_push) & police_used_force == 0, 0, grab_push)) %>%
+  mutate(point_gun = ifelse(is.na(point_gun) & police_used_force == 0, 0, point_gun)) %>%
+  mutate(pepper_stun = ifelse(is.na(pepper_stun) & police_used_force == 0, 0, pepper_stun)) %>%
+  mutate(other_force = ifelse(is.na(other_force) & police_used_force == 0, 0, other_force))
+
+
 
 ```
 
@@ -166,6 +174,18 @@ ppcs_2008_F <- ppcs_2008_F %>%
 ```
 
 ```{r}
+ppcs_2008_F <- ppcs_2008_F %>%
+  mutate(civilian_injured = case_when(
+    (V8 == 1) ~ 1,
+    (V8 == 2) ~ 0,
+    TRUE ~ NA_real_
+  )) %>%
+  mutate(civilian_injured = ifelse(is.na(civilian_injured) & police_used_force == 0, 0, civilian_injured ))
+    
+```
+
+
+```{r}
 #officer shot suspect
 ppcs_2008_F <- ppcs_2008_F %>%
   mutate(shot_suspect = case_when(
@@ -192,7 +212,7 @@ ppcs_2008_F <- ppcs_2008_F %>%
     (V12A == 1) ~ 1,
     (V12A == 2) ~ 0
   )) %>% 
-  mutate(other_bahevior = NA) %>%
+  mutate(other_behavior = NA) %>%
   mutate(civilian_escape = case_when(
     (V12B == 1) ~ 1,
     (V12B == 2) ~ 0
@@ -231,7 +251,286 @@ ppcs_2008_F <- ppcs_2008_F %>%
 #civilian searched
 ppcs_2008_F <- ppcs_2008_F %>%
   mutate(civilian_searched = case_when(
-    (V29B == 1 | V29D == 1 | V48 == 2) ~ 1,
+    (V29B == 1 | V29D == 1 | V48 == 1) ~ 1,
+    ((V29B == 2 & V29D == 2) | V48 == 2) ~ 0
+  ))
+```
+
+```{r}
+#civilian guilty of carrying drugs, alcohol, or weapon
+ppcs_2008_F <- ppcs_2008_F %>%
+  mutate(civilian_guilty_of_illegal = case_when(
+    (V34 == 1 | V49 == 1) ~ 1,
+    (V34 == 2 | V49 == 2) ~ 0
+  ))
+```
+
+```{r}
+#fired gun
+ppcs_2008_F <- ppcs_2008_F %>%
+  mutate(fired_gun = NA)
+```
+
+```{r}
+#year
+ppcs_2008_F <- ppcs_2008_F %>%
+  mutate(year = 2008)
+```
+
+---
+title: "ppcs 2008 Fryer"
+author: "Brenda Fried"
+date: "9/9/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(readr)
+library(tidyverse)
+library(here)
+```
+
+```{r}
+ppcs_2008_F <- read_tsv(here("raw_data","32022-0001-Data.tsv"))
+```
+
+```{r}
+#had contact
+ppcs_2008_F <- ppcs_2008_F %>%
+  mutate(had_contact = case_when(
+    (V2 == 1) ~ 1,
+    (V2 == 2) ~ 0,
+    (V2== 0) ~ NA_real_
+  ))
+```
+
+```{r}
+#civilian race
+ppcs_2008_F <- ppcs_2008_F %>%
+  mutate(civilian_race = case_when(
+    (RACEHISP == 2) ~ "black",
+    (RACEHISP == 3) ~ "hispanic",
+    (RACEHISP == 1) ~ "white",
+    (RACEHISP == 4 | RACEHISP == 5) ~ "other"
+  ))
+```
+
+```{r}
+#civilian_age
+ppcs_2008_F <- ppcs_2008_F %>%
+  mutate(civilian_age = AGE)
+```
+
+```{r}
+#civilian gender
+ppcs_2008_F <- ppcs_2008_F %>%
+  mutate(civilian_gender = case_when(
+    (SEX == 1) ~ 1,
+    (SEX == 2) ~ 0
+  ))
+```
+
+```{r}
+#civilian employed
+ppcs_2008_F <- ppcs_2008_F %>%
+  mutate(civilian_employed = case_when(
+    (WORK == 1) ~ 1,
+    (WORK == 2) ~ 0
+  ))
+```
+
+```{r}
+#civilian income - not in 2008
+ppcs_2008_F <- ppcs_2008_F %>%
+  mutate(civilian_income = NA)
+```
+
+```{r}
+#population size - not in 2008
+ppcs_2008_F <- ppcs_2008_F %>%
+  mutate(population_size = NA)
+```
+
+```{r}
+#time of encounter
+ppcs_2008_F <- ppcs_2008_F %>%
+  mutate(time_of_encounter = case_when(
+    (V4 %in% c(1,2,3)) ~ 1,
+    (V4 %in% c(4,5,6)) ~ 0
+  ))
+```
+
+```{r}
+#police used force
+ppcs_2008_F <- ppcs_2008_F %>%
+  mutate(police_used_force = case_when(
+    (V5 == 1) ~ 1,
+    (V5 == 2) ~ 0
+  ))
+```
+
+```{r}
+#civilian arrested
+ppcs_2008_F <- ppcs_2008_F %>%
+  mutate(civilian_arrested = case_when(
+    (V9 == 1) ~ 1,
+    (V9 == 2) ~ 0
+  )) %>% 
+  mutate(civilian_arrested = ifelse(police_used_force == 0 & is.na(civilian_arrested), 0, civilian_arrested))
+
+```
+
+```{r}
+#officer use force
+ppcs_2008_F <- ppcs_2008_F %>%
+  mutate(hit_kick = case_when(
+    (V6E == 1)~ 1,
+    (V6E == 2) ~ 0
+  )) %>%
+  mutate(grab_push = case_when(
+    (V6D == 1) ~ 1,
+    (V6D == 2) ~ 0
+  )) %>%
+  mutate(point_gun = case_when(
+    (V6H == 1) ~ 1,
+    (V6H == 2) ~ 0
+  )) %>%
+  mutate(pepper_stun = case_when(
+    (V6F == 1 | V6G == 1) ~ 1,
+    (V6F == 2 | V6G == 2) ~ 0
+  )) %>%
+  mutate(other_force = case_when(
+    (V6I == 1) ~ 1,
+    (V6I == 2) ~ 0
+  ))
+```
+
+```{r}
+# for all of these check 
+#    if it's NA and police_used_force == 0 
+#    replace with 0
+
+ppcs_2008_F <- ppcs_2008_F %>%
+  mutate(hit_kick = ifelse(is.na(hit_kick) & police_used_force == 0, 0, hit_kick)) %>%
+  mutate(grab_push = ifelse(is.na(grab_push) & police_used_force == 0, 0, grab_push)) %>%
+  mutate(point_gun = ifelse(is.na(point_gun) & police_used_force == 0, 0, point_gun)) %>%
+  mutate(pepper_stun = ifelse(is.na(pepper_stun) & police_used_force == 0, 0, pepper_stun)) %>%
+  mutate(other_force = ifelse(is.na(other_force) & police_used_force == 0, 0, other_force))
+
+
+
+```
+
+```{r}
+#civilian is handcuffed
+ppcs_2008_F <- ppcs_2008_F %>%
+  mutate(civilian_is_handcuffed = case_when(
+    (V10 == 1) ~ 1,
+    (V10 == 2) ~ 0,
+    (police_used_force == 0 & V10 == 0) ~ 0
+  )) %>%
+  mutate(officer_handcuffed = case_when(
+    (civilian_is_handcuffed == 1 & civilian_arrested != 0) ~ 1,
+    ((civilian_is_handcuffed == 1 & civilian_arrested == 1) | civilian_is_handcuffed == 0) ~ 0
+  )) %>%
+  mutate(officer_handcuffed = ifelse(is.na(officer_handcuffed) & police_used_force == 0, 0, officer_handcuffed ))
+```
+
+```{r}
+#civilian perceived excessive force
+ppcs_2008_F <- ppcs_2008_F %>%
+  mutate(excessive_force = case_when(
+    (V7 == 1) ~ 1,
+    (V7 == 2) ~ 0,
+    TRUE ~ NA_real_
+  )) %>%
+  mutate(excessive_force = ifelse(is.na(excessive_force) & police_used_force == 0, 0, excessive_force ))
+    
+```
+
+```{r}
+ppcs_2008_F <- ppcs_2008_F %>%
+  mutate(civilian_injured = case_when(
+    (V8 == 1) ~ 1,
+    (V8 == 2) ~ 0,
+    TRUE ~ NA_real_
+  )) %>%
+  mutate(civilian_injured = ifelse(is.na(civilian_injured) & police_used_force == 0, 0, civilian_injured ))
+    
+```
+
+
+```{r}
+#officer shot suspect
+ppcs_2008_F <- ppcs_2008_F %>%
+  mutate(shot_suspect = case_when(
+    (V8A1 == 1) ~ 1
+  ))
+```
+
+```{r}
+#civilian behavior
+ppcs_2008_F <- ppcs_2008_F %>%
+  mutate(civilian_threatened = case_when(
+    (V11 == 1) ~ 1,
+    (V11 == 2) ~ 0
+  )) %>%
+  mutate(civilian_physical = case_when(
+    (V12C == 1 | V12E == 1) ~ 1,
+    (V12C == 2 | V12E == 2) ~ 0
+  )) %>% 
+  mutate(civilian_argued = case_when(
+    (V11 == 1) ~ 1,
+    (V11 == 2) ~ 0
+  )) %>%
+  mutate(civilian_disobey = case_when(
+    (V12A == 1) ~ 1,
+    (V12A == 2) ~ 0
+  )) %>% 
+  mutate(other_behavior = NA) %>%
+  mutate(civilian_escape = case_when(
+    (V12B == 1) ~ 1,
+    (V12B == 2) ~ 0
+  )) %>%
+  mutate(civilian_resist = case_when(
+    (V12D == 1) ~ 1,
+    (V12D == 2) ~ 0
+  )) %>%
+  mutate(civilian_complained = NA)
+```
+
+```{r}
+#type of incident
+ppcs_2008_F <- ppcs_2008_F %>%
+  mutate(type_of_incident = case_when(
+    (V13 == 1 | V14A == 1) ~ "traffic",
+    ((V13 != 1 & V14A != 1) & had_contact == 1) ~ "other"
+  ))
+```
+
+```{r}
+#officer race
+ppcs_2008_F <- ppcs_2008_F %>%
+  mutate(off_race = case_when(
+    (V23 == 1 & V24A == 1) ~ "white",
+    (V23 == 1 & V24A == 2) ~ "black",
+    (V23 == 1 & V24A == 3) ~ "other",
+    (V23 == 2 & (V24B == 1 | V24B == 4)) ~ "white",
+    (V23 == 2 & (V24B == 2 | V24B == 5)) ~ "black",
+    (V23 == 2 & (V24B == 3 | V24B == 6)) ~ "other",
+    (V23 == 2 & V24B == 7) ~ "split"
+  ))
+```
+
+```{r}
+#civilian searched
+ppcs_2008_F <- ppcs_2008_F %>%
+  mutate(civilian_searched = case_when(
+    (V29B == 1 | V29D == 1 | V48 == 1) ~ 1,
     ((V29B == 2 & V29D == 2) | V48 == 2) ~ 0
   ))
 ```
