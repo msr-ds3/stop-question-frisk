@@ -9,8 +9,8 @@
 #
 
 # set a relative path for the NYPD sqf data
-# (use current directory by default)
-DATA_DIR=.
+
+DATA_DIR=./raw_data
 
 # change to the data directory
 cd $DATA_DIR
