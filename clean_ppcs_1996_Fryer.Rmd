@@ -75,7 +75,7 @@ ppcs_1996_F <- ppcs_1996_F %>%
 ```{r}
 #type of incident
 ppcs_1996_F <- ppcs_1996_F %>%
-  mutate(type_of_incident = NA)
+  mutate(type_of_incident = "missing")
 ```
 
 ```{r}
@@ -109,45 +109,58 @@ ppcs_1996_F <- ppcs_1996_F %>%
     (WEAPONS_FLASHLIGHT == 'Yes' & HOW_USED_FLASHLIGHT == 'Used it on resp') ~ 1, 
     (WEAPONS_POLICE_DOG == 'Yes' & HOW_USED_POLICE_DOG == 'Used it on resp') ~ 1, 
     (WEAPONS_SOMETHING_ELSE == 'Yes' & HOW_USED_OTHER_WEAPON == 'Used it on resp') ~ 1,
-    TRUE ~ 0
   )) %>%
   mutate(grab_push = case_when(
     (POLICE_DO_HOLD_YOU_BY_THE_ARM == 'Yes') ~ 1,
     (POLICE_DO_PUSH_YOU == 'Yes') ~ 1,
-    TRUE ~ 0
   )) %>%
   mutate(hit_kick = case_when(
     (POLICE_DO_HIT_OR_PUNCH_YOU == 'Yes') ~ 1,
     (POLICE_DO_KICK_YOU == 'Yes') ~ 1,
     (POLICE_DO_USE_A_CHOKEHOLD == 'Yes') ~ 1,
-    TRUE ~ 0
   )) %>%
   mutate(point_gun = case_when(
     ((WEAPONS_FIREARM == 'Yes') & ((HOW_USED_FIREARM == 'Used it on resp') | (HOW_USED_FIREARM == 'Thrtn resp only'))) ~ 1,
-    TRUE ~ 0
   )) %>%
   mutate(pepper_stun = case_when(
     ((WEAPONS_CHEMICAL_OR_PEPPER_SPRAY == 'Yes') & ((HOW_USED_CHEMICAL_OR_PEPPER_SPRAY == 'Used it on resp') | (HOW_USED_CHEMICAL_OR_PEPPER_SPRAY == 'Thrtn resp only')))~ 1,
-    TRUE ~ 0
   ))
-```
 
-```{r}
-#civilian handcuffed - come back to this
-ppcs_1996_F <- ppcs_1996_F %>% 
-  mutate(officer_handcuffed = NA)
-```
-
-
-```{r}
 #any use of force
 ppcs_1996_tmp <- ppcs_1996_F %>%
   select(other_force, grab_push, hit_kick, point_gun, pepper_stun)
 
 ppcs_1996_F <- ppcs_1996_F %>%
   mutate(force_sum = rowSums(ppcs_1996_tmp, na.rm = TRUE)) %>%
-  mutate(any_force = ifelse((force_sum > 0) & (had_contact == 1), 1, 0))
+  mutate(any_force = ifelse((force_sum > 0) & !(is.na(force_sum) & had_contact == 1), 1, NA)) %>% mutate(any_force = ifelse(force_sum == 0, 0, any_force))
+
 ```
+
+```{r}
+#assert that if reported use of force, there is a type coded
+ppcs_1996_F %>%
+  mutate(assertion = case_when(
+    (OFFICER_USE_ANY_FORM_OF_PHYSICAL_FORCE == 'Yes' & !(is.na(any_force)) & any_force == 1) ~ 'good',
+    (OFFICER_USE_ANY_FORM_OF_PHYSICAL_FORCE == 'Yes' & !(is.na(any_force)) & any_force == 0) ~ 'bad',
+    TRUE ~ 'NA'
+  )) %>% group_by(assertion) %>% summarise(n())
+
+ppcs_1996_F <- ppcs_1996_F %>%
+  mutate_at(.funs = list( ~ ifelse(is.na(.) & ppcs_1996_F$any_force == 1, 0, .)), .vars = colnames(ppcs_1996_tmp))
+
+
+
+```
+
+
+```{r}
+#civilian handcuffed
+ppcs_1996_F <- ppcs_1996_F %>% 
+  mutate(officer_handcuffed = NA, civilian_is_handcuffed = NA)
+
+#comment from Fryer code: they say if they have been handcuffed in the last year but not in the incident in question.
+```
+
 
 ```{r}
 #officer fired gun - not sure what this is used for
@@ -208,11 +221,16 @@ ppcs_1996_tmp <- ppcs_1996_F %>%
 
 ppcs_1996_F <- ppcs_1996_F %>%
   mutate(behav_sum = rowSums(ppcs_1996_tmp, na.rm = TRUE)) %>%
-  mutate(any_behavior = ifelse((behav_sum > 0) & (had_contact == 1), 1, 0))
+  mutate(any_behavior = ifelse((behav_sum > 0) & (had_contact == 1) & !(is.na(behav_sum)), 1, ifelse(behav_sum == 0, 0, NA)))
+
+ppcs_1996_F <- ppcs_1996_F %>%
+  mutate_at(.funs = list( ~ ifelse(is.na(.) & any_behavior == 1, 0, .)), .vars = colnames(ppcs_1996_tmp))
+
+
 ```
 
 ```{r}
-# drop civilian has weapon, don't want to be confused with civilian guilty, only needed to get the row total above - from fryer code
+# Fryer: drop civilian has weapon, don't want to be confused with civilian guilty, only needed to get the row total above - from fryer code
 ppcs_1996_F <- ppcs_1996_F %>% select(-civilian_has_weapon)
 ```
 
@@ -258,8 +276,10 @@ ppcs_1996_F <- ppcs_1996_F %>%
 ppcs_1996_F <- ppcs_1996_F %>%
   mutate(civilian_injured = case_when(
     (WERE_YOU_INJURED_AS_A_RESULT_OF_INCIDENT == 'Yes') ~ 1,
-    (WERE_YOU_INJURED_AS_A_RESULT_OF_INCIDENT == 'No') ~ 0,
-    (WERE_YOU_INJURED_AS_A_RESULT_OF_INCIDENT == 'missing/ni/ou' & police_used_force == 0) ~ 0
+    (WERE_YOU_INJURED_AS_A_RESULT_OF_INCIDENT == 'No') ~ 0
+  )) %>% 
+  mutate(civilian_injured = case_when(
+    (is.na(civilian_injured) & police_used_force == 0) ~ 0
   ))
 ```
 
@@ -268,8 +288,10 @@ ppcs_1996_F <- ppcs_1996_F %>%
 ppcs_1996_F <- ppcs_1996_F %>%
   mutate(excessive_force = case_when(
     (TAKE_ANY_FORMAL_OR_INFORMAL_ACTIONS == 'Yes') ~ 1,
-    (TAKE_ANY_FORMAL_OR_INFORMAL_ACTIONS == 'No') ~ 0,
-    (TAKE_ANY_FORMAL_OR_INFORMAL_ACTIONS == 'missing/ni/ou' & police_used_force == 0) ~ 0
+    (TAKE_ANY_FORMAL_OR_INFORMAL_ACTIONS == 'No') ~ 0
+  )) %>% 
+  mutate(excessive_force = case_when(
+    (is.na(excessive_force) & police_used_force == 0) ~ 0
   ))
 ```
 
@@ -341,7 +363,6 @@ ppcs_1996_F <- ppcs_1996_F %>%
     excessive_force,
     civilian_searched,
     civilian_arrested,
-    civilian_guilty_drugs,
     civilian_guilty_of_illegal,
     year
   )
