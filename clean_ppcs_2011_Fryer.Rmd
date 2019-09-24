@@ -1,0 +1,582 @@
+---
+title: "ppcs_2011_Fryer"
+author: "Brenda Fried"
+date: "9/11/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(here)
+library(tidyverse)
+library(matrixStats)
+
+load(here("raw_data", "34276-0001-Data.rda"))
+ppcs_2011_F <- da34276.0001
+```
+
+```{r}
+#had contact
+ppcs_2011_F <- ppcs_2011_F %>%
+  mutate(had_contact = case_when(
+    (V30 == 998 | V30 == 999) ~ NA_real_,
+    (V30 %in% seq(1, 999)) ~ 1,
+    (V30 == 0 | V30 == -9) ~ 0,
+  ))
+```
+
+```{r}
+b <- c('(02) Black Only', '(06) White-Black', '(10) Black-American Indian', '(11) Black-Asian','(12) Black-Hawaiian/Pacific Islander', '(15) White-Black-American Indian', '(16) White-Black-Asian')
+o <- c('(03) American Indian, Alaskan Native Only', '(04) Asian Only', '(05) Hawaiian/Pacific Islander Only', '(07) White-American Indian', '(08) White-Asian ', '(09) White-Hawaiian', '(13) American Indian-Asian', '(14) Asian-Hawaiian/Pacific Islander', '(17) White-American Indian-Asian',  '(18) White-Asian-Hawaiian', '(19) 2 or 3 Races', '(20) 4 or 5 Races')
+ppcs_2011_F <- ppcs_2011_F %>%
+  mutate(civilian_race = case_when(
+    (RACE %in% b) ~ 'black',
+    (HISP == '(1) Respondent is Hispanic' & !(RACE %in% b)) ~ 'hispanic',
+    (RACE == '(01) White Only' & HISP != '(1) Respondent is Hispanic') ~ 'white',
+    (RACE %in% o & HISP != '(1) Respondent is Hispanic') ~ 'other'
+  ))
+
+```
+
+```{r}
+#AGE
+ppcs_2011_F <- ppcs_2011_F %>% 
+  mutate(civilian_age = AGE) 
+```
+
+```{r}
+#GENDER
+ppcs_2011_F <- ppcs_2011_F %>% 
+  mutate(civilian_gender = case_when(
+    (SEX == '(1) Male') ~ 1,
+    (SEX == '(2) Female') ~ 0
+))
+```
+
+```{r}
+#EMPLOYED
+ppcs_2011_F <- ppcs_2011_F %>% 
+  mutate(civilian_employed = case_when(
+    (WORK == '(1) Yes') ~ 1,
+    (WORK == '(2) No') ~ 0,
+  ))
+```
+
+```{r}
+#INCOME
+ppcs_2011_F <- ppcs_2011_F %>% 
+  mutate(civilian_income = case_when(INCOME =='(1) Less than $20,000 or NA' ~ 1, 
+                                     INCOME == '(2) $20,000 - $49,999' ~ 2,
+                                     INCOME == '(3) $50,000 or more' ~ 3)) 
+```
+
+```{r}
+#POPULATION
+ppcs_2011_F <- ppcs_2011_F %>%
+  mutate(population_size = case_when(
+    (PLACE == '(1) Under 100,000/Not in a place') ~ 1, 
+    (PLACE == '(2) 100,000-499,999') ~ 2,
+    (PLACE == '(3) 500,000-999,999') ~ 3,
+    (PLACE == '(4) 1 million or more') ~ 4
+  )) 
+```
+
+```{r}
+# COMMENT FROM FRYER'S CODE
+# **** NOTE: THIS IS NOT A RESHAPE YEAR - participants were only asked about their most recent 
+# ***        stop, not both street and traffic stops the way they were in 1999. Because the variables
+# ***		   are so complicated, I'm going to keep the variable construction this way and then make 
+# ***		   combined variables at the end, WITHOUT reshaping to avoid double-counting demographics, etc. ;
+```
+
+```{r}
+responses_more_than_1_contact <- c('(1) Yes', '(2) No', '(8) Refused', "(9) Don't know")
+ppcs_2011_F <- ppcs_2011_F %>%
+  mutate(type_of_incident_s = case_when(
+    ((V11 == '(1) Yes' & V31 %in% responses_more_than_1_contact) | V32 == '(05) Respondent was stopped in a public place, but not in a moving vehicle.')  ~ 'street')) %>%
+  mutate(type_of_incident_t = case_when(
+    ((((V13 == '(1) Yes' | V15 == '(1) Yes') & V31 %in% responses_more_than_1_contact)) | (V32 == '(06) Respondent was stopped while driving a motor vehicle' | V32 == '(07) Respondent was a passenger of a motor vehicle that was stopped.')) ~ 'traffic'
+  ))
+      
+```
+
+##Street Incidents
+```{r}
+#they replace each var with a numeric label. I will just use the original label
+
+#codes individuals or multiple officers where there is only 1 race reported
+ppcs_2011_F <- ppcs_2011_F %>%
+  mutate(off_race_1_s = case_when(
+    
+    #only one officer - V65 == 1
+    (V65 == '(1) Yes' & V67 == '(1) Yes' & V68 != '(1) White' & V69 != '(1) Black or African American' & V71 != '(1) Asian') ~ 'hispanic',
+    (V65 == '(1) Yes' & V67 != '(1) Yes' & V68 == '(1) White' & V69 != '(1) Black or African American' & V71 != '(1) Asian') ~ 'white',
+    (V65 == '(1) Yes' & V67 != '(1) Yes' & V68 != '(1) White' & V69 == '(1) Black or African American' & V71 != '(1) Asian') ~ 'black',
+    (V65 == '(1) Yes' & V67 != '(1) Yes' & V68 != '(1) White' & V69 != '(1) Black or African American' & V71 == '(1) Asian') ~ 'other',
+    
+    #more than one officer V65 == 2 (Fryer)
+    (V65 == '(2) No' & V74 == '(1) Yes' & V75 != '(1) White' & V76 != '(1) Black or African American' & V78 != '(1) Asian') ~ 'hispanic',
+    (V65 == '(2) No' & V74 != '(1) Yes' & V75 == '(1) White' & V76 != '(1) Black or African American' & V78 != '(1) Asian') ~ 'white',
+    (V65 == '(2) No' & V74 != '(1) Yes' & V75 != '(1) White' & V76 == '(1) Black or African American' & V78 == '(1) Asian') ~ 'black',
+    (V65 == '(2) No' & V74 != '(1) Yes' & V75 != '(1) White' & V76 != '(1) Black or African American' & V78 == '(1) Asian') ~ 'other'
+  ))
+
+#codes individuals or multiple officers where there is only 1 race reported
+ppcs_2011_F <- ppcs_2011_F %>%
+  mutate(off_race_2_s = case_when(
+    ((V65 == '(1) Yes' & V67 == '(1) Yes') | (V65 == '(2) No' & V74 == '(1) Yes')) ~ 'hispanic',
+    ((V65 == '(1) Yes' & V68 == '(1) Yes') | (V65 == '(2) No' & V75 == '(1) Yes')) ~ 'white',
+    ((V65 == '(1) Yes' & V69 == '(1) Yes') | (V65 == '(2) No' & V76 == '(1) Yes')) ~ 'black',
+    ((V65 == '(1) Yes' & V71 == '(1) Yes') | (V65 == '(2) No' & V78 == '(1) Yes')) ~ 'other',
+    TRUE ~ ""
+  )) 
+
+```
+
+```{r}
+# time of encounter - street
+day <- c('(01) After 6 a.m. - 12 noon', '(02) After 12 noon - 6 p.m.', "(03) Don't know what time of day")
+
+night <- c('(04) After 6 p.m. - 12 midnight', '(05) After 12 midnight - 6 a.m.', "(06) Don't know what time of night")
+
+ppcs_2011_F <- ppcs_2011_F %>%
+  mutate(time_of_encounter_s = case_when(
+  (V81 %in% day) ~ 1,
+  (V81 %in% night) ~ 0
+  ))
+```
+
+```{r}
+#civilian arrested - street
+ppcs_2011_F <- ppcs_2011_F %>%
+  mutate(civilian_arrested_s = case_when(
+    (V182 == '(1) Yes') ~ 1,
+    (V182 == '(2) No') ~ 0
+  ))
+```
+
+```{r}
+#use of force - street
+ppcs_2011_F <- ppcs_2011_F %>%
+  mutate(hit_kick_s = case_when(
+    (V152 == '(1) Yes') ~ 1,
+     (V152 == '(2) No') ~ 0
+  )) %>%
+  mutate(grab_push_s = case_when(
+    (V148 == '(1) Yes') ~ 1,
+    (V148 == '(2) No') ~ 0
+  )) %>% 
+  mutate(point_gun_s = case_when(
+    (V158 == '(1) Yes') ~ 1,
+    (V158 == '(2) No') ~ 0
+  )) %>%
+  mutate(pepper_stun_s = case_when(
+    (V154 == '(1) Yes' | V156 == '(1) Yes') ~ 1,
+    (V154 == '(2) No' | V156 == '(2) No') ~ 0
+  )) %>%
+  mutate(other_force_s = case_when(
+    (V160 == '(1) Yes') ~ 1,
+    (V160 == '(2) No') ~ 0
+  ))
+```
+
+```{r}
+#civilian handcuffed - street
+# officer handcuffed civilian - street
+ppcs_2011_F <- ppcs_2011_F %>%
+  mutate(civilian_is_handcuffed_s = case_when(
+    (V150 == '(1) Yes') ~ 1,
+    (V150 == '(2) No') ~ 0
+  )) %>%
+  mutate(officer_handcuffed_s = case_when(
+    (civilian_is_handcuffed_s == 1 & civilian_arrested_s != 1) ~ 1,
+    ((civilian_is_handcuffed_s == 1 & civilian_arrested_s == 1) | civilian_is_handcuffed_s == 0) ~ 0
+  ))
+```
+
+```{r}
+#civilian perceived excess force - street
+ppcs_2011_F <- ppcs_2011_F %>%
+  mutate(excessive_force_s = case_when(
+    (V163 == '(1) Yes') ~ 1,
+    (V163 == '(2) No') ~ 0
+  ))
+
+tmp <- ppcs_2011_F %>%
+  select(hit_kick_s, grab_push_s, point_gun_s, pepper_stun_s, other_force_s)
+
+ppcs_2011_F <- ppcs_2011_F %>%
+  mutate(temp = do.call(pmax, tmp)) %>%
+  mutate(excessive_force_s = ifelse(temp == 0 & is.na(excessive_force_s), 0, excessive_force_s)) %>%
+  select(-temp)
+
+```
+
+```{r}
+#civilian behavior - street
+ppcs_2011_F <- ppcs_2011_F %>%
+  mutate(civilian_threatened_s = case_when(
+    (V176 == '(1) Yes') ~ 1,
+    (V176 == '(2) No') ~ 0
+  )) %>%
+  mutate(civilian_physical_s = case_when(
+    (V168 == '(1) Yes' | V178 == '(1) Yes') ~ 1,
+    (V168 == '(2) No' & V178 == '(2) No') ~ 0
+  )) %>% 
+  mutate(civilian_argued_s = case_when(
+    (V174 == '(1) Yes') ~ 1,
+    (V174 == '(2) No') ~ 0
+  )) %>%
+  mutate(civilian_disobey_s = case_when(
+    (V164 == '(1) Yes') ~ 1,
+    (V164 == '(2) No') ~ 0
+  )) %>%
+  mutate(other_behavior_s = NA) %>%
+  mutate(civilian_escape_s = case_when(
+    (V166 == '(1) Yes') ~ 1,
+    (V166 == '(2) No') ~ 0
+  )) %>%
+  mutate(civilian_resist_s = case_when(
+    (V170 == '(1) Yes') ~ 1,
+    (V170 == '(2) No') ~ 0
+  )) %>%
+  mutate(civilian_complained_s = case_when(
+    (V172 == '(1) Yes') ~ 1,
+    (V172 == '(2) No') ~ 0
+  )) 
+
+```
+
+```{r}
+#civilian injured - street
+ppcs_2011_F <- ppcs_2011_F %>%
+  mutate(civilian_injured_s = case_when(
+    (V180 == '(1) Yes') ~ 1,
+    (V180 == '(2) No') ~ 0
+  ))
+
+tmp <- ppcs_2011_F %>%
+  select(hit_kick_s, grab_push_s, point_gun_s, pepper_stun_s, other_force_s)
+
+ppcs_2011_F <- ppcs_2011_F %>%
+  mutate(temp = do.call(pmax, tmp)) %>%
+  mutate(civilian_injured_s = ifelse(temp == 0 & is.na(civilian_injured_s), 0, civilian_injured_s)) %>%
+  select(-temp)
+
+```
+
+```{r}
+#civilian searched - street
+ppcs_2011_F <- ppcs_2011_F %>%
+  mutate(civilian_searched_s = case_when(
+    (V183 == '(1) Yes') ~ 1,
+    (V183 == '(2) No') ~ 0
+  ))
+```
+
+```{r}
+# civilian guilty of carrying drugs or alcohol - street
+ppcs_2011_F <- ppcs_2011_F %>%
+  mutate(civilian_guilty_of_illegal_s = case_when(
+    (V187 == '(1) Yes') ~ 1,
+    (V187 == '(2) No') ~ 0
+  ))
+```
+
+```{r}
+#police used force - street
+tmp <- ppcs_2011_F %>%
+  select(hit_kick_s, grab_push_s, point_gun_s, pepper_stun_s, other_force_s)
+
+ppcs_2011_F <- ppcs_2011_F %>%
+  mutate(temp = do.call(pmax, tmp)) %>%
+  mutate(police_used_force_s = temp) %>%
+  select(-temp)
+```
+
+```{r}
+#fired gun - street
+# shot suspect - street
+ppcs_2011_F <- ppcs_2011_F %>%
+  mutate(fired_gun_s = NA, shot_suspect_s = NA)
+```
+
+## Traffic Incident
+
+```{r}
+#civilian race - traffic
+
+#they replace each var with a numeric label. I will just use the original label
+
+#codes individuals or multiple officers where there is only 1 race reported
+ppcs_2011_F <- ppcs_2011_F %>%
+  mutate(off_race_1_t = case_when(
+    
+    #only one officer - V189 == 1
+    (V189 == '(1) One officer' & V190 == '(1) Yes' & V191 != '(1) White' & V192 != '(1) Black or African American' & V193 != '(1) American Indian or Alaska Native' & V194 != '(1) Asian' & V195 != '(1) Native Hawaiian or other Pacific Islander') ~ 'hispanic',
+    (V189 == '(1) One officer' & V190 != '(1) Yes' & V191 == '(1) White' & V192 != '(1) Black or African American' & V193 != '(1) American Indian or Alaska Native' & V194 != '(1) Asian' & V195 != '(1) Native Hawaiian or other Pacific Islander') ~ 'white',
+    (V189 == '(1) One officer' & V190 != '(1) Yes' & V191 != '(1) White' & V192 == '(1) Black or African American' & V193 != '(1) American Indian or Alaska Native' & V194 != '(1) Asian' & V195 != '(1) Native Hawaiian or other Pacific Islander') ~ 'black',
+    (V189 == '(1) One officer' & V190 != '(1) Yes' & V191 != '(1) White' & V192 != '(1) Black or African American' & (V193 == '(1) American Indian or Alaska Native' | V194 == '(1) Asian' | V195 == '(1) Native Hawaiian or other Pacific Islander')) ~ 'other',
+    
+    #more than one officer V189 == 2 (Fryer)
+    (V189 == '(2) More than one officer' & V197 == '(1) Yes' & V198 != '(1) White' & V199 != '(1) Black or African American' & V200 != '(1) American Indian or Alaska Native' & V201 != '(1) Asian' & V202 != '(1) Native Hawaiian or other Pacific Islander') ~ 'hispanic',
+    (V189 == '(2) More than one officer' & V197 != '(1) Yes' & V198 == '(1) White' & V199 != '(1) Black or African American' & V200 != '(1) American Indian or Alaska Native' & V201 != '(1) Asian' & V202 != '(1) Native Hawaiian or other Pacific Islander') ~ 'white',
+    (V189 == '(2) More than one officer' & V197 != '(1) Yes' & V198 != '(1) White' & V199 == '(1) Black or African American' & V200 != '(1) American Indian or Alaska Native' & V201 != '(1) Asian' & V202 != '(1) Native Hawaiian or other Pacific Islander') ~ 'black',
+    (V189 == '(2) More than one officer' & V197 != '(1) Yes' & V198 != '(1) White' & V199 != '(1) Black or African American' & (V200 == '(1) American Indian or Alaska Native' | V201 == '(1) Asian' | V202 == '(1) Native Hawaiian or other Pacific Islander')) ~ 'other'
+  ))
+
+#codes individuals or multiple officers under a;; possible races reported
+ppcs_2011_F <- ppcs_2011_F %>%
+  mutate(off_race_2_t = case_when(
+    ((V189 == '(1) One officer' & V190 == '(1) Yes') | (V189 == '(2) More than one officer' & V197 == '(1) Yes')) ~ 'hispanic',
+    ((V189 == '(1) One officer' & V191 == '(1) White') | (V189 == '(2) More than one officer' & V198 == '(1) White')) ~ 'white',
+    ((V189 == '(1) One officer' & V192 == '(1) Black or African American') | (V189 == '(2) More than one officer' & V199 == '(1) Black or African American')) ~ 'black',
+    (V189 == '(1) One officer' & ((V193 == '(1) American Indian or Alaska Native') | (V194 == '(1) Asian' | V195 == '(1) Native Hawaiian or other Pacific Islander')) | (V189 == '(2) More than one officer' & (V200 == '(1) American Indian or Alaska Native' | V201 == '(1) Asian' | V202 == '(1) Native Hawaiian or other Pacific Islander'))) ~ 'other',
+    TRUE ~ ""
+  )) 
+
+```
+
+```{r}
+#time of encounter - traffic
+
+day <- c('(01) After 6 a.m. - 12 noon', '(02) After 12 noon - 6 p.m.', "(03) Don't know what time of day")
+
+night <- c('(04) After 6 p.m. - 12 midnight', '(05) After 12 midnight - 6 a.m.', "(06) Don't know what time of night")
+
+ppcs_2011_F <- ppcs_2011_F %>%
+  mutate(time_of_encounter_t = case_when(
+  (V204 %in% day) ~ 1,
+  (V204 %in% night) ~ 0
+  ))
+```
+
+```{r}
+# there is no 0 for V295 and V297 so I used '(9) Don't know' - check pepper_stun
+
+#use of force - traffic
+ppcs_2011_F <- ppcs_2011_F %>%
+  mutate(hit_kick_t = case_when(
+    (V293 == '(1) Yes') ~ 1,
+     (V293 == '(2) No') ~ 0
+  )) %>%
+  mutate(grab_push_t = case_when(
+    (V289 == '(1) Yes') ~ 1,
+    (V289 == '(2) No') ~ 0
+  )) %>% 
+  mutate(point_gun_t = case_when(
+    (V299 == '(1) Yes') ~ 1,
+    (V299 == '(2) No') ~ 0
+  )) %>%
+  mutate(pepper_stun_t = case_when(
+    (V295 == '(1) Yes' | V297 == '(1) Yes') ~ 1,
+    ((V295 == '(2) No' & V297 == '(2) No') | (V295 == '(2) No' & V297 == "(9) Don't know")| (V295 == "(9) Don't know" & V297 == "(2) No")) ~ 0
+  )) %>%
+  mutate(other_force_t = case_when(
+    (V301 == '(1) Yes') ~ 1,
+    (V301 == '(2) No') ~ 0
+  ))
+```
+
+```{r}
+# civilian arrested - traffic
+ppcs_2011_F <- ppcs_2011_F %>%
+  mutate(civilian_arrested_t = case_when(
+    (V324 == '(1) Yes') ~ 1,
+    (V324 == '(2) No') ~ 0
+  ))
+```
+
+```{r}
+#civilian handcuffed - traffic
+# officer handcuffed civilian - traffic
+ppcs_2011_F <- ppcs_2011_F %>%
+  mutate(civilian_is_handcuffed_t = case_when(
+    (V291 == '(1) Yes') ~ 1,
+    (V291 == '(2) No') ~ 0
+  )) %>%
+  mutate(officer_handcuffed_t = case_when(
+    (civilian_is_handcuffed_t == 1 & civilian_arrested_t != 1) ~ 1,
+    ((civilian_is_handcuffed_t == 1 & civilian_arrested_t == 1) | civilian_is_handcuffed_t == 0) ~ 0
+  ))
+```
+
+```{r}
+#civilian perceived excess force - traffic
+ppcs_2011_F <- ppcs_2011_F %>%
+  mutate(excessive_force_t = case_when(
+    (V305 == '(1) Yes') ~ 1,
+    (V305 == '(2) No') ~ 0
+  ))
+
+tmp <- ppcs_2011_F %>%
+  select(hit_kick_t, grab_push_t, point_gun_t, pepper_stun_t, other_force_t)
+
+ppcs_2011_F <- ppcs_2011_F %>%
+  mutate(temp = do.call(pmax, tmp)) %>%
+  mutate(excessive_force_t = ifelse(temp == 0 & is.na(excessive_force_t), 0, excessive_force_t)) %>%
+  select(-temp)
+```
+
+```{r}
+#civilian behavior - traffic
+ppcs_2011_F <- ppcs_2011_F %>%
+  mutate(civilian_threatened_t = case_when(
+    (V318 == '(1) Yes') ~ 1,
+    (V318 == '(2) No') ~ 0
+  )) %>%
+  mutate(civilian_physical_t = case_when(
+    (V310 == '(1) Yes' | V320 == '(1) Yes') ~ 1,
+    (V310 == '(2) No' & V320 == '(2) No') ~ 0
+  )) %>% 
+  mutate(civilian_argued_t = case_when(
+    (V316 == '(1) Yes') ~ 1,
+    (V316 == '(2) No') ~ 0
+  )) %>%
+  mutate(civilian_disobey_t = case_when(
+    (V306 == '(1) Yes') ~ 1,
+    (V306 == '(2) No') ~ 0
+  )) %>%
+  mutate(other_behavior_t = NA) %>%
+  mutate(civilian_escape_t = case_when(
+    (V308 == '(1) Yes') ~ 1,
+    (V308 == '(2) No') ~ 0
+  )) %>%
+  mutate(civilian_resist_t = case_when(
+    (V312 == '(1) Yes') ~ 1,
+    (V312 == '(2) No') ~ 0
+  )) %>%
+  mutate(civilian_complained_t = case_when(
+    (V314 == '(1) Yes') ~ 1,
+    (V314 == '(2) No') ~ 0
+  )) 
+```
+
+```{r}
+#civilian injured - traffic
+
+ppcs_2011_F <- ppcs_2011_F %>%
+  mutate(civilian_injured_t = case_when(
+    (V322 == '(1) Yes') ~ 1,
+    (V322 == '(2) No') ~ 0
+  ))
+
+tmp <- ppcs_2011_F %>%
+  select(hit_kick_t, grab_push_t, point_gun_t, pepper_stun_t, other_force_t)
+
+ppcs_2011_F <- ppcs_2011_F %>%
+  mutate(temp = do.call(pmax, tmp)) %>%
+  mutate(civilian_injured_t = ifelse(temp == 0 & is.na(civilian_injured_t), 0, civilian_injured_t)) %>%
+  select(-temp)
+
+```
+
+```{r}
+# civilian searched - traffic
+ppcs_2011_F <- ppcs_2011_F %>%
+  mutate(civilian_searched_t = case_when(
+    (V325 == '(1) Yes' | V327 == '(1) Yes') ~ 1,
+    (V325 == '(2) No' & V327 == '(2) No') ~ 0
+  ))
+```
+
+```{r}
+# civilian gilty of carrying drugs or alcohol - traffic
+ppcs_2011_F <- ppcs_2011_F %>%
+  mutate(civilian_guilty_of_illegal_t = case_when(
+    (V334 == '(1) Yes') ~ 1,
+    (V334 == '(2) No') ~ 0
+  ))
+```
+
+```{r}
+#police used force - traffic
+tmp <- ppcs_2011_F %>%
+  select(hit_kick_t, grab_push_t, point_gun_t, pepper_stun_t, other_force_t)
+
+ppcs_2011_F <- ppcs_2011_F %>%
+  mutate(temp = do.call(pmax, tmp)) %>%
+  mutate(police_used_force_t = temp) %>%
+  select(-temp)
+```
+
+```{r}
+#fired gun - traffic
+# shot suspect - traffic
+ppcs_2011_F <- ppcs_2011_F %>%
+  mutate(fired_gun_t = NA, shot_suspect_t = NA)
+```
+
+```{r}
+#Assertions!
+
+#From stata code: 
+# unab vars: *_t;
+# local vars = subinstr("`vars'", "_t", "", .);
+library(stringr)
+
+
+#if street is missing then traffic cant be
+traffic_cols <- ppcs_2011_F[ , grepl( "*_t$" , names(ppcs_2011_F) ) ]
+
+cols <- colnames(traffic_cols)
+local <- gsub("*_t$", "", cols)
+
+for (var in local) {
+  vars <- str_interp("${var}_s")
+  vart <- str_interp("${var}_t")
+  print(var)
+  mutate(ppcs_2011_F, assertion = case_when(
+    (!(is.na(ppcs_2011_F[[vars]])) & is.na(ppcs_2011_F[[vart]])) ~ 'good',
+    (is.na(ppcs_2011_F[[vars]]) & !is.na(ppcs_2011_F[[vart]])) ~ 'good',
+    (!(is.na(ppcs_2011_F[[vars]])) & !(is.na(ppcs_2011_F[[vart]]))) ~ 'bad',
+    TRUE ~ 'both na'
+  )) %>%
+  select(vars, vart, assertion) %>% 
+  group_by(assertion) %>% summarise(n()) %>% print()
+}
+
+```
+
+```{r}
+#combine everything
+
+#use coalesce
+ppcs_2011_F <- ppcs_2011_F %>%
+  mutate(type_of_incident = coalesce(type_of_incident_s, type_of_incident_t)) %>%
+  mutate(off_race_1 = coalesce(off_race_1_s, off_race_1_t)) %>%
+  mutate(time_of_encounter = coalesce(time_of_encounter_s, time_of_encounter_t)) %>%
+  mutate(hit_kick = coalesce(hit_kick_s, hit_kick_t)) %>%
+  mutate(grab_push = coalesce(grab_push_s, grab_push_t)) %>%
+  mutate(point_gun = coalesce(point_gun_s, point_gun_t)) %>%
+  mutate(pepper_stun = coalesce(pepper_stun_s, pepper_stun_t)) %>%
+  mutate(other_force = coalesce(other_force_s, other_force_t)) %>%
+  mutate(civilian_arrested = coalesce(civilian_arrested_s, civilian_arrested_t)) %>%
+  mutate(civilian_is_handcuffed = coalesce(civilian_is_handcuffed_s, civilian_is_handcuffed_t)) %>%
+  mutate(officer_handcuffed = coalesce(officer_handcuffed_s, officer_handcuffed_t)) %>%
+  mutate(excessive_force = coalesce(excessive_force_s, excessive_force_t)) %>%
+  mutate(civilian_threatened = coalesce(civilian_threatened_s, civilian_threatened_t)) %>%
+  mutate(civilian_physical = coalesce(civilian_physical_s, civilian_physical_t)) %>%
+  mutate(civilian_argued = coalesce(civilian_argued_s, civilian_argued_t)) %>%
+  mutate(civilian_disobey = coalesce(civilian_disobey_s, civilian_disobey_t)) %>%
+  mutate(other_behavior = coalesce(other_behavior_s, other_behavior_t)) %>%
+  mutate(civilian_escape = coalesce(civilian_escape_s, civilian_escape_t)) %>%
+  mutate(civilian_resist = coalesce(civilian_resist_s, civilian_resist_t)) %>%
+  mutate(civilian_complained = coalesce(civilian_complained_s, civilian_complained_t)) %>%
+  mutate(civilian_injured = coalesce(civilian_injured_s, civilian_injured_t)) %>%
+  mutate(civilian_searched = coalesce(civilian_searched_s, civilian_searched_t)) %>%
+  mutate(civilian_guilty_of_illegal = coalesce(civilian_guilty_of_illegal_s, civilian_guilty_of_illegal_t)) %>%
+  mutate(police_used_force = coalesce(police_used_force_s, police_used_force_t)) %>%
+  mutate(fired_gun = coalesce(fired_gun_s, fired_gun_t)) %>%
+  mutate(shot_suspect = coalesce(shot_suspect_s, shot_suspect_t))
+```
+
+```{r}
+#add year
+ppcs_2011_F <- ppcs_2011_F %>%
+  mutate(year = 2011)
+```
+
