@@ -1,0 +1,192 @@
+---
+title: "Merge_PPCS_Fryer"
+author: "Brenda Fried"
+date: "9/24/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(here)
+library(DescTools)
+```
+
+# Load All PPCS years
+```{r merge-data}
+load(here('clean_data', 'ppcs_1999_F.RData'))
+load(here('clean_data', 'ppcs_1996_F.RData'))
+load(here('clean_data','ppcs_2008_F.RData'))
+load(here('clean_data','ppcs_2005_F.RData'))
+load(here('clean_data','ppcs_2002_F.RData'))
+load(here('clean_data', 'ppcs_2011_F.RData'))
+```
+
+
+```{r bind-into-dataframe}
+#bind all the years into one data frame
+merged_ppcs_F <- rbind(ppcs_1996_F, ppcs_1999_F, ppcs_2008_F, ppcs_2002_F, ppcs_2005_F, ppcs_2011_F)
+```
+
+```{r}
+# foreach var of varlist policeusedforce-sdrugs {;
+# foreach year in 1999 2002 2005 2008 2011{;
+# di "`var' - `year'";
+# assert !mi(incidenttype) if !mi(`var') & year==`year';
+# };
+# };
+
+```
+
+Final Cleaning
+```{r}
+ppcs_full_F <- merged_ppcs_F %>%
+  mutate(race_black = case_when(
+    (civilian_race == 'black') ~ 1,
+    (civilian_race == 'hispanic' | civilian_race == 'white' | civilian_race == 'other') ~ 0
+  )) %>%
+  
+  mutate(race_hispanic = case_when(
+    (civilian_race == 'hispanic') ~ 1,
+    (civilian_race == 'black' | civilian_race == 'white' | civilian_race == 'other') ~ 0
+  )) %>%
+  
+  mutate(race_white = case_when(
+    (civilian_race == 'white') ~ 1,
+    (civilian_race == 'black' | civilian_race == 'hispanic' | civilian_race == 'other') ~ 0
+  )) %>%
+  
+  mutate(race_other = case_when(
+    (civilian_race == 'other') ~ 1,
+    (civilian_race == 'black' | civilian_race == 'white' | civilian_race == 'hispanic') ~ 0
+  ))
+```
+
+```{r}
+ppcs_full_F <- ppcs_full_F %>%
+  mutate(female = 1 - civilian_gender)
+```
+
+```{r}
+#egen sbehavior = rowmax(sthreatened sphysical sargued sdisobey sotherbehavior sescape sresist scomplained);
+
+tmp <- ppcs_full_F %>% select(civilian_threatened, civilian_physical, civilian_argued, civilian_disobey, civilian_other_behavior, civilian_escape, civilian_resist, civilian_complained)
+
+ppcs_full_F <- ppcs_full_F %>%
+  mutate(any_behavior = apply(tmp, 1, max))
+```
+
+```{r}
+ppcs_full_F <- ppcs_full_F %>%
+  mutate(incident_type_street = case_when(
+    (type_of_incident == 'street') ~ 1,
+    (type_of_incident == 'traffic' | type_of_incident == 'other') ~ 0
+  )) %>%
+  
+  mutate(incident_type_traffic = case_when(
+    (type_of_incident == 'traffic') ~ 1,
+    (type_of_incident == 'street' | type_of_incident == 'other') ~ 0
+  )) %>%
+  
+  mutate(incident_type_other = case_when(
+    (type_of_incident == 'other') ~ 1,
+    (type_of_incident == 'traffic' | type_of_incident == 'street') ~ 0
+  )) %>%
+  
+  mutate(incident_type_num = case_when(
+    (type_of_incident == 'street') ~ 1,
+    (type_of_incident == 'traffic') ~ 2,
+    (type_of_incident == 'other') ~ 3
+  )) 
+```
+
+```{r}
+ppcs_full_F <- ppcs_full_F %>%
+  mutate(nighttime = 1 - time_of_encounter)
+```
+
+```{r}
+race <- c('white', 'black', 'hispanic', 'other')
+race <- replace(race, c(1,2,3,4), toupper(substr(race, 1, 1)))
+
+ppcs_full_F <- ppcs_full_F %>%
+  mutate(omaj_black = case_when(
+    (off_race == 'black') ~ 1,
+    ((off_race != 'black') & (!is.na(off_race))) ~ 0
+  ))
+
+ppcs_full_F <- ppcs_full_F %>%
+  mutate(omaj_white = case_when(
+    (off_race == 'white') ~ 1,
+    ((off_race != 'white') & (!is.na(off_race))) ~ 0
+  ))
+
+ppcs_full_F <- ppcs_full_F %>%
+  mutate(omaj_other = case_when(
+    (off_race == 'other') ~ 1,
+    ((off_race != 'other') & (!is.na(off_race))) ~ 0
+  ))
+
+ppcs_full_F <- ppcs_full_F %>%
+  mutate(omaj_hispanic = case_when(
+    (off_race =='hispanic') ~ 1,
+    ((off_race != 'hispanic') & (!is.na(off_race))) ~ 0
+  )) %>%
+  mutate(omaj_hispanic = ifelse(year != 2011, NA, omaj_hispanic))
+
+ppcs_full_F <- ppcs_full_F %>%
+  mutate(osplit = case_when(
+    (off_race == 'split') ~ 1,
+    ((off_race != 'split') & (!is.na(off_race))) ~ 0
+  ))
+
+```
+
+```{r}
+#Use of force
+tmp <- ppcs_full_F %>% select(hit_kick, grab_push, point_gun, pepper_stun, officer_handcuffed)
+
+ppcs_full_F <- ppcs_full_F %>%
+  mutate(any_force = apply(tmp, 1, max))
+```
+
+
+#Recodes and Missing
+```{r}
+
+missings <- ppcs_full_F %>% select(race_black, race_hispanic, race_white, race_other, civilian_gender, female, civilian_age, civilian_employed, civilian_income, population_size, any_behavior, civilian_threatened, civilian_physical, civilian_argued, civilian_disobey, civilian_other_behavior, civilian_escape, civilian_resist, civilian_complained, incident_type_street, incident_type_traffic, incident_type_other, incident_type_num, time_of_encounter, nighttime, omaj_black, omaj_white, omaj_hispanic, omaj_other, osplit, civilian_injured, excessive_force, civilian_searched, civilian_guilty_of_illegal, any_force, police_used_force, hit_kick, grab_push, point_gun, pepper_stun, officer_handcuffed, other_force )
+
+for (var in colnames(missings)) {
+  ppcs_full_F[,str_interp("${var}_r")] <- ppcs_full_F[[var]]
+}
+
+cols <- ppcs_full_F[,grep('*_r$', colnames(ppcs_full_F))]
+cols <- colnames(cols)
+
+
+ppcs_full_F <- ppcs_full_F %>%
+  mutate_at(.funs = list( ~ ifelse(is.na(.), 0, .)), .vars = cols)
+
+for (var in colnames(missings)) {
+  ppcs_full_F[,str_interp("M_${var}")] <- is.na(ppcs_full_F[[var]])
+}
+```
+
+```{r}
+# do age_2 = age*age - but there are NA's so converting them to 0 and then changing back to NA.
+ppcs_full_F <- ppcs_full_F %>% 
+  mutate(civilian_age_r = ifelse(civilian_age_r == "missing/ni/ou", 0, civilian_age_r)) %>%
+  mutate(civilian_age_r = as.numeric(civilian_age_r)) %>%
+  mutate(civilian_age_2_r = civilian_age_r * civilian_age_r) %>%
+  mutate(civilian_age_r = ifelse(civilian_age_r == 0, NA, civilian_age_r)) %>%
+  mutate(civilian_age_2_r = ifelse(civilian_age_2_r == 0, NA, civilian_age_2_r))
+  
+```
+
+```{r}
+save(ppcs_full_F, file= "clean_data/ppcs_full_F.RData")
+```
+
