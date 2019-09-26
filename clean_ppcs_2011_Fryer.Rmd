@@ -547,7 +547,7 @@ for (var in local) {
 #use coalesce
 ppcs_2011_F <- ppcs_2011_F %>%
   mutate(type_of_incident = coalesce(type_of_incident_s, type_of_incident_t)) %>%
-  mutate(off_race_1 = coalesce(off_race_1_s, off_race_1_t)) %>%
+  mutate(off_race = coalesce(off_race_1_s, off_race_1_t)) %>%
   mutate(time_of_encounter = coalesce(time_of_encounter_s, time_of_encounter_t)) %>%
   mutate(hit_kick = coalesce(hit_kick_s, hit_kick_t)) %>%
   mutate(grab_push = coalesce(grab_push_s, grab_push_t)) %>%
@@ -562,7 +562,7 @@ ppcs_2011_F <- ppcs_2011_F %>%
   mutate(civilian_physical = coalesce(civilian_physical_s, civilian_physical_t)) %>%
   mutate(civilian_argued = coalesce(civilian_argued_s, civilian_argued_t)) %>%
   mutate(civilian_disobey = coalesce(civilian_disobey_s, civilian_disobey_t)) %>%
-  mutate(other_behavior = coalesce(other_behavior_s, other_behavior_t)) %>%
+  mutate(civilian_other_behavior = coalesce(other_behavior_s, other_behavior_t)) %>%
   mutate(civilian_escape = coalesce(civilian_escape_s, civilian_escape_t)) %>%
   mutate(civilian_resist = coalesce(civilian_resist_s, civilian_resist_t)) %>%
   mutate(civilian_complained = coalesce(civilian_complained_s, civilian_complained_t)) %>%
@@ -570,8 +570,8 @@ ppcs_2011_F <- ppcs_2011_F %>%
   mutate(civilian_searched = coalesce(civilian_searched_s, civilian_searched_t)) %>%
   mutate(civilian_guilty_of_illegal = coalesce(civilian_guilty_of_illegal_s, civilian_guilty_of_illegal_t)) %>%
   mutate(police_used_force = coalesce(police_used_force_s, police_used_force_t)) %>%
-  mutate(fired_gun = coalesce(fired_gun_s, fired_gun_t)) %>%
-  mutate(shot_suspect = coalesce(shot_suspect_s, shot_suspect_t))
+  mutate(off_fired_gun = coalesce(fired_gun_s, fired_gun_t)) %>%
+  mutate(off_shot_suspect = coalesce(shot_suspect_s, shot_suspect_t))
 ```
 
 ```{r}
@@ -580,3 +580,45 @@ ppcs_2011_F <- ppcs_2011_F %>%
   mutate(year = 2011)
 ```
 
+
+```{r}
+ppcs_2011_F <- ppcs_2011_F %>%
+  select(
+    had_contact,
+    civilian_race,
+    civilian_age,
+    civilian_gender,
+    civilian_employed,
+    civilian_income,
+    population_size,
+    type_of_incident,
+    time_of_encounter,
+    police_used_force,
+    other_force,
+    grab_push,
+    hit_kick,
+    point_gun,
+    civilian_is_handcuffed,
+    officer_handcuffed,
+    pepper_stun,
+    off_fired_gun,
+    off_shot_suspect,
+    off_race,
+    civilian_threatened,
+    civilian_physical, 
+    civilian_argued,
+    civilian_disobey,
+    civilian_resist,
+    civilian_other_behavior,
+    civilian_complained,
+    civilian_escape,
+    civilian_injured,
+    excessive_force,
+    civilian_searched,
+    civilian_arrested,
+    civilian_guilty_of_illegal,
+    year
+  )
+
+save(ppcs_2011_F, file = "clean_data/ppcs_2011_F.Rdata")
+```
