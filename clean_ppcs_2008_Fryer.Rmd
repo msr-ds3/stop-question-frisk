@@ -414,12 +414,9 @@ ppcs_2008_F <- ppcs_2008_F %>%
 #    if it's NA and police_used_force == 0 
 #    replace with 0
 
-ppcs_2008_F <- ppcs_2008_F %>%
-  mutate(hit_kick = ifelse(is.na(hit_kick) & police_used_force == 0, 0, hit_kick)) %>%
-  mutate(grab_push = ifelse(is.na(grab_push) & police_used_force == 0, 0, grab_push)) %>%
-  mutate(point_gun = ifelse(is.na(point_gun) & police_used_force == 0, 0, point_gun)) %>%
-  mutate(pepper_stun = ifelse(is.na(pepper_stun) & police_used_force == 0, 0, pepper_stun)) %>%
-  mutate(other_force = ifelse(is.na(other_force) & police_used_force == 0, 0, other_force))
+ppcs_2005_F <- ppcs_2005_F %>%
+  mutate_at(.funs = list( ~ ifelse(is.na(.) & ppcs_2005_F$police_used_force == 0, 0, .)), .vars = c("hit_kick", "grab_push", "point_gun", "pepper_stun", "other_force"))
+
 
 
 
@@ -467,7 +464,7 @@ ppcs_2008_F <- ppcs_2008_F %>%
 ```{r}
 #officer shot suspect
 ppcs_2008_F <- ppcs_2008_F %>%
-  mutate(shot_suspect = case_when(
+  mutate(off_shot_suspect = case_when(
     (V8A1 == 1) ~ 1
   ))
 ```
@@ -491,7 +488,7 @@ ppcs_2008_F <- ppcs_2008_F %>%
     (V12A == 1) ~ 1,
     (V12A == 2) ~ 0
   )) %>% 
-  mutate(other_behavior = NA) %>%
+  mutate(civilian_other_behavior = NA) %>%
   mutate(civilian_escape = case_when(
     (V12B == 1) ~ 1,
     (V12B == 2) ~ 0
@@ -547,12 +544,54 @@ ppcs_2008_F <- ppcs_2008_F %>%
 ```{r}
 #fired gun
 ppcs_2008_F <- ppcs_2008_F %>%
-  mutate(fired_gun = NA)
+  mutate(off_fired_gun = NA)
 ```
 
 ```{r}
 #year
 ppcs_2008_F <- ppcs_2008_F %>%
   mutate(year = 2008)
+```
+
+```{r}
+ppcs_2008_F <- ppcs_2008_F %>%
+  select(
+    had_contact,
+    civilian_race,
+    civilian_age,
+    civilian_gender,
+    civilian_employed,
+    civilian_income,
+    population_size,
+    type_of_incident,
+    time_of_encounter,
+    police_used_force,
+    other_force,
+    grab_push,
+    hit_kick,
+    point_gun,
+    civilian_is_handcuffed,
+    officer_handcuffed,
+    pepper_stun,
+    off_fired_gun,
+    off_shot_suspect,
+    off_race,
+    civilian_threatened,
+    civilian_physical, 
+    civilian_argued,
+    civilian_disobey,
+    civilian_resist,
+    civilian_other_behavior,
+    civilian_complained,
+    civilian_escape,
+    civilian_injured,
+    excessive_force,
+    civilian_searched,
+    civilian_arrested,
+    civilian_guilty_of_illegal,
+    year
+  )
+
+save(ppcs_2008_F, file = "clean_data/ppcs_2008_F.Rdata")
 ```
 
