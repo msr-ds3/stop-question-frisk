@@ -24,8 +24,8 @@ ppcs_1996_F <- read_ascii_setup(here('raw_data', '06999-0001-Data.txt'),here('ra
 
 ```{r}
 # filter data to only include those that had an interview
-ppcs_1996_F <- ppcs_1996_F %>% 
-  filter(LAST_12_MONTHS_CONTACT_W_POLICE_OFFICER != 'missing/ni/ou')
+#ppcs_1996_F <- ppcs_1996_F %>% 
+#  filter(LAST_12_MONTHS_CONTACT_W_POLICE_OFFICER != 'missing/ni/ou')
 ```
 
 ```{r}
@@ -61,7 +61,7 @@ ppcs_1996_F <- ppcs_1996_F %>%
 ppcs_1996_F <- ppcs_1996_F %>%
   mutate(civilian_gender = case_when(
     (RESPONDENT_SEX == "Male") ~ 1,
-    (RESPONDENT_SEX == "Female") ~ 2
+    (RESPONDENT_SEX == "Female") ~ 0
 ))
 
 ```
@@ -132,7 +132,8 @@ ppcs_1996_tmp <- ppcs_1996_F %>%
 
 ppcs_1996_F <- ppcs_1996_F %>%
   mutate(force_sum = rowSums(ppcs_1996_tmp, na.rm = TRUE)) %>%
-  mutate(any_force = ifelse((force_sum > 0) & !(is.na(force_sum) & had_contact == 1), 1, NA)) %>% mutate(any_force = ifelse(force_sum == 0, 0, any_force))
+  mutate(any_force = ifelse((force_sum > 0) & !(is.na(force_sum) & had_contact == 1), 1, NA)) %>%
+  mutate(any_force = ifelse(force_sum == 0, 0, any_force))
 
 ```
 
@@ -186,7 +187,7 @@ ppcs_1996_F <- ppcs_1996_F %>%
 
 #argue
 ppcs_1996_F <- ppcs_1996_F %>%
-  mutate(civilian_argue = ifelse(YOU_DO_ARGUE_WITH_THE_OFFICER == 'Yes', 1, NA))
+  mutate(civilian_argued = ifelse(YOU_DO_ARGUE_WITH_THE_OFFICER == 'Yes', 1, NA))
 
 #disobey
 ppcs_1996_F <- ppcs_1996_F %>%
@@ -217,7 +218,7 @@ ppcs_1996_F <- ppcs_1996_F %>%
 ```{r}
 #any behavior
 ppcs_1996_tmp <- ppcs_1996_F %>%
-  select(civilian_threatened, civilian_physical, civilian_argue, civilian_disobey, civilian_other_behavior, civilian_escape, civilian_resist, civilian_has_weapon)
+  select(civilian_threatened, civilian_physical, civilian_argued, civilian_disobey, civilian_other_behavior, civilian_escape, civilian_resist, civilian_has_weapon)
 
 ppcs_1996_F <- ppcs_1996_F %>%
   mutate(behav_sum = rowSums(ppcs_1996_tmp, na.rm = TRUE)) %>%
@@ -260,13 +261,13 @@ b <- c("All black", "Mostly black")
 o <- c("All of some other race", "Mostly some other race")
 ppcs_1996_F <- ppcs_1996_F %>%
   mutate(off_race = case_when(
-    (num_officers == 1  & OFFICER_WHITE_BLACK_OR_OTHER_RACE == "White") ~ "White",
-    (num_officers == 1  & OFFICER_WHITE_BLACK_OR_OTHER_RACE == "Black") ~ "Black",
-    (num_officers == 1  & OFFICER_WHITE_BLACK_OR_OTHER_RACE == "Other") ~ "Other",
-    (num_officers %in% seq(2, 10) & OFFICERS_WHITE_BLACK_OR_OTHER_RACE %in% w) ~ "White",
-    (num_officers %in% seq(2, 10) & OFFICERS_WHITE_BLACK_OR_OTHER_RACE %in% b) ~ "Black",
-    (num_officers %in% seq(2, 10) & OFFICERS_WHITE_BLACK_OR_OTHER_RACE %in% o) ~ "Other",
-    (num_officers %in% seq(2, 10) & OFFICERS_WHITE_BLACK_OR_OTHER_RACE == "Equally mixed") ~ "Split",
+    (num_officers == 1  & OFFICER_WHITE_BLACK_OR_OTHER_RACE == "White") ~ "white",
+    (num_officers == 1  & OFFICER_WHITE_BLACK_OR_OTHER_RACE == "Black") ~ "black",
+    (num_officers == 1  & OFFICER_WHITE_BLACK_OR_OTHER_RACE == "Other") ~ "other",
+    (num_officers %in% seq(2, 10) & OFFICERS_WHITE_BLACK_OR_OTHER_RACE %in% w) ~ "white",
+    (num_officers %in% seq(2, 10) & OFFICERS_WHITE_BLACK_OR_OTHER_RACE %in% b) ~ "black",
+    (num_officers %in% seq(2, 10) & OFFICERS_WHITE_BLACK_OR_OTHER_RACE %in% o) ~ "other",
+    (num_officers %in% seq(2, 10) & OFFICERS_WHITE_BLACK_OR_OTHER_RACE == "Equally mixed") ~ "split",
   ))
 ```
 
@@ -343,22 +344,20 @@ ppcs_1996_F <- ppcs_1996_F %>%
     grab_push,
     hit_kick,
     point_gun,
-    handcuffed,
+    civilian_is_handcuffed,
+    officer_handcuffed,
     pepper_stun,
-    any_force,
     off_fired_gun,
     off_shot_suspect,
     off_race,
     civilian_threatened,
     civilian_physical, 
-    civilian_argue,
+    civilian_argued,
     civilian_disobey,
     civilian_resist,
     civilian_other_behavior,
     civilian_complained,
     civilian_escape,
-    civilian_has_weapon,
-    any_behavior,
     civilian_injured,
     excessive_force,
     civilian_searched,
@@ -366,9 +365,6 @@ ppcs_1996_F <- ppcs_1996_F %>%
     civilian_guilty_of_illegal,
     year
   )
-```
 
-```{r}
-save(ppcs_1996_F, file='ppcs_1996_F.RData')
-sessionInfo()
+save(ppcs_1996_F, file = "clean_data/ppcs_1996_F.Rdata")
 ```
