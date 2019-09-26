@@ -121,17 +121,9 @@ ppcs_2005_F <- ppcs_2005_F %>%
   mutate(force_sum = rowSums(ppcs_2005_tmp, na.rm = TRUE)) %>%
   mutate(any_force = ifelse((force_sum > 0) & (had_contact == 1), 1, 0))
 
-## This is to replace NA's with 0 - takes too long to run. come up with other solution.
-# replace_0 <- function(x) {
-#   ifelse(ppcs_2005_F$any_force == 1 & is.na(x), 0 , x)
-# }
-# 
-# replace_0 <- Vectorize(replace_0)
-# 
-# columns <- c(colnames(ppcs_2005_tmp))
-# 
-# df <- ppcs_2005_F %>%
-#   mutate_at(vars(columns), replace_0)
+ppcs_2005_F <- ppcs_2005_F %>%
+  mutate_at(.funs = list( ~ ifelse(is.na(.) & ppcs_2005_F$any_force == 1, 0, .)), .vars = colnames(ppcs_2005_tmp)) %>%
+  mutate_at(.funs = list( ~ ifelse(is.na(.) & (V12 == 'No' | V14 == 'No'), 0, .)), .vars = colnames(ppcs_2005_tmp))
 
 ```
 
@@ -254,8 +246,8 @@ ppcs_2005_F <- ppcs_2005_F %>%
 #fired gun
 #shot suspect
 ppcs_2005_F <- ppcs_2005_F %>%
-  mutate(fired_gun = NA) %>%
-  mutate(shot_suspect = NA)
+  mutate(off_fired_gun = NA) %>%
+  mutate(off_shot_suspect = NA)
 ```
 
 ```{r}
@@ -275,6 +267,44 @@ ppcs_2005_F <- ppcs_2005_F %>%
 ```
 
 ```{r}
+ppcs_2005_F <- ppcs_2005_F %>%
+  select(
+    had_contact,
+    civilian_race,
+    civilian_age,
+    civilian_gender,
+    civilian_employed,
+    civilian_income,
+    population_size,
+    type_of_incident,
+    time_of_encounter,
+    police_used_force,
+    other_force,
+    grab_push,
+    hit_kick,
+    point_gun,
+    civilian_is_handcuffed,
+    officer_handcuffed,
+    pepper_stun,
+    off_fired_gun,
+    off_shot_suspect,
+    off_race,
+    civilian_threatened,
+    civilian_physical, 
+    civilian_argued,
+    civilian_disobey,
+    civilian_resist,
+    civilian_other_behavior,
+    civilian_complained,
+    civilian_escape,
+    civilian_injured,
+    excessive_force,
+    civilian_searched,
+    civilian_arrested,
+    civilian_guilty_of_illegal,
+    year
+  )
 
+save(ppcs_2005_F, file = "clean_data/ppcs_2005_F.Rdata")
 ```
 
