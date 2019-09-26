@@ -19,16 +19,24 @@ library(here)
 
 ``` {r load-data}
 ppcs_1999_F <- read_ascii_setup(here('raw_data','03151-0001-Data.txt'),here('raw_data', '03151-0001-Setup.sas'))
-ppcs_1999_F <- ppcs_1999_F[, !duplicated(colnames(ppcs_1999_F))]
+#ppcs_1999_F <- ppcs_1999_F[, !duplicated(colnames(ppcs_1999_F))]
+
+#rename columns so don't have issue with duplicate column names
+new_names <- seq(1:311)
+ppcs_1999_F <- as_tibble(ppcs_1999_F, .name_repair = ~new_names)
+ppcs_1999_F <- data.frame(ppcs_1999_F)
+
+df <- data.frame(colnames(ppcs_1999_F), colnames(ppcs_1999))
+view(df)
 ```
 
 ```{r}
 #had contact
 ppcs_1999_F <- ppcs_1999_F %>%
   mutate(had_contact = case_when(
-    (ANY_POLICE_CONTACT_IN_LAST_12_MONTHS == 'Yes' & FACE_TO_FACE_CONTACT == 'Yes') ~ 1,
-    (ANY_POLICE_CONTACT_IN_LAST_12_MONTHS == 'No' | (ANY_POLICE_CONTACT_IN_LAST_12_MONTHS == 'Yes' & FACE_TO_FACE_CONTACT == 'No')) ~ 0,
-    (ANY_POLICE_CONTACT_IN_LAST_12_MONTHS == 'Out of Universe/Missing') ~ NA_real_
+    (X10 == 'Yes' & X11 == 'Yes') ~ 1,
+    (X10 == 'No' | (X10 == 'Yes' & X11 == 'No')) ~ 0,
+    (X10 == 'Out of Universe/Missing') ~ NA_real_
   ))
 ```
 
@@ -37,25 +45,25 @@ ppcs_1999_F <- ppcs_1999_F %>%
 # civilian race
 ppcs_1999_F <- ppcs_1999_F %>%
   mutate(civilian_race = case_when(
-    (RESPONDENT_S_RACE == "White" & RESPONDENT_S_HISPANIC_ORIGIN != "Yes") ~ "white",
-    (RESPONDENT_S_RACE == "Black" ) ~ "black",
-    (RESPONDENT_S_HISPANIC_ORIGIN == "Yes" & RESPONDENT_S_RACE != "Black") ~ "hispanic",
-    (RESPONDENT_S_RACE == "Other" &  RESPONDENT_S_HISPANIC_ORIGIN != "Yes") ~ "other"
+    (X6 == "White" & X7 != "Yes") ~ "white",
+    (X6 == "Black" ) ~ "black",
+    (X7 == "Yes" & X6 != "Black") ~ "hispanic",
+    (X6 == "Other" &  X7 != "Yes") ~ "other"
   ))
 ```
 
 ```{r}
 #Civilian Age
 ppcs_1999_F <- ppcs_1999_F %>% 
-  mutate(civilian_age = RESPONDENT_S_AGE)
+  mutate(civilian_age = X5)
 ```
 
 ```{r}
 #Civilian Gender
 ppcs_1999_F <- ppcs_1999_F %>%
   mutate(civilian_gender = case_when(
-    (RESPONDENT_S_SEX == "Male") ~ 1,
-    (RESPONDENT_S_SEX == "Female") ~ 0
+    (X4 == "Male") ~ 1,
+    (X4 == "Female") ~ 0
   ))
 ```
 
@@ -64,8 +72,8 @@ ppcs_1999_F <- ppcs_1999_F %>%
 
 ppcs_1999_F <- ppcs_1999_F %>%
   mutate(civilian_employed = case_when(
-    (WORKED_LAST_WEEK == 'Yes') ~1,
-    (WORKED_LAST_WEEK == 'No') ~ 0
+    (X265 == 'Yes') ~1,
+    (X265 == 'No') ~ 0
      ))
 ```
 
@@ -75,9 +83,9 @@ ppcs_1999_F <- ppcs_1999_F %>%
 # They did not factor
 ppcs_1999_F <- ppcs_1999_F %>%
   mutate(civilian_income = case_when(
-    (INCOME == 'Less than $20,000 or NA')~1,
-    (INCOME == '$20,000-49,999')~2,
-    (INCOME == '$50,000 or more')~3
+    (X264 == 'Less than $20,000 or NA')~1,
+    (X264 == '$20,000-49,999')~2,
+    (X264 == '$50,000 or more')~3
   ))
 ```
 
@@ -85,10 +93,10 @@ ppcs_1999_F <- ppcs_1999_F %>%
 #Population-size
 ppcs_1999_F <- ppcs_1999_F %>%
   mutate(population_size = case_when(
-    (PLACE_SIZE == 'Under 100,000/not a place') ~ 1,
-    (PLACE_SIZE == '100,000-499,999') ~ 2,
-    (PLACE_SIZE == '500,000-999,999') ~ 3,
-    (PLACE_SIZE == '1 million or more')~4,
+    (X267 == 'Under 100,000/not a place') ~ 1,
+    (X267 == '100,000-499,999') ~ 2,
+    (X267 == '500,000-999,999') ~ 3,
+    (X267 == '1 million or more')~4,
     TRUE ~ NA_real_
   ))
 ```
@@ -99,9 +107,9 @@ ppcs_1999_F <- ppcs_1999_F %>%
 
 ppcs_1999_F <- ppcs_1999_F %>%
   mutate(type_of_incident = case_when(
-    (VEHICLE_STOPPED_BY_POLICE == 'Once' | VEHICLE_STOPPED_BY_POLICE == 'More than once') ~ "traffic",
-    (OTHER_CONTACT_RESULTED_IN_FORCE_THREAT != 'Out of Universe/Missing' ) ~ "other",
-    (OTHER_CONTACT_RESULTED_IN_FORCE_THREAT == 'Out of Universe/Missing' & had_contact == 1  & PERSONAL_SEARCH_USE_OR_THREATEN_FORCE == "No") ~ "other"
+    (X12 == 'Once' | X12 == 'More than once') ~ "traffic",
+    (X152 != 'Out of Universe/Missing' ) ~ "other",
+    (X152 == 'Out of Universe/Missing' & had_contact == 1  & X176 == "No") ~ "other"
   ))
 ```
 
@@ -117,8 +125,8 @@ ppcs_1999_F <- ppcs_1999_F %>%
 ```{r}
 # number of officers - traffic stop
 ppcs_1999_F <- ppcs_1999_F %>%
-  mutate(num_officers_t = ifelse(NUMBER_OF_OFFICERS_VEHICLE_STOP == "Out of Universe/Missing", NA_real_, NUMBER_OF_OFFICERS_VEHICLE_STOP)) %>%
-  mutate(num_officers_t = ifelse(num_officers_t == "One", 1, NUMBER_OF_OFFICERS_VEHICLE_STOP)) %>%
+  mutate(num_officers_t = ifelse(X34 == "Out of Universe/Missing", NA_real_, X34)) %>%
+  mutate(num_officers_t = ifelse(num_officers_t == "One", 1, X34)) %>%
   mutate(num_officers_t = as.numeric(num_officers_t))
 ```
 
@@ -129,10 +137,10 @@ b <- c("All black", "Mostly black")
 o <- c("All of another race", "Mostly another race")
 ppcs_1999_F <- ppcs_1999_F %>%
   mutate(off_race_t = case_when(
-    (( num_officers_t == 1 & OFFICER_RACE_VEHICLE_STOP == 'White' ) | (num_officers_t %in% seq(2, 30) & OFFICERS_RACES_VEHICLE_STOP %in% w)) ~ "White" ,
-    (( num_officers_t == 1 & OFFICER_RACE_VEHICLE_STOP == 'Black' ) | (num_officers_t %in% seq(2, 30) & OFFICERS_RACES_VEHICLE_STOP %in% b)) ~ "Black",
-    (( num_officers_t == 1 & OFFICER_RACE_VEHICLE_STOP == 'Some other race' ) | (num_officers_t %in% seq(2, 30) & OFFICERS_RACES_VEHICLE_STOP %in% o)) ~ "Other",
-    (num_officers_t %in% seq(2, 30) & OFFICERS_RACES_VEHICLE_STOP == "Equally mixed") ~ "Split"
+    (( num_officers_t == 1 & X36 == 'White' ) | (num_officers_t %in% seq(2, 30) & X35 %in% w)) ~ "white" ,
+    (( num_officers_t == 1 & X36 == 'Black' ) | (num_officers_t %in% seq(2, 30) & X35 %in% b)) ~ "black",
+    (( num_officers_t == 1 & X36 == 'Some other race' ) | (num_officers_t %in% seq(2, 30) & X35 %in% o)) ~ "other",
+    (num_officers_t %in% seq(2, 30) & X35 == "Equally mixed") ~ "split"
   ))
 ```
 
@@ -140,8 +148,8 @@ ppcs_1999_F <- ppcs_1999_F %>%
 #civilian arrested - traffic stop
 ppcs_1999_F <- ppcs_1999_F %>%
   mutate(civilian_arrested_t = case_when(
-    (ARRESTED_VEHICLE_STOP == 'Yes') ~ 1,
-    (ARRESTED_VEHICLE_STOP == 'No') ~ 0
+    (X37 == 'Yes') ~ 1,
+    (X37 == 'No') ~ 0
   ))
 ```
 
@@ -149,8 +157,8 @@ ppcs_1999_F <- ppcs_1999_F %>%
 #civilian searched - vehicle searched or civilian searched
 ppcs_1999_F <- ppcs_1999_F %>%
   mutate(civilian_searched_t = case_when(
-    (VEHICLE_SEARCH == "Yes" | PERSONAL_SEARCH_VEHICLE_STOP == "Yes") ~ 1,
-    ((VEHICLE_SEARCH == "No" | VEHICLE_SEARCH == "Unkown") & (PERSONAL_SEARCH_VEHICLE_STOP == "No" | PERSONAL_SEARCH_VEHICLE_STOP == "Unknown") & !(VEHICLE_SEARCH == "Unknown" & PERSONAL_SEARCH_VEHICLE_STOP == "Unknown")) ~ 0
+    (X39 == "Yes" | X49 == "Yes") ~ 1,
+    ((X39 == "No" | X39 == "Unkown") & (X49 == "No" | X49 == "Unknown") & !(X39 == "Unknown" & X49 == "Unknown")) ~ 0
   ))
 ```
 
@@ -158,16 +166,15 @@ ppcs_1999_F <- ppcs_1999_F %>%
 #civilian guilty of carrying illegal drugs, alcohol or wewapons
 ppcs_1999_F <- ppcs_1999_F %>%
   mutate(civilian_guilty_of_illegal_t = case_when(
-    (WEAPON_FOUND_IN_VEHICLE == 'Illegal weapons' | 
-     DRUGS_FOUND_IN_VEHICLE == 'Illegal drugs'   |
-     OPEN_ALCOHOL_FOUND_IN_VEHICLE == 'Open alcohol' |
-     OTHER_EVIDENCE_FOUND_IN_VEHICLE == 'Other crime evidence'|
-     WEAPONS_FOUND_ON_OR_NEAR_YOU_VEHICLE_S == 'Illegal weapons'|
-     DRUGS_FOUND_ON_OR_NEAR_YOU_VEHICLE_STO == 'Illegal drugs' |
-     ALCOHOL_FOUND_ON_OR_NEAR_YOU_VEHICLE_S == 'Open alcohol' |
-     OTHER_EVIDENCE_FOUND_IN_PERSONAL_SEARCH == 'Other crime evidence') ~ 1,
-    
-    (NO_EVIDENCE_FOUND_IN_VEHICLE == 'None of the above' & NO_EVIDENCE_FOUND_IN_PERSONAL_SEARCH_V == 'None of the above') ~ 0
+    (X42 == 'Illegal weapons' | 
+     X43 == 'Illegal drugs'   |
+     X44 == 'Open alcohol' |
+     X45 == 'Other crime evidence'|
+     X52 == 'Illegal weapons'|
+     X53 == 'Illegal drugs' |
+     X54 == 'Open alcohol' |
+     X55 == 'Other crime evidence') ~ 1,
+    (X47 == 'None of the above' & X57 == 'None of the above') ~ 0
   ))
 ```
 
@@ -175,8 +182,8 @@ ppcs_1999_F <- ppcs_1999_F %>%
 #police used force
 ppcs_1999_F <- ppcs_1999_F %>%
   mutate(police_used_force_t = case_when(
-    (FORCE_USED_OR_THREATENED_VEHICLE_STOP == 'Yes' | HANDCUFFED_AND_FORCE_USED_OR_THREATENED == 'Yes') ~ 1,
-    (FORCE_USED_OR_THREATENED_VEHICLE_STOP == 'No' | HANDCUFFED_AND_FORCE_USED_OR_THREATENED == 'No') ~ 0
+    (X83 == 'Yes' | X84 == 'Yes') ~ 1,
+    (X83 == 'No' | X84 == 'No') ~ 0
   )) 
 ```
 
@@ -184,19 +191,19 @@ ppcs_1999_F <- ppcs_1999_F %>%
 # Officer use of force
 ppcs_1999_F <- ppcs_1999_F %>%
   mutate(hit_kick_t = case_when(
-    (KICKED_OR_HIT_VEHICLE_STOP == 'Kicked or hit') ~ 1
+    (X87 == 'Kicked or hit') ~ 1
   )) %>%
   mutate(grab_push_t = case_when (
-    (PUSHED_OR_GRABBED_WITHOUT_PAIN_VEHICLE == 'Pushed or grabbed without pain' | PUSHED_OR_GRABBED_WITH_PAIN_VEHICLE_ST == 'Pushed or grabbed with pain') ~ 1 
+    (X85 == 'Pushed or grabbed without pain' | X86 == 'Pushed or grabbed with pain') ~ 1 
   )) %>%
   mutate(point_gun_t = case_when(
-    (POINTED_GUN_VEHICLE_STOP == 'Pointed gun' | FIRED_GUN_VEHICLE_STOP == 'Fired gun') ~ 1
+    (X90 == 'Pointed gun' | X91 == 'Fired gun') ~ 1
   )) %>%
   mutate(pepper_stun_t = case_when(
-    (SPRAYED_WITH_CHEMICAL_PEPPER_SPRAY_VEH == 'Sprayed with chemical/pepper spray' ) ~ 1
+    (X89 == 'Sprayed with chemical/pepper spray' ) ~ 1
   )) %>%
   mutate(other_force_t = case_when(
-    (UNLEASHED_POLICE_DOG_BIT_VEHICLE_STOP == 'Unleashed police dog bit' | OTHER_FORCE_VEHICLE_STOP == 'Other force') ~ 1
+    (X88 == 'Unleashed police dog bit' | X92 == 'Other force') ~ 1
   ))
 ```
 
@@ -208,6 +215,10 @@ ppcs_1999_tmp <- ppcs_1999_F %>%
 ppcs_1999_F <- ppcs_1999_F %>%
   mutate(force_sum_t = rowSums(ppcs_1999_tmp, na.rm = TRUE)) %>%
   mutate(any_force_t = ifelse((force_sum_t > 0) & (had_contact == 1), 1, 0))
+
+ppcs_1999_F <- ppcs_1999_F %>%
+  mutate_at(.funs = list( ~ ifelse(is.na(.) & ppcs_1999_F$any_force_t == 1, 0, .)), .vars = colnames(ppcs_1999_tmp)) %>%
+  mutate_at(.funs = list( ~ ifelse(is.na(.) & ppcs_1999_F$police_used_force_t, 0, .)), .vars = colnames(ppcs_1999_tmp))
 ```
 
 ```{r}
@@ -215,9 +226,9 @@ ppcs_1999_F <- ppcs_1999_F %>%
 # officer handcuffed
 ppcs_1999_F <- ppcs_1999_F %>%
   mutate(civilian_is_handcuffed_t = case_when(
-    (HANDCUFFED_VEHICLE_STOP == 'Yes') ~ 1,
-    (HANDCUFFED_VEHICLE_STOP == 'No') ~ 0,
-    (HANDCUFFED_VEHICLE_STOP == 'Out of Universe/Missing' & police_used_force_t == 0) ~ 0
+    (X82 == 'Yes') ~ 1,
+    (X82 == 'No') ~ 0,
+    (X82 == 'Out of Universe/Missing' & police_used_force_t == 0) ~ 0
   )) %>%
   mutate(officer_handcuffed_t = case_when(
     (civilian_is_handcuffed_t == 1 & civilian_arrested_t != 1 ) ~ 1,
@@ -231,10 +242,10 @@ ppcs_1999_F <- ppcs_1999_F %>%
 
 ppcs_1999_F <- ppcs_1999_F %>%
   mutate(off_fired_gun_t = case_when(
-    (FIRED_GUN_VEHICLE_STOP == 'Fired gun') ~ 1
+    (X91 == 'Fired gun') ~ 1
   )) %>%
   mutate(off_shot_suspect_t = case_when(
-    (INJURED_VEHICLE_STOP == 'Yes' & GUNSHOT_WOUND_VEHICLE_STOP == 'Gunshot wound') ~ 1
+    (X118 == 'Yes' & X119 == 'Gunshot wound') ~ 1
   ))
 ```
 
@@ -242,9 +253,9 @@ ppcs_1999_F <- ppcs_1999_F %>%
 # civilian perceived excessive force
 ppcs_1999_F <- ppcs_1999_F %>%
   mutate(excessive_force_t = case_when(
-    (EXCESSIVE_FORCE_USED_OR_THREATENED_VEH == 'Yes') ~ 1,
-    (EXCESSIVE_FORCE_USED_OR_THREATENED_VEH == 'No') ~ 0,
-    (police_used_force_t == 0 & EXCESSIVE_FORCE_USED_OR_THREATENED_VEH == NA) ~ 0
+    (X101 == 'Yes') ~ 1,
+    (X101 == 'No') ~ 0,
+    (police_used_force_t == 0 & X101 == NA) ~ 0
   ))
 ```
 
@@ -253,31 +264,31 @@ ppcs_1999_F <- ppcs_1999_F %>%
 
 #threatened
 ppcs_1999_F <- ppcs_1999_F %>%
-  mutate(civilian_threatened_t = ifelse(CURSE_OR_INSULT_OFFICER_VEHICLE_STOP == 'Curse or insult officer' | VERBAL_THREAT_TO_OFFICER_VEHICLE_STOP == 'Verbal threat to officer' | THREATEN_OFFICER_WITH_WEAPON_VEHICLE_S == 'Threaten officer with weapon', 1, NA))
+  mutate(civilian_threatened_t = ifelse(X129 == 'Curse or insult officer' | X130 == 'Verbal threat to officer' | X135 == 'Threaten officer with weapon', 1, NA))
 
 #physical
 ppcs_1999_F <- ppcs_1999_F %>%
-  mutate(civilian_physical_t = ifelse(GRAB_HIT_OR_FIGHT_OFFICER_VEHICLE_ST == 'Grab, hit, or fight with officer' | ASSAULT_OFFICER_WITH_WEAPON_VEHICLE_ST == 'Assault officer with weapon', 1, NA))
+  mutate(civilian_physical_t = ifelse(X134 == 'Grab, hit, or fight with officer' | X136 == 'Assault officer with weapon', 1, NA))
 
 #argued
 ppcs_1999_F <- ppcs_1999_F %>%
-  mutate(civilian_argued_t = ifelse(ARGUE_OR_DISOBEY_OFFICER_VEHICLE_STOP == 'Argue or disobey officer', 1, NA))
+  mutate(civilian_argued_t = ifelse(X128 == 'Argue or disobey officer', 1, NA))
 
 #disobey - counted twice because the question is argue or disobey officer?
 ppcs_1999_F <- ppcs_1999_F %>%
-  mutate(civilian_disobey_t = ifelse(ARGUE_OR_DISOBEY_OFFICER_VEHICLE_STOP == 'Argue or disobey officer', 1, NA))
+  mutate(civilian_disobey_t = ifelse(X128== 'Argue or disobey officer', 1, NA))
 
 #other behavior
 ppcs_1999_F <- ppcs_1999_F %>%
-  mutate(civilian_other_behavior_t = ifelse(OTHER_ACTIONS_TO_PROVOKE_VEHICLE_STOP == 'Other actions to provoke', 1, NA))
+  mutate(civilian_other_behavior_t = ifelse(X137 == 'Other actions to provoke', 1, NA))
 
 #escape
 ppcs_1999_F <- ppcs_1999_F %>%
-  mutate(civilian_escape_t = ifelse(TRY_TO_ESCAPE_VEHICLE_STOP == 'Try to escape', 1, NA))
+  mutate(civilian_escape_t = ifelse(X133 == 'Try to escape', 1, NA))
 
 #resist 
 ppcs_1999_F <- ppcs_1999_F %>%
-  mutate(civilian_resist_t = ifelse(RESIST_ARREST_OR_HANDCUFFS_VEHICLE_STO == 'Resist arrest or handcuffs' | RESIST_SEARCH_VEHICLE_STOP == 'Resist search', 1, NA))
+  mutate(civilian_resist_t = ifelse(X131 == 'Resist arrest or handcuffs' | X132 == 'Resist search', 1, NA))
 
 #complained
 ppcs_1999_F <- ppcs_1999_F %>%
@@ -306,27 +317,19 @@ ppcs_1999_F <- ppcs_1999_F %>%
 # civilian injured
 ppcs_1999_F <- ppcs_1999_F %>%
   mutate(civilian_injured_t = case_when(
-    (INJURED_VEHICLE_STOP == 'Yes') ~ 1,
-    (INJURED_VEHICLE_STOP == 'No') ~ 0,
-    (INJURED_VEHICLE_STOP == NA & police_used_force_t == 0) ~ 0
+    (X118 == 'Yes') ~ 1,
+    (X118 == 'No') ~ 0,
+    (X118 == NA & police_used_force_t == 0) ~ 0
   ))
 ```
 
 ## Other stops
-```{r}
-#police used force
-ppcs_1999_F <- ppcs_1999_F %>%
-  mutate(police_used_force_o = case_when(
-    (OTHER_CONTACT_RESULTED_IN_FORCE_THREAT == 'Yes') ~ 1,
-    (OTHER_CONTACT_RESULTED_IN_FORCE_THREAT == 'No') ~ 0
-  )) 
-```
 
 ```{r}
 # number of officers
 ppcs_1999_F <- ppcs_1999_F %>%
-  mutate(num_officers_o = ifelse(NUMBER_OF_OFFICERS_USE_OR_THREATEN_FORCE == "Out of Universe/Missing", NA_real_, NUMBER_OF_OFFICERS_USE_OR_THREATEN_FORCE)) %>%
-  mutate(num_officers_o = ifelse(num_officers_o == "One", 1, NUMBER_OF_OFFICERS_USE_OR_THREATEN_FORCE)) %>%
+  mutate(num_officers_o = ifelse(X171 == "Out of Universe/Missing", NA_real_, X171)) %>%
+  mutate(num_officers_o = ifelse(num_officers_o == "One", 1, X171)) %>%
   mutate(num_officers_o = as.numeric(num_officers_o))
 ```
 
@@ -337,10 +340,10 @@ b <- c("All black", "Mostly black")
 o <- c("All of another race", "Mostly another race")
 ppcs_1999_F <- ppcs_1999_F %>%
   mutate(off_race_o = case_when(
-    (( num_officers_o == 1 & RACE_OF_OFFICER_USE_OR_THREATEN_FORCE == 'White' ) | (num_officers_o %in% seq(2, 30) & RACE_OF_OFFICERS_USE_OR_THREATEN_FORCE %in% w)) ~ "White" ,
-    (( num_officers_o == 1 & RACE_OF_OFFICER_USE_OR_THREATEN_FORCE == 'Black' ) | (num_officers_o %in% seq(2, 30) & RACE_OF_OFFICERS_USE_OR_THREATEN_FORCE %in% b)) ~ "Black",
-    (( num_officers_o == 1 & RACE_OF_OFFICER_USE_OR_THREATEN_FORCE == 'Some other race' ) | (num_officers_o %in% seq(2, 30) & RACE_OF_OFFICERS_USE_OR_THREATEN_FORCE %in% o)) ~ "Other",
-    (num_officers_o %in% seq(2, 30) & RACE_OF_OFFICERS_USE_OR_THREATEN_FORCE == "Equally mixed") ~ "Split"
+    (( num_officers_o == 1 & X173 == 'White' ) | (num_officers_o %in% seq(2, 30) & X172 %in% w)) ~ "white" ,
+    (( num_officers_o == 1 & X173 == 'Black' ) | (num_officers_o %in% seq(2, 30) & X172 %in% b)) ~ "black",
+    (( num_officers_o == 1 & X173 == 'Some other race' ) | (num_officers_o %in% seq(2, 30) & X172 %in% o)) ~ "other",
+    (num_officers_o %in% seq(2, 30) & X172 == "Equally mixed") ~ "split"
   ))
 ```
 
@@ -348,8 +351,8 @@ ppcs_1999_F <- ppcs_1999_F %>%
 #civilian arrested - other stop
 ppcs_1999_F <- ppcs_1999_F %>%
   mutate(civilian_arrested_o = case_when(
-    (ARRESTED_USE_OR_THREATEN_FORCE == 'Yes') ~ 1,
-    (ARRESTED_USE_OR_THREATEN_FORCE == 'No') ~ 0
+    (X174 == 'Yes') ~ 1,
+    (X174 == 'No') ~ 0
   ))
 ```
 
@@ -357,8 +360,8 @@ ppcs_1999_F <- ppcs_1999_F %>%
 #civilian searched - vehicle searched or civilian searched
 ppcs_1999_F <- ppcs_1999_F %>%
   mutate(civilian_searched_o = case_when(
-    (PERSONAL_SEARCH_USE_OR_THREATEN_FORCE == "Yes") ~ 1,
-    (PERSONAL_SEARCH_USE_OR_THREATEN_FORCE == "No") ~ 0
+    (X176 == "Yes") ~ 1,
+    (X176 == "No") ~ 0
   ))
 ```
 
@@ -366,32 +369,41 @@ ppcs_1999_F <- ppcs_1999_F %>%
 #civilian guilty of carrying illegal drugs, alcohol or wewapons
 ppcs_1999_F <- ppcs_1999_F %>%
   mutate(civilian_guilty_of_illegal_o = case_when(
-    (ILLEGAL_WEAPONS_FOUND_USE_OR_THREATEN_FO == 'Illegal weapons' | 
-     ILLEGAL_DRUGS_FOUND_USE_OR_THREATEN_FORC == 'Illegal drugs'   |
-     OPEN_ALCOHOL_FOUND_USE_OR_THREATEN_FORCE == 'Open alcohol' |
-     OTHER_EVIDENCE_FOUND_USE_OR_THREATEN_FOR == 'Other crime evidence') ~ 1,
+    (X179 == 'Illegal weapons' | 
+     X180 == 'Illegal drugs'   |
+     X181 == 'Open alcohol' |
+     X182 == 'Other crime evidence') ~ 1,
     
-    (NO_EVIDENCE_FOUND_USE_OR_THREATEN_FORCE == 'None of the above') ~ 0
+    (X184 == 'None of the above') ~ 0
   ))
+```
+
+```{r}
+#police used force
+ppcs_1999_F <- ppcs_1999_F %>%
+  mutate(police_used_force_o = case_when(
+    (X152 == 'Yes') ~ 1,
+    (X152 == 'No') ~ 0
+  )) 
 ```
 
 ```{r}
 # Officer use of force
 ppcs_1999_F <- ppcs_1999_F %>%
   mutate(hit_kick_o = case_when(
-    (KICKED_OR_HIT_OTHER_CONTACT == 'Kicked or hit') ~ 1
+    (X200 == 'Kicked or hit') ~ 1
   )) %>%
   mutate(grab_push_o = case_when (
-    (PUSHED_OR_GRABBED_WITHOUT_PAIN_OTHER_CON == 'Pushed or grabbed without pain' | PUSHED_OR_GRABBED_WITH_PAIN_OTHER_CONTAC == 'Pushed or grabbed with pain') ~ 1 
+    (X198 == 'Pushed or grabbed without pain' | X199 == 'Pushed or grabbed with pain') ~ 1 
   )) %>%
   mutate(point_gun_o = case_when(
-    (POINTED_GUN_OTHER_CONTACT == 'Pointed gun' | FIRED_GUN_OTHER_CONTACT == 'Fired gun') ~ 1
+    (X203 == 'Pointed gun' | X204 == 'Fired gun') ~ 1
   )) %>%
   mutate(pepper_stun_o = case_when(
-    (SPRAYED_WITH_CHEMICAL_PEPPER_SPRAY_OTHER == 'Sprayed with chemical/pepper spray' ) ~ 1
+    (X202 == 'Sprayed with chemical/pepper spray' ) ~ 1
   )) %>%
   mutate(other_force_o = case_when(
-    (UNLEASHED_POLICE_DOG_BIT_OTHER_CONTACT == 'Unleashed police dog bit' | USED_OTHER_FORCE_OTHER_CONTACT == 'Used other force') ~ 1
+    (X201 == 'Unleashed police dog bit' | X205 == 'Used other force') ~ 1
   ))
 ```
 
@@ -403,25 +415,23 @@ ppcs_1999_F <- ppcs_1999_F %>%
   mutate(force_sum_o = rowSums(ppcs_1999_tmp, na.rm = TRUE)) %>%
   mutate(any_force_o = ifelse((force_sum_o > 0) & (had_contact == 1), 1, 0))
 
-
-			#  foreach var in oforce_hitorkick_o oforce_graborpush_o oforce_pointgun_o oforce_sprayortaser_o oforce_other_o {;
-			# replace `var' = 0 if mi(`var') & anyuseofforce_o==1;
-			# replace `var' = 0 if mi(`var') & (V178=="2" | V179=="2" | V138=="2");
-			# };
+ppcs_1999_F <- ppcs_1999_F %>%
+  mutate_at(.funs = list( ~ ifelse(is.na(.) & ppcs_1999_F$any_force_o == 1, 0, .)), .vars = colnames(ppcs_1999_tmp)) %>%
+  mutate_at(.funs = list( ~ ifelse(is.na(.) & (X196 == 'No' | X197 == 'No' | X152 == 'No'), 0, .)), .vars = colnames(ppcs_1999_tmp))
 ```
 
 ```{r}
 # civilian is handcuffed
 ppcs_1999_F <- ppcs_1999_F %>%
   mutate(civilian_is_handcuffed_o = case_when(
-    (HANDCUFFED_OTHER_CONTACT == 'Yes') ~ 1,
-    (HANDCUFFED_OTHER_CONTACT == 'No') ~ 0,
-    (HANDCUFFED_OTHER_CONTACT == 'Out of Universe/Missing' & police_used_force_o == 0) ~ 0
+    (X195 == 'Yes') ~ 1,
+    (X195 == 'No') ~ 0,
+    (X195 == 'Out of Universe/Missing' & police_used_force_o == 0) ~ 0
   )) %>%
   mutate(officer_handcuffed_o = case_when(
     (civilian_is_handcuffed_o == 1 & civilian_arrested_o != 1 ) ~ 1,
     ((civilian_is_handcuffed_o == 1 & civilian_arrested_o == 1 ) | civilian_is_handcuffed_o == 0) ~ 0,
-    (OTHER_CONTACT_RESULTED_IN_FORCE_THREAT == 'No') ~ 0
+    (X152 == 'No') ~ 0
   ))
 ```
 
@@ -430,10 +440,10 @@ ppcs_1999_F <- ppcs_1999_F %>%
 
 ppcs_1999_F <- ppcs_1999_F %>%
   mutate(off_fired_gun_o = case_when(
-    (FIRED_GUN_OTHER_CONTACT == 'Fired gun') ~ 1
+    (X204 == 'Fired gun') ~ 1
   )) %>%
   mutate(off_shot_suspect_o = case_when(
-    (INJURED_OTHER_CONTACT == 'Yes' & GUNSHOT_WOUND_OTHER_CONTACT == 'Gunshot wound') ~ 1
+    (X231 == 'Yes' & X232 == 'Gunshot wound') ~ 1
   ))
 ```
 
@@ -442,9 +452,9 @@ ppcs_1999_F <- ppcs_1999_F %>%
 
 ppcs_1999_F <- ppcs_1999_F %>%
   mutate(excessive_force_o = case_when(
-    (EXCESSIVE_FORCE_USED_OR_THREATENED_OTHER == 'Yes') ~ 1,
-    (EXCESSIVE_FORCE_USED_OR_THREATENED_OTHER == 'No') ~ 0,
-    (police_used_force_o == 0 & EXCESSIVE_FORCE_USED_OR_THREATENED_OTHER == NA) ~ 0
+    (X214 == 'Yes') ~ 1,
+    (X214 == 'No') ~ 0,
+    (police_used_force_o == 0 & X214 == NA) ~ 0
   ))
 ```
 
@@ -453,31 +463,31 @@ ppcs_1999_F <- ppcs_1999_F %>%
 
 #threatened
 ppcs_1999_F <- ppcs_1999_F %>%
-  mutate(civilian_threatened_o = ifelse(CURSE_OR_INSULT_OFFICER_OTHER_CONTACT == 'Curse or insult officer' | VERBAL_THREAT_TO_OFFICER_OTHER_CONTACT == 'Verbal threat to officer' | THREATEN_OFFICER_WITH_WEAPON_OTHER_CON == 'Threaten officer with weapon', 1, NA))
+  mutate(civilian_threatened_o = ifelse(X242 == 'Curse or insult officer' | X243 == 'Verbal threat to officer' | X248 == 'Threaten officer with weapon', 1, NA))
 
 #physical
 ppcs_1999_F <- ppcs_1999_F %>%
-  mutate(civilian_physical_o = ifelse(GRAB_HIT_OR_FIGHT_OFFICER_OTHER_CONT == 'Grab, hit, or fight with officer' | ASSAULT_OFFICER_WITH_WEAPON_OTHER_CONT == 'Assault officer with weapon', 1, NA))
+  mutate(civilian_physical_o = ifelse(X247 == 'Grab, hit, or fight with officer' | X249 == 'Assault officer with weapon', 1, NA))
 
 #argued
 ppcs_1999_F <- ppcs_1999_F %>%
-  mutate(civilian_argued_o = ifelse(ARGUE_OR_DISOBEY_OFFICER_OTHER_CONTACT == 'Argue or disobey officer', 1, NA))
+  mutate(civilian_argued_o = ifelse(X241 == 'Argue or disobey officer', 1, NA))
 
 #disobey - counted twice because the question is argue or disobey officer?
 ppcs_1999_F <- ppcs_1999_F %>%
-  mutate(civilian_disobey_o = ifelse(ARGUE_OR_DISOBEY_OFFICER_OTHER_CONTACT == 'Argue or disobey officer', 1, NA))
+  mutate(civilian_disobey_o = ifelse(X241 == 'Argue or disobey officer', 1, NA))
 
 #other behavior
 ppcs_1999_F <- ppcs_1999_F %>%
-  mutate(civilian_other_behavior_o = ifelse(OTHER_ACTIONS_TO_PROVOKE_OTHER_CONTACT == 'Other actions to provoke', 1, NA))
+  mutate(civilian_other_behavior_o = ifelse(X250 == 'Other actions to provoke', 1, NA))
 
 #escape
 ppcs_1999_F <- ppcs_1999_F %>%
-  mutate(civilian_escape_o = ifelse(TRY_TO_ESCAPE_OTHER_CONTACT == 'Try to escape', 1, NA))
+  mutate(civilian_escape_o = ifelse(X246 == 'Try to escape', 1, NA))
 
 #resist 
 ppcs_1999_F <- ppcs_1999_F %>%
-  mutate(civilian_resist_o = ifelse(RESIST_ARREST_OR_HANDCUFFS_OTHER_CONTA == 'Resist arrest or handcuffs' | RESIST_SEARCH_OTHER_CONTACT == 'Resist search', 1, NA))
+  mutate(civilian_resist_o = ifelse(X244 == 'Resist arrest or handcuffs' | X245 == 'Resist search', 1, NA))
 
 #complained
 ppcs_1999_F <- ppcs_1999_F %>%
@@ -505,9 +515,9 @@ ppcs_1999_F <- ppcs_1999_F %>%
 # civilian injured
 ppcs_1999_F <- ppcs_1999_F %>%
   mutate(civilian_injured_o = case_when(
-    (INJURED_OTHER_CONTACT == 'Yes') ~ 1,
-    (INJURED_OTHER_CONTACT == 'No') ~ 0,
-    (INJURED_OTHER_CONTACT == NA & police_used_force_o == 0) ~ 0
+    (X231 == 'Yes') ~ 1,
+    (X231 == 'No') ~ 0,
+    (X231 == NA & police_used_force_o == 0) ~ 0
   ))
 ```
 
@@ -518,9 +528,63 @@ ppcs_1999_F <- ppcs_1999_F %>%
 ```
 
 ```{r}
-# not sure what the stata code means at the end.
-# there has to be some way of combining the traffic and other columns
+#get the variable names without extension
+traffic_cols <- ppcs_1999_F[ , grepl( "*_t$" , names(ppcs_1999_F) ) ]
+cols <- colnames(traffic_cols)
+vars <- gsub("*_t$", "", cols)
+
+other_cols <- ppcs_1999_F[ , grepl( "*_o$" , names(ppcs_1999_F) ) ]
+cols <- colnames(other_cols)
+vars2 <- gsub("*_o$", "", cols)
+
+#add id
+ppcs_1999_F <- ppcs_1999_F %>% 
+  mutate(id = row_number())
+
+#reshape from wide to long
+ppcs_1999_F <- ppcs_1999_F %>%
+  reshape(direction = "long", idvar = 'id',
+          v.names = vars, 
+          varying=list(grep("*num_officers", colnames(ppcs_1999_F)),
+                       grep("*off_race", colnames(ppcs_1999_F)),
+                       grep("*civilian_arrested", colnames(ppcs_1999_F)),
+                       grep("*civilian_searched", colnames(ppcs_1999_F)),
+                       grep("*civilian_guilty_of_illegal", colnames(ppcs_1999_F)),
+                       grep("*police_used_force", colnames(ppcs_1999_F)),
+                       grep("*hit_kick", colnames(ppcs_1999_F)),
+                       grep("*grab_push", colnames(ppcs_1999_F)),
+                       grep("*point_gun", colnames(ppcs_1999_F)),
+                       grep("*pepper_stun", colnames(ppcs_1999_F)),
+                       grep("*other_force", colnames(ppcs_1999_F)),
+                       grep("*force_sum", colnames(ppcs_1999_F)),
+                       grep("*any_force", colnames(ppcs_1999_F)),
+                       grep("*civilian_is_handcuffed", colnames(ppcs_1999_F)),
+                       grep("*officer_handcuffed", colnames(ppcs_1999_F)),
+                       grep("*off_fired_gun", colnames(ppcs_1999_F)),
+                       grep("*off_shot_suspect", colnames(ppcs_1999_F)),
+                       grep("*excessive_force", colnames(ppcs_1999_F)),
+                       grep("*civilian_threatened", colnames(ppcs_1999_F)),
+                       grep("*civilian_physical", colnames(ppcs_1999_F)),
+                       grep("*civilian_argued", colnames(ppcs_1999_F)),
+                       grep("*civilian_disobey", colnames(ppcs_1999_F)),
+                       grep("*civilian_other_behavior", colnames(ppcs_1999_F)),
+                       grep("*civilian_escape", colnames(ppcs_1999_F)),
+                       grep("*civilian_resist", colnames(ppcs_1999_F)),
+                       grep("*civilian_complained", colnames(ppcs_1999_F)),
+                       grep("*behav_sum", colnames(ppcs_1999_F)),
+                       grep("*any_behavior", colnames(ppcs_1999_F)),
+                       grep("*time_of_encounter", colnames(ppcs_1999_F)),
+                       grep("*civilian_injured", colnames(ppcs_1999_F))
+          ),
+          timevar='type',
+          times=c('other', 'traffic'))
+ppcs_1999_F <- ppcs_1999_F %>% select(-type)
+
+#drop duplicates
+ppcs_1999_F <- ppcs_1999_F %>% distinct()
+
 ```
+
 
 ```{r}
 #select the columns we want
@@ -534,61 +598,35 @@ ppcs_1999_F <- ppcs_1999_F %>%
     civilian_income,
     population_size,
     type_of_incident,
-    time_of_encounter_t,
-    police_used_force_t,
-    other_force_t,
-    grab_push_t,
-    hit_kick_t,
-    point_gun_t,
-    civilian_is_handcuffed_t,
-    officer_handcuffed_t,
-    pepper_stun_t,
-    any_force_t,
-    off_fired_gun_t,
-    off_shot_suspect_t,
-    off_race_t,
-    civilian_threatened_t,
-    civilian_physical_t, 
-    civilian_argued_t,
-    civilian_disobey_t,
-    civilian_resist_t,
-    civilian_other_behavior_t,
-    civilian_complained_t,
-    civilian_escape_t,
-    any_behavior_t,
-    civilian_injured_t,
-    excessive_force_t,
-    civilian_searched_t,
-    civilian_arrested_t,
-    civilian_guilty_of_illegal_t,
-    time_of_encounter_o,
-    police_used_force_o,
-    other_force_o,
-    grab_push_o,
-    hit_kick_o,
-    point_gun_o,
-    civilian_is_handcuffed_o,
-    officer_handcuffed_o,
-    pepper_stun_o,
-    any_force_o,
-    off_fired_gun_o,
-    off_shot_suspect_o,
-    off_race_o,
-    civilian_threatened_o,
-    civilian_physical_o, 
-    civilian_argued_o,
-    civilian_disobey_o,
-    civilian_resist_o,
-    civilian_other_behavior_o,
-    civilian_complained_o,
-    civilian_escape_o,
-    any_behavior_o,
-    civilian_injured_o,
-    excessive_force_o,
-    civilian_searched_o,
-    civilian_arrested_o,
-    civilian_guilty_of_illegal_o,
+    time_of_encounter,
+    police_used_force,
+    other_force,
+    grab_push,
+    hit_kick,
+    point_gun,
+    civilian_is_handcuffed,
+    officer_handcuffed,
+    pepper_stun,
+    off_fired_gun,
+    off_shot_suspect,
+    off_race,
+    civilian_threatened,
+    civilian_physical, 
+    civilian_argued,
+    civilian_disobey,
+    civilian_resist,
+    civilian_other_behavior,
+    civilian_complained,
+    civilian_escape,
+    civilian_injured,
+    excessive_force,
+    civilian_searched,
+    civilian_arrested,
+    civilian_guilty_of_illegal,
     year
   )
+
+save(ppcs_1999_F, file = "clean_data/ppcs_1999_F.Rdata")
 ```
+
 
