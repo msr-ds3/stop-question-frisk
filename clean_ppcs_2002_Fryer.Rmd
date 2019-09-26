@@ -88,9 +88,9 @@ ppcs_2002_F <- ppcs_2002_F %>%
 # type of incident
 ppcs_2002_F <- ppcs_2002_F %>%
   mutate(type_of_incident = case_when(
-    (TRAFFIC_ACCIDENT == "Yes" | TRAFFIC_STOP == "Yes") ~2,
-    (TRAFFIC_ACCIDENT == "No" & TRAFFIC_STOP == "No") ~ 3,
-    (TRAFFIC_ACCIDENT == "Out of universe/missing" &  had_contact == 1) ~ NA_real_
+    (TRAFFIC_ACCIDENT == "Yes" | TRAFFIC_STOP == "Yes") ~ 'traffic',
+    (TRAFFIC_ACCIDENT == "No" & TRAFFIC_STOP == "No") ~ 'other',
+    (TRAFFIC_ACCIDENT == "Out of universe/missing" &  had_contact == 1) ~ NA_character_
   ))
 ```
 
@@ -223,11 +223,9 @@ ppcs_2002_F <- ppcs_2002_F %>%
   mutate(behav_sum = rowSums(ppcs_2002_tmp, na.rm = TRUE)) %>%
   mutate(any_behavior = ifelse((behav_sum > 0) & (had_contact == 1), 1, 0))
 
-###go back to this###
-# foreach var in sthreatened sphysical sargued sdisobey sotherbehavior sescape sresist {;
-# replace `var' = 0 if mi(`var') & anysbehav==1;
-# replace `var' = 0 if mi(`var') & V32=="6";
-# }; 
+ppcs_2002_F <- ppcs_2002_F %>%
+  mutate_at(.funs = list( ~ ifelse(is.na(.) & ppcs_2002_F$any_force == 1, 0, .)), .vars = colnames(ppcs_2002_tmp)) %>%
+  mutate_at(.funs = list( ~ ifelse(is.na(.) & POLICE_USED_OR_THREATENED_FORCE == 'No', 0, .)), .vars = colnames(ppcs_2002_tmp))
 ```
 
 ```{r}
@@ -327,10 +325,9 @@ ppcs_2002_F <- ppcs_2002_F %>%
     grab_push,
     hit_kick,
     point_gun,
-    pepper_stun,
-    any_force,
     civilian_is_handcuffed,
     officer_handcuffed,
+    pepper_stun,
     off_fired_gun,
     off_shot_suspect,
     off_race,
@@ -342,7 +339,6 @@ ppcs_2002_F <- ppcs_2002_F %>%
     civilian_other_behavior,
     civilian_complained,
     civilian_escape,
-    any_behavior,
     civilian_injured,
     excessive_force,
     civilian_searched,
@@ -350,5 +346,7 @@ ppcs_2002_F <- ppcs_2002_F %>%
     civilian_guilty_of_illegal,
     year
   )
+
+save(ppcs_2002_F, file = "clean_data/ppcs_2002_F.Rdata")
 ```
 
