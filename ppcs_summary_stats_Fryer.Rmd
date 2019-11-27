@@ -1,0 +1,489 @@
+---
+title: "ppcs_summary_stats_Fryer"
+author: "Brenda Fried"
+date: "9/26/2019"
+output: html_document
+---
+
+# Load Libraries
+```{r}
+library(ggplot2)
+library(scales)
+library(here)
+library(tidyverse)
+```
+
+```{r load-data}
+load(here("clean_data", "ppcs_full_F.RData"))
+ppcs_full_F <- ppcs_full_F %>% filter((had_contact == 1) | !is.na(type_of_incident))
+```
+# Proportion of Race
+```{r}
+#percentage of races from whole sample
+ppcs_full_F %>%
+  group_by(civilian_race) %>%
+  filter(!is.na(civilian_race)) %>%
+  summarize(count = n()) %>% 
+  mutate(prop = count/sum(count))
+```
+#Proportions of gender 
+```{r}
+#percentage of male and female from whole sample
+ppcs_full_F %>%
+  group_by(civilian_gender) %>%
+  filter(!is.na(civilian_gender)) %>%
+  summarize(count = n()) %>%
+  mutate(prop = count/sum(count))
+```
+
+```{r}
+#percentage of gender per race
+ppcs_full_F %>%
+  group_by(civilian_race, civilian_gender) %>%
+  summarize(gender_count = n()) %>%
+  mutate(sum = sum(gender_count)) %>%
+  mutate(prop = gender_count/sum)
+
+```
+# Average age
+```{r avg-age-full-sample}
+ppcs_full_F %>%
+  mutate(civilian_age = as.numeric(civilian_age)) %>%
+  filter(!is.na(civilian_age)) %>%
+  summarize(mean = mean(civilian_age))
+```
+
+```{r avg-age-per-race}
+ppcs_full_F %>%
+  mutate(civilian_age = as.numeric(civilian_age)) %>%
+  filter(!is.na(civilian_age)) %>%
+  group_by(civilian_race) %>%
+  summarize(mean = mean(civilian_age))
+```
+
+# Proportion of Civilian Employed
+```{r employed-full-sample}
+ppcs_full_F %>%
+  group_by(civilian_employed) %>%
+  filter(!is.na(civilian_employed)) %>%
+  summarize(count = n()) %>%
+  mutate(prop = count/sum(count))
+
+```
+
+
+```{r employed-per-race}
+ppcs_full_F %>%
+  mutate(civilian_employed = as.numeric(civilian_employed)) %>%
+  group_by(civilian_race, civilian_employed) %>%
+  filter(!is.na(civilian_race)) %>%
+  filter(!is.na(civilian_employed)) %>%
+  summarize(employed_count = n()) %>% 
+  ungroup() %>%
+  group_by(civilian_race) %>%
+  mutate(sum = sum(employed_count)) %>%
+  filter(civilian_employed == 1) %>%
+  mutate(prop = employed_count/sum)
+  
+```
+# Average Income as factor
+```{r income-full-sample}
+ppcs_full_F %>%
+  summarise(mean = mean(as.numeric(civilian_income), na.rm = TRUE))
+  
+```
+
+
+```{r income-by-race}
+ppcs_full_F %>%
+  group_by(civilian_race) %>%
+  filter(!is.na(civilian_race)) %>%
+  summarise(mean = mean(as.numeric(civilian_income), na.rm = TRUE))
+```
+# Average Population Size
+
+```{r pop-size-full-sample}
+ppcs_full_F %>%
+  summarise(mean = mean(as.numeric(population_size), na.rm = TRUE))
+```
+
+```{r pop-size-by-race}
+ppcs_full_F %>%
+  group_by(civilian_race) %>%
+  summarise(mean = mean(as.numeric(population_size), na.rm = TRUE))
+```
+
+# Proportion of Incident Type
+```{r incident-type-full-sample}
+ppcs_full_F %>%
+  group_by(type_of_incident) %>%
+  filter(!is.na(type_of_incident)) %>%
+  summarize(count = n()) %>%
+  mutate(prop = count/sum(count))
+```
+
+```{r incident-type-by-race}
+ppcs_full_F %>%
+  filter(is.na(type_of_incident) != TRUE) %>%
+  mutate(type_of_incident = as.factor(type_of_incident)) %>%
+  group_by(civilian_race, type_of_incident) %>%
+  filter(!is.na(civilian_race)) %>%
+  summarise(c = n()) %>%
+  ungroup() %>%
+  group_by(civilian_race) %>%
+  mutate(sum = sum(c)) %>%
+  mutate(prop = c/sum)
+```
+
+# Proportion of Time of Encounter
+```{r time-of-encounter-full-sample}
+ppcs_full_F %>%
+  group_by(time_of_encounter) %>%
+  filter(is.na(time_of_encounter) != TRUE ) %>%
+  summarise(count = n()) %>%
+  ungroup() %>%
+  mutate(prop = count/ sum(count))
+
+
+```
+
+```{r time-of-encounter-by-race}
+ppcs_full_F %>%
+  filter(is.na(time_of_encounter) != TRUE ) %>%
+  group_by(civilian_race, time_of_encounter) %>%
+  filter(!is.na(civilian_race)) %>%
+  summarize(enc_count = n()) %>% 
+  ungroup() %>%
+  group_by(civilian_race) %>%
+  mutate(sum = sum(enc_count)) %>%
+  mutate(prop = enc_count/sum)
+
+```
+
+# Proportion of Officer Race
+```{r officer-race-full-sample}
+#View(colnames(ppcs_full_F))
+ppcs_full_F %>%
+  mutate(off_race = case_when(
+    (omaj_black == 1) ~ 'black',
+    (omaj_white == 1) ~ 'white',
+    (omaj_other == 1) ~ 'other',
+    (osplit == 1) ~ 'split',
+    (omaj_hispanic == 1)~ 'hispanic'
+    )) %>%
+  filter(is.na(off_race) == FALSE) %>%
+  group_by(off_race) %>%
+  summarise(count = n()) %>%
+  mutate(prop = count/sum(count))
+```
+
+```{r}
+ppcs_full_F %>%
+  mutate(off_race = case_when(
+    (omaj_black == 1) ~ 'black',
+    (omaj_white == 1) ~ 'white',
+    (omaj_other == 1) ~ 'other',
+    (osplit == 1) ~ 'split',
+    (omaj_hispanic == 1)~ 'hispanic'
+  )) %>%
+  filter(is.na(off_race) == FALSE) %>%
+  filter(!is.na(civilian_race)) %>%
+  group_by(civilian_race, off_race) %>%
+  summarise(offrace_count = n()) %>%
+  ungroup() %>%
+  group_by(civilian_race) %>%
+  mutate(sum = sum(offrace_count)) %>%
+  mutate(prop = offrace_count/sum) %>%
+  select(civilian_race, off_race, prop)
+
+```
+
+# Proportion of Alternative outcomes
+
+```{r searched-full-sample}
+ppcs_full_F %>%
+  group_by(civilian_searched) %>%
+  filter(!is.na(civilian_searched)) %>%
+  summarise(count = n()) %>%
+  mutate(prop = count/sum(count))
+```
+
+```{r searched-by-race}
+ppcs_full_F %>%
+  group_by(civilian_race, civilian_searched) %>%
+  filter(!is.na(civilian_race)) %>%
+  filter(!is.na(civilian_searched)) %>%
+  summarise(search_count = n()) %>%
+  mutate(prop = search_count/sum(search_count)) %>%
+  filter(civilian_searched == 1)
+```
+
+# Proportion of arrested
+```{r arrested-full-sample}
+ppcs_full_F %>%
+  group_by(civilian_arrested) %>%
+  filter(!is.na(civilian_arrested)) %>%
+  summarise(count = n()) %>%
+  mutate(prop = count/sum(count))
+```
+
+
+```{r arrested-by-race}
+ppcs_full_F %>%
+  filter(!is.na(civilian_race)) %>%
+  group_by(civilian_race) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  group_by(civilian_race, civilian_arrested) %>%
+  filter(!is.na(civilian_arrested)) %>%
+  summarise(arrest_count = n()) %>%
+  mutate(prop = arrest_count/sum(arrest_count)) %>%
+  filter(civilian_arrested == 1)
+
+```
+
+# Proportion of civilians carrying illegal items
+```{r guily-carrying-illegal-full-sample}
+ppcs_full_F %>%
+  group_by(civilian_guilty_of_illegal) %>%
+  filter(!is.na(civilian_guilty_of_illegal)) %>%
+  summarise(count = n()) %>%
+  mutate(prop = count/sum(count))
+```
+
+```{r guilty-carrying-illegal-by-race}
+ppcs_full_F %>%
+  group_by(civilian_race, civilian_guilty_of_illegal) %>%
+  filter(!is.na(civilian_guilty_of_illegal)) %>%
+  summarise(guilt_count = n()) %>%
+  mutate(prop = guilt_count/sum(guilt_count)) %>%
+  filter(civilian_guilty_of_illegal == 1)
+```
+
+# Proportion of civilian injured
+```{r injured-full-sample}
+ppcs_full_F %>%
+  group_by(civilian_injured) %>%
+  filter(!is.na(civilian_injured)) %>%
+  summarise(count = n()) %>%
+  mutate(prop = count/sum(count))
+```
+
+```{r injured-by-race}
+ppcs_full_F %>%
+  group_by(civilian_race, civilian_injured) %>%
+  filter(!is.na(civilian_race)) %>%
+  filter(!is.na(civilian_injured)) %>%
+  summarise(inj_count = n()) %>%
+  mutate(prop = inj_count/sum(inj_count)) %>%
+  filter(civilian_injured == 1)
+```
+
+# Proportion of perceiving excess force
+```{r exess-force-full-sample}
+ppcs_full_F %>%
+  group_by(excessive_force) %>%
+  filter(!is.na(excessive_force)) %>%
+  summarise(count = n()) %>%
+  mutate(prop = count/sum(count))
+```
+
+
+```{r excess-force-by-race}
+ppcs_full_F %>%
+  group_by(civilian_race, excessive_force) %>%
+  filter(!is.na(excessive_force)) %>%
+  filter(!is.na(civilian_race)) %>%
+  summarise(ex_count = n()) %>%
+  mutate(prop = ex_count/sum(ex_count))
+```
+
+#Check use of force
+
+```{r any-force-full-sample} 
+ppcs_full_F %>%
+  group_by(any_force) %>%
+  filter(!is.na(any_force)) %>%
+  summarise(count = n()) %>%
+  mutate(prop = count/sum(count))
+```
+
+```{r any-force-by-race}
+ppcs_full_F %>%
+  group_by(any_force) %>%
+  filter(!is.na(any_force)) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  group_by(civilian_race, any_force) %>%
+  filter(!is.na(civilian_race)) %>%
+  summarise(any_force_count = n()) %>%
+  mutate(prop = any_force_count/sum(any_force_count))
+```
+
+```{r grab-push-full-sample}
+ppcs_full_F %>%
+  group_by(grab_push) %>%
+  filter(!is.na(grab_push)) %>%
+  summarise(count = n()) %>%
+  mutate(prop = count/sum(count))
+```
+
+```{r grab-push-by-race}
+ppcs_full_F %>%
+  filter(!is.na(civilian_race)) %>%
+  filter(!is.na(grab_push)) %>%
+  group_by(civilian_race, grab_push) %>%
+  summarise(grab_push_count = n()) %>%
+  mutate(prop = grab_push_count/sum(grab_push_count)) %>%
+  filter(grab_push == 1)
+```
+
+#hit and kick
+
+```{r hit-kick-full-sample}
+ppcs_full_F %>%
+  group_by(hit_kick) %>%
+  filter(!is.na(hit_kick)) %>%
+  summarise(count = n()) %>%
+  mutate(prop = count/sum(count))
+```
+
+```{r hit-kick-by-race}
+ppcs_full_F %>%
+  group_by(civilian_race, hit_kick) %>%
+  filter(!is.na(civilian_race)) %>%
+  filter(!is.na(hit_kick)) %>%
+  summarise(hit_kick_count = n()) %>%
+  mutate(prop = hit_kick_count/sum(hit_kick_count)) %>%
+  filter(hit_kick == 1)
+```
+
+#point gun
+
+```{r point-gun-full-sample}
+ppcs_full_F %>%
+  group_by(point_gun) %>%
+  filter(!is.na(point_gun)) %>%
+  summarise(count = n()) %>%
+  mutate(prop = count/sum(count))
+```
+
+```{r point-gun-by-race}
+ppcs_full_F %>%
+  group_by(civilian_race, point_gun) %>%
+  filter(!is.na(civilian_race)) %>%
+  filter(!is.na(point_gun)) %>%
+  summarise(point_gun_count = n()) %>%
+  mutate(prop = point_gun_count/sum(point_gun_count)) %>%
+  filter(point_gun == 1)
+```
+
+# Proportion of handcuffed
+
+```{r handcuffed-full-sample}
+ppcs_full_F %>%
+  group_by(civilian_is_handcuffed) %>%
+  filter(!is.na(civilian_is_handcuffed)) %>%
+  summarise(count = n()) %>%
+  mutate(prop = count/sum(count))
+```
+
+```{r handcuffed-by-race}
+ppcs_full_F %>%
+  group_by(civilian_race, civilian_is_handcuffed) %>%
+  filter(!is.na(civilian_is_handcuffed)) %>%
+  filter(!is.na(civilian_race)) %>%
+  summarise(handcuffed_count = n()) %>%
+  mutate(prop = handcuffed_count/sum(handcuffed_count))
+```
+#pepperspray stungun
+
+```{r pepper-stun-full-sample}
+ppcs_full_F %>%
+  group_by(pepper_stun) %>%
+  filter(!is.na(pepper_stun)) %>%
+  summarise(count = n()) %>%
+  mutate(prop = count/sum(count))
+```
+
+```{r pepper-stun-by-race}
+ppcs_full_F %>%
+  group_by(civilian_race, pepper_stun) %>%
+  filter(!is.na(pepper_stun)) %>%
+  filter(!is.na(civilian_race)) %>%
+  summarise(pepper_count = n()) %>%
+  mutate(prop = pepper_count/sum(pepper_count)) %>%
+  filter(pepper_stun == 1)
+```
+
+# Add at least use of force levels and factor
+```{r}
+# ppcs_full_F <- ppcs_full_F %>%
+#   mutate(
+#     at_least_grabbed = ifelse(
+#       grab_push == 1 |
+#       civilian_is_handcuffed == 1|
+#       point_gun == 1 |
+#       hit_kick == 1  |
+#       pepper_stun == 1, 1, 0),
+#     
+#     at_least_handcuffed = ifelse(
+#       civilian_is_handcuffed == 1|
+#       point_gun == 1 |
+#       hit_kick == 1  |
+#       pepper_stun == 1, 1, 0),
+#     
+#     at_least_point_gun = ifelse(
+#       point_gun == 1 |
+#       hit_kick == 1  |
+#       pepper_stun == 1, 1, 0),
+#     
+#     at_least_kick_pepper_stun = ifelse(
+#       point_gun == 1 |
+#       hit_kick == 1  |
+#       pepper_stun == 1, 1, 0),
+#     
+#     force = ifelse(
+#       any_force == 1 |
+#       grab_push == 1 |
+#       civilian_is_handcuffed == 1|
+#       point_gun == 1 |
+#       hit_kick == 1  |
+#       pepper_stun == 1, 1, 0),
+#     year = as.factor(year),
+#     civilian_race = factor(civilian_race, levels = c("white", "black", "hispanic", "other")),
+#     civilian_gender = as.factor(civilian_gender),
+#     civilian_income = as.factor(civilian_income),
+#     civilian_employed = as.factor(civilian_employed),
+#     population_size = as.factor(population_size),
+#     time_of_encounter = as.factor(time_of_encounter),
+#     omaj_black = as.factor(omaj_black),
+#     omaj_white = as.factor(omaj_white),
+#     omaj_hispanic = as.factor(omaj_hispanic),
+#     omaj_other = as.factor(omaj_other),
+#     osplit = as.factor(osplit),
+#     type_of_incident = as.factor(type_of_incident),
+#     civilian_disobey = as.factor(civilian_disobey),
+#     civilian_resist = as.factor(civilian_resist),
+#     civilian_physical = as.factor(civilian_physical),
+#     civilian_searched = as.factor(civilian_searched),
+#     civilian_arrested = as.factor(civilian_arrested),
+#     civilian_guilty_of_illegal = as.factor(civilian_guilty_of_illegal),
+#     civilian_injured = as.factor(civilian_injured),
+#     excessive_force = as.factor(excessive_force),
+#     any_force = as.factor(any_force),
+#     grab_push = as.factor(grab_push),
+#     hit_kick = as.factor(hit_kick),
+#     point_gun = as.factor(point_gun),
+#     handcuffed = as.factor(handcuffed),
+#     pepper_stun = as.factor(pepper_stun),
+#     at_least_grabbed = as.factor(at_least_grabbed),
+#     at_least_handcuffed = as.factor(at_least_handcuffed),
+#     at_least_point_gun = as.factor(at_least_point_gun),
+#     at_least_kick_pepper_stun = as.factor(at_least_kick_pepper_stun),
+#     force = as.factor(force)
+#   ) 
+# save(ppcs_full_F, file = 'clean_data/ppcs_full_factored_F.RData')
+# sessionInfo()
+```
+
