@@ -162,7 +162,7 @@ sf_data3 <- sf_data3 %>%
        stop_location_precinct = addrpct)
 
 
-#recode the factor values of "susepect_sex" and "suspect_race_description" for the 17/18 data
+#recode the factor values of "suspect_sex" and "suspect_race_description" for the 17/18 data
 
 sf_1718 <- sf_1718 %>%
   replace_with_na(replace = list(suspect_sex = c("","19","23","24","39"),
@@ -186,9 +186,10 @@ stop_and_frisk <- bind_rows(sf_data3, sf_1718)
 
 
 #save the 03-13 data_set
+#this is the prime dataset
 save(sf_data1, file = "sqf_03_13.RData")
 
-#save the 03-18 dataset
+#save the 03-18 dataset (the whole clean dataset)
 save(stop_and_frisk, file = "sqf_03_18.RData")
 
 

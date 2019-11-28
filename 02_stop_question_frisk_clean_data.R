@@ -2,27 +2,29 @@
 library(tidyverse)
 library(naniar)
 library(scales)
+library(here)
 
+#make sure you have run "01_download_sqf_data.sh" before running this script
 
 #set directory to source file location
 
 #read in the stop, question, and frisk dataset for the years 2003-2018
-df3 <- read.csv("sqf_2003.csv") 
-df4 <- read.csv("sqf_2004.csv") 
-df5 <- read.csv("sqf_2005.csv") 
-df6 <- read.csv("sqf_2006.csv")
-df7 <- read.csv("sqf_2007.csv") 
-df8 <- read.csv("sqf_2008.csv") 
-df9 <- read.csv("sqf_2009.csv") 
-df10 <- read.csv("sqf_2010.csv") 
-df11 <- read.csv("sqf_2011.csv") 
-df12 <- read.csv("sqf_2012.csv") 
-df13 <- read.csv("sqf_2013.csv") 
-df14 <- read.csv("sqf_2014.csv") 
-df15 <- read.csv("sqf_2015.csv") 
-df16 <- read.csv("sqf_2016.csv") 
-df17 <- readxl::read_xlsx ("sqf_2017.xlsx")
-df18<- readxl::read_xlsx ("sqf_2018.xlsx")
+df3 <- read.csv(here("raw_data","sqf_2003.csv")) 
+df4 <- read.csv(here("raw_data","sqf_2004.csv")) 
+df5 <- read.csv(here("raw_data","sqf_2005.csv")) 
+df6 <- read.csv(here("raw_data","sqf_2006.csv"))
+df7 <- read.csv(here("raw_data","sqf_2007.csv")) 
+df8 <- read.csv(here("raw_data","sqf_2008.csv"))
+df9 <- read.csv(here("raw_data","sqf_2009.csv")) 
+df10 <- read.csv(here("raw_data","sqf_2010.csv")) 
+df11 <- read.csv(here("raw_data","sqf_2011.csv"))
+df12 <- read.csv(here("raw_data","sqf_2012.csv")) 
+df13 <- read.csv(here("raw_data","sqf_2013.csv")) 
+df14 <- read.csv(here("raw_data","sqf_2014.csv")) 
+df15 <- read.csv(here("raw_data","sqf_2015.csv"))
+df16 <- read.csv(here("raw_data","sqf_2016.csv"))
+df17 <- readxl::read_xlsx(here("raw_data","sqf_2017.xlsx"))
+df18<- readxl::read_xlsx(here("raw_data","sqf_2018.xlsx"))
 
 
 
@@ -181,14 +183,14 @@ sf_1718 <- sf_1718 %>%
 
 
 #bind all the data from 2003-2018 together
-stop_and_frisk <- bind_rows(sf_data3, sf_1718)
+#stop_and_frisk <- bind_rows(sf_data3, sf_1718)
 
 
 
 #save the 03-13 data_set
 #this is the prime dataset
-save(sf_data1, file = "sqf_03_13.RData")
+save(sf_data1, file = here("clean_data","sqf_03_13.RData"))
 
 
 #save the 03-18 dataset
-save(stop_and_frisk, file = "sqf_03_18.RData")
+#save(stop_and_frisk, file = "sqf_03_18.RData")

@@ -5,7 +5,7 @@
 #
 # usage: ./01_download_sqf_data.sh
 #
-# author:Roymil Terrero
+# author:Roymil Terrero, Adnan Hoq
 #
 
 # set a relative path for the NYPD sqf data
