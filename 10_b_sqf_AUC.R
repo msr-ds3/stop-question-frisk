@@ -7,6 +7,8 @@ library(pROC)
 library(ROCR)
 library(here)
 
+#set directory to source file location
+
 #make sure you have run "01_download_sqf_data.sh" and "02_stop_and_frisk_clean_data.R" before running this script (only for the first time. After the first time, you can just load the RData file)
 
 #make sure you set the directory using "setwd" to the "stop-question-frisk" directory before loading the "here" library
@@ -179,7 +181,7 @@ df_no_race <- data.frame(actual = new_data_no_race$any_force_used,
 
 #create numeric objects for predicted probabilities and actual values
 pred_probs_no_race <- as.numeric(round(df_no_race$probs))
-actual_values__no_race <- as.numeric(as.character(df_no_race$actual))
+actual_values_no_race <- as.numeric(as.character(df_no_race$actual))
 
 #calculate the area under the curve
 roc_obj_no_race <- roc(pred_probs_no_race,actual_values_no_race)
