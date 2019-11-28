@@ -24,7 +24,7 @@ load("../../raw_data/sqf_03_13.Rdata")
 
 sf_data1 %>%
   select(race) %>%
-  mutate(race = recode_factor(race,"P" = "H","Q" = "H")) %>%
+  mutate(race = recode_factor(race,"P" = "B","Q" = "H")) %>%
   group_by(race) %>%
   summarise(count = n(), total = nrow(sf_data1)) %>%
   ggplot() +
@@ -40,10 +40,9 @@ sf_data1 %>%
   theme(axis.text.x = element_text(angle = 70, hjust = 1, face = "bold"))+
   theme(axis.text.y = element_text(face = "bold"))+
   theme(plot.title = element_text(hjust = 0.5,size=20)) +
-  scale_x_discrete(labels = c("X" = "Others", "I" = "AMERICAN  INDIAN", "U" = "UNKNOWN",
-                              "A" = "ASIAN / PACIFIC  ISLANDER", "Z" = "",
-                              "W" ="WHITE", "H" = "HISPANIC", "B" = "BLACK"),
-                   limits = c("I","A", "W", "H", "B")) +
+  scale_x_discrete(labels = c("Z" = "Others", "I" = "AMERICAN  INDIAN", "U" = "UNKNOWN",
+                              "A" = "ASIAN / PACIFIC  ISLANDER",
+                              "W" ="WHITE", "H" = "HISPANIC", "B" = "BLACK")) +
   scale_y_continuous(labels = scales::percent_format(accuracy = 1))
 
 
@@ -88,8 +87,8 @@ sf_data1 %>%
 sf_data1 %>%
   select(race, timestop) %>%
   mutate(race = recode_factor(race,"P" = "B","Q" = "H")) %>%
-  mutate(timestop = as.numeric(timestop)) %>%
-  mutate(daytime = ifelse(200<=timestop & timestop<=1900,"Y","N")) %>%
+  mutate(timestop = as.numeric(gsub(":","",timestop)),
+         daytime = ifelse(200<=timestop & timestop<=1900,"Y","N")) %>%
   ungroup() %>%
   group_by(race, daytime) %>%
   summarise(count =n()) %>%
