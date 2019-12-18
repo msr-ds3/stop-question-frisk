@@ -393,8 +393,7 @@ $(document).ready(function () {
 
 <div id="load-the-2003-2013-sqf-dataset" class="section level2">
 <h2>Load the 2003-2013 SQF dataset</h2>
-<pre class="r"><code>log_data &lt;- read.csv(&#39;log_data.csv&#39;)
-#load(&quot;log_data.Rdata&quot;)</code></pre>
+<pre class="r"><code>log_data &lt;- readRDS(&#39;log_data2.rds&#39;)</code></pre>
 </div>
 <div id="run-our-logistic-regression-models" class="section level2">
 <h2>Run Our Logistic Regression Models</h2>
@@ -420,12 +419,12 @@ summary(model_no_cntrl)</code></pre>
 ## 
 ## Coefficients:
 ##               Estimate Std. Error  z value Pr(&gt;|z|)    
-## (Intercept)  -1.607895   0.006978 -230.420  &lt; 2e-16 ***
-## raceBlack     0.356058   0.007124   49.977  &lt; 2e-16 ***
-## raceHispanic  0.390035   0.007315   53.318  &lt; 2e-16 ***
-## raceOther     0.229018   0.008968   25.537  &lt; 2e-16 ***
-## raceU         0.005587   0.019225    0.291    0.771    
-## raceWhite    -0.044077   0.008014   -5.500  3.8e-08 ***
+## (Intercept)  -1.651972   0.003941 -419.219  &lt; 2e-16 ***
+## raceBlack     0.400135   0.004194   95.402  &lt; 2e-16 ***
+## raceHispanic  0.434112   0.004511   96.239  &lt; 2e-16 ***
+## raceAsian     0.044077   0.008014    5.500  3.8e-08 ***
+## raceOther     0.273095   0.006875   39.724  &lt; 2e-16 ***
+## raceU         0.049665   0.018342    2.708  0.00677 ** 
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
@@ -437,10 +436,10 @@ summary(model_no_cntrl)</code></pre>
 ## 
 ## Number of Fisher Scoring iterations: 4</code></pre>
 <pre class="r"><code>exp(coef(model_no_cntrl))</code></pre>
-<pre><code>##  (Intercept)    raceBlack raceHispanic    raceOther        raceU 
-##    0.2003088    1.4276897    1.4770328    1.2573643    1.0056029 
-##    raceWhite 
-##    0.9568800</code></pre>
+<pre><code>##  (Intercept)    raceBlack raceHispanic    raceAsian    raceOther 
+##    0.1916715    1.4920259    1.5435925    1.0450631    1.3140251 
+##        raceU 
+##    1.0509185</code></pre>
 <pre class="r"><code>#model with civilian demographics added as control
  model_civilian_demo &lt;- glm(any_force_used ~ race + sex + age + I(age^2),
                             data = log_data,
@@ -464,12 +463,12 @@ summary(model_civilian_demo)</code></pre>
 ## 
 ## Coefficients:
 ##                Estimate Std. Error  z value Pr(&gt;|z|)    
-## (Intercept)  -1.976e+00  8.993e-03 -219.693   &lt;2e-16 ***
-## raceBlack     3.548e-01  7.140e-03   49.698   &lt;2e-16 ***
-## raceHispanic  3.858e-01  7.331e-03   52.622   &lt;2e-16 ***
-## raceOther     2.398e-01  9.744e-03   24.614   &lt;2e-16 ***
-## raceU         2.382e-02  1.928e-02    1.235   0.2168    
-## raceWhite    -1.907e-02  8.033e-03   -2.374   0.0176 *  
+## (Intercept)  -1.995e+00  6.863e-03 -290.640   &lt;2e-16 ***
+## raceBlack     3.739e-01  4.207e-03   88.869   &lt;2e-16 ***
+## raceHispanic  4.049e-01  4.525e-03   89.469   &lt;2e-16 ***
+## raceAsian     1.907e-02  8.033e-03    2.374   0.0176 *  
+## raceOther     2.589e-01  7.852e-03   32.971   &lt;2e-16 ***
+## raceU         4.289e-02  1.840e-02    2.331   0.0197 *  
 ## sexM          6.409e-01  5.292e-03  121.121   &lt;2e-16 ***
 ## sexZ          5.842e-01  9.854e-03   59.282   &lt;2e-16 ***
 ## age          -8.518e-03  9.242e-05  -92.161   &lt;2e-16 ***
@@ -486,10 +485,10 @@ summary(model_civilian_demo)</code></pre>
 ## 
 ## Number of Fisher Scoring iterations: 4</code></pre>
 <pre class="r"><code>exp(coef(model_civilian_demo))</code></pre>
-<pre><code>##  (Intercept)    raceBlack raceHispanic    raceOther        raceU 
-##    0.1386665    1.4259400    1.4707675    1.2710320    1.0241026 
-##    raceWhite         sexM         sexZ          age     I(age^2) 
-##    0.9811086    1.8982753    1.7935474    0.9915184    1.0000008</code></pre>
+<pre><code>##  (Intercept)    raceBlack raceHispanic    raceAsian    raceOther 
+##    0.1360468    1.4533967    1.4990874    1.0192552    1.2955060 
+##        raceU         sexM         sexZ          age     I(age^2) 
+##    1.0438219    1.8982753    1.7935474    0.9915184    1.0000008</code></pre>
 <pre class="r"><code>#model with encounter characteristics added as control
  model_encnt_char &lt;- glm(any_force_used ~ race + sex + I(age^2)
                          + inout + daytime + ac_incid + ac_time +
@@ -521,24 +520,24 @@ summary(model_encnt_char)</code></pre>
 ## 
 ## Coefficients:
 ##                Estimate Std. Error  z value Pr(&gt;|z|)    
-## (Intercept)  -1.673e+00  1.329e-02 -125.887  &lt; 2e-16 ***
-## raceBlack     4.349e-01  7.767e-03   55.995  &lt; 2e-16 ***
-## raceHispanic  4.182e-01  7.963e-03   52.518  &lt; 2e-16 ***
-## raceOther     2.845e-01  1.049e-02   27.135  &lt; 2e-16 ***
-## raceU         1.173e-01  2.125e-02    5.522 3.36e-08 ***
-## raceWhite    -5.625e-02  8.708e-03   -6.459 1.05e-10 ***
+## (Intercept)  -1.730e+00  1.157e-02 -149.468  &lt; 2e-16 ***
+## raceBlack     4.912e-01  4.575e-03  107.347  &lt; 2e-16 ***
+## raceHispanic  4.745e-01  4.906e-03   96.704  &lt; 2e-16 ***
+## raceAsian     5.625e-02  8.708e-03    6.459 1.05e-10 ***
+## raceOther     3.408e-01  8.404e-03   40.551  &lt; 2e-16 ***
+## raceU         1.736e-01  2.030e-02    8.550  &lt; 2e-16 ***
 ## sexM          5.842e-01  5.757e-03  101.481  &lt; 2e-16 ***
 ## sexZ          5.320e-01  1.052e-02   50.577  &lt; 2e-16 ***
 ## I(age^2)     -9.045e-09  3.580e-09   -2.526   0.0115 *  
-## inout        -2.887e-01  3.037e-03  -95.054  &lt; 2e-16 ***
-## daytime      -2.128e-01  2.604e-03  -81.721  &lt; 2e-16 ***
-## ac_incid     -1.958e-01  2.586e-03  -75.685  &lt; 2e-16 ***
-## ac_time      -8.449e-02  2.712e-03  -31.156  &lt; 2e-16 ***
-## offunif      -4.048e-01  2.558e-03 -158.236  &lt; 2e-16 ***
+## inout1       -2.887e-01  3.037e-03  -95.054  &lt; 2e-16 ***
+## daytime1     -2.128e-01  2.604e-03  -81.721  &lt; 2e-16 ***
+## ac_incid1    -1.958e-01  2.586e-03  -75.685  &lt; 2e-16 ***
+## ac_time1     -8.449e-02  2.712e-03  -31.156  &lt; 2e-16 ***
+## offunif1     -4.048e-01  2.558e-03 -158.236  &lt; 2e-16 ***
 ## typeofidP    -8.997e-02  9.127e-03   -9.858  &lt; 2e-16 ***
 ## typeofidR    -3.224e-01  1.244e-02  -25.928  &lt; 2e-16 ***
 ## typeofidV    -8.669e-02  9.153e-03   -9.471  &lt; 2e-16 ***
-## othpers       3.574e-01  2.720e-03  131.383  &lt; 2e-16 ***
+## othpers1      3.574e-01  2.720e-03  131.383  &lt; 2e-16 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
@@ -551,13 +550,13 @@ summary(model_encnt_char)</code></pre>
 ## 
 ## Number of Fisher Scoring iterations: 4</code></pre>
 <pre class="r"><code>exp(coef(model_encnt_char))</code></pre>
-<pre><code>##  (Intercept)    raceBlack raceHispanic    raceOther        raceU 
-##    0.1876345    1.5448168    1.5192576    1.3291394    1.1244906 
-##    raceWhite         sexM         sexZ     I(age^2)        inout 
-##    0.9453067    1.7935450    1.7022974    1.0000000    0.7492231 
-##      daytime     ac_incid      ac_time      offunif    typeofidP 
+<pre><code>##  (Intercept)    raceBlack raceHispanic    raceAsian    raceOther 
+##    0.1773721    1.6341964    1.6071584    1.0578577    1.4060404 
+##        raceU         sexM         sexZ     I(age^2)       inout1 
+##    1.1895511    1.7935450    1.7022974    1.0000000    0.7492231 
+##     daytime1    ac_incid1     ac_time1     offunif1    typeofidP 
 ##    0.8082991    0.8222177    0.9189837    0.6670974    0.9139592 
-##    typeofidR    typeofidV      othpers 
+##    typeofidR    typeofidV     othpers1 
 ##    0.7243756    0.9169629    1.4295481</code></pre>
 <pre class="r"><code>#model with civilian behavior added as control
  model_civ_behv &lt;- glm(any_force_used ~ race + sex + I(age^2) + inout + daytime + ac_incid + ac_time +
@@ -587,35 +586,35 @@ summary(model_civ_behv)</code></pre>
 ## 
 ## Coefficients:
 ##                Estimate Std. Error  z value Pr(&gt;|z|)    
-## (Intercept)  -2.104e+00  1.381e-02 -152.387  &lt; 2e-16 ***
-## raceBlack     3.203e-01  7.952e-03   40.275  &lt; 2e-16 ***
-## raceHispanic  3.482e-01  8.147e-03   42.733  &lt; 2e-16 ***
-## raceOther     2.444e-01  1.074e-02   22.771  &lt; 2e-16 ***
-## raceU         1.234e-02  2.170e-02    0.569   0.5695    
-## raceWhite    -6.879e-02  8.904e-03   -7.725 1.12e-14 ***
+## (Intercept)  -2.173e+00  1.210e-02 -179.602  &lt; 2e-16 ***
+## raceBlack     3.890e-01  4.700e-03   82.776  &lt; 2e-16 ***
+## raceHispanic  4.169e-01  5.031e-03   82.877  &lt; 2e-16 ***
+## raceAsian     6.879e-02  8.904e-03    7.725 1.12e-14 ***
+## raceOther     3.132e-01  8.612e-03   36.373  &lt; 2e-16 ***
+## raceU         8.113e-02  2.073e-02    3.914 9.10e-05 ***
 ## sexM          5.079e-01  5.874e-03   86.467  &lt; 2e-16 ***
 ## sexZ          4.720e-01  1.076e-02   43.870  &lt; 2e-16 ***
 ## I(age^2)     -8.507e-09  3.595e-09   -2.367   0.0179 *  
-## inout        -1.428e-01  3.179e-03  -44.918  &lt; 2e-16 ***
-## daytime      -1.719e-01  2.687e-03  -63.966  &lt; 2e-16 ***
-## ac_incid     -1.513e-01  2.709e-03  -55.854  &lt; 2e-16 ***
-## ac_time      -1.480e-01  2.864e-03  -51.683  &lt; 2e-16 ***
-## offunif      -4.220e-01  2.667e-03 -158.222  &lt; 2e-16 ***
+## inout1       -1.428e-01  3.179e-03  -44.918  &lt; 2e-16 ***
+## daytime1     -1.719e-01  2.687e-03  -63.966  &lt; 2e-16 ***
+## ac_incid1    -1.513e-01  2.709e-03  -55.854  &lt; 2e-16 ***
+## ac_time1     -1.480e-01  2.864e-03  -51.683  &lt; 2e-16 ***
+## offunif1     -4.220e-01  2.667e-03 -158.222  &lt; 2e-16 ***
 ## typeofidP    -8.903e-02  9.384e-03   -9.488  &lt; 2e-16 ***
 ## typeofidR    -3.254e-01  1.275e-02  -25.520  &lt; 2e-16 ***
 ## typeofidV    -8.471e-02  9.413e-03   -9.000  &lt; 2e-16 ***
-## othpers       3.867e-01  2.822e-03  137.031  &lt; 2e-16 ***
-## cs_bulge      9.753e-01  3.937e-03  247.753  &lt; 2e-16 ***
-## cs_cloth      2.368e-01  5.725e-03   41.369  &lt; 2e-16 ***
-## cs_casng     -6.850e-02  3.215e-03  -21.308  &lt; 2e-16 ***
-## cs_lkout     -7.342e-02  3.672e-03  -19.996  &lt; 2e-16 ***
-## cs_descr      6.457e-01  3.303e-03  195.458  &lt; 2e-16 ***
-## cs_drgtr     -2.921e-02  4.447e-03   -6.568 5.11e-11 ***
-## cs_furtv      4.921e-01  2.655e-03  185.307  &lt; 2e-16 ***
-## cs_vcrim      5.252e-01  4.166e-03  126.052  &lt; 2e-16 ***
-## cs_objcs      1.434e-01  7.551e-03   18.996  &lt; 2e-16 ***
-## cs_other      4.346e-02  3.567e-03   12.182  &lt; 2e-16 ***
-## wepnfnd       1.301e+00  6.283e-03  207.048  &lt; 2e-16 ***
+## othpers1      3.867e-01  2.822e-03  137.031  &lt; 2e-16 ***
+## cs_bulge1     9.753e-01  3.937e-03  247.753  &lt; 2e-16 ***
+## cs_cloth1     2.368e-01  5.725e-03   41.369  &lt; 2e-16 ***
+## cs_casng1    -6.850e-02  3.215e-03  -21.308  &lt; 2e-16 ***
+## cs_lkout1    -7.342e-02  3.672e-03  -19.996  &lt; 2e-16 ***
+## cs_descr1     6.457e-01  3.303e-03  195.458  &lt; 2e-16 ***
+## cs_drgtr1    -2.921e-02  4.447e-03   -6.568 5.11e-11 ***
+## cs_furtv1     4.921e-01  2.655e-03  185.307  &lt; 2e-16 ***
+## cs_vcrim1     5.252e-01  4.166e-03  126.052  &lt; 2e-16 ***
+## cs_objcs1     1.434e-01  7.551e-03   18.996  &lt; 2e-16 ***
+## cs_other1     4.346e-02  3.567e-03   12.182  &lt; 2e-16 ***
+## wepnfnd1      1.301e+00  6.283e-03  207.048  &lt; 2e-16 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
@@ -628,25 +627,20 @@ summary(model_civ_behv)</code></pre>
 ## 
 ## Number of Fisher Scoring iterations: 4</code></pre>
 <pre class="r"><code>exp(coef(model_civ_behv))</code></pre>
-<pre><code>##  (Intercept)    raceBlack raceHispanic    raceOther        raceU 
-##    0.1219080    1.3774798    1.4164641    1.2769125    1.0124162 
-##    raceWhite         sexM         sexZ     I(age^2)        inout 
-##    0.9335268    1.6617669    1.6032154    1.0000000    0.8669269 
-##      daytime     ac_incid      ac_time      offunif    typeofidP 
+<pre><code>##  (Intercept)    raceBlack raceHispanic    raceAsian    raceOther 
+##    0.1138044    1.4755653    1.5173255    1.0712065    1.3678370 
+##        raceU         sexM         sexZ     I(age^2)       inout1 
+##    1.0845068    1.6617669    1.6032154    1.0000000    0.8669269 
+##     daytime1    ac_incid1     ac_time1     offunif1    typeofidP 
 ##    0.8420573    0.8595955    0.8623992    0.6557417    0.9148177 
-##    typeofidR    typeofidV      othpers     cs_bulge     cs_cloth 
+##    typeofidR    typeofidV     othpers1    cs_bulge1    cs_cloth1 
 ##    0.7222289    0.9187784    1.4721809    2.6520192    1.2672503 
-##     cs_casng     cs_lkout     cs_descr     cs_drgtr     cs_furtv 
+##    cs_casng1    cs_lkout1    cs_descr1    cs_drgtr1    cs_furtv1 
 ##    0.9337919    0.9292109    1.9072429    0.9712155    1.6357163 
-##     cs_vcrim     cs_objcs     cs_other      wepnfnd 
+##    cs_vcrim1    cs_objcs1    cs_other1     wepnfnd1 
 ##    1.6907240    1.1542366    1.0444144    3.6724937</code></pre>
 <pre class="r"><code>#model with precinct and year levels added as controls
- model_full_control &lt;- glm(any_force_used ~ race + sex + age + I(age^2) + inout + daytime + ac_incid + ac_time +
-                             offunif + typeofid + othpers + cs_bulge + cs_cloth + cs_casng + cs_lkout +
-                             cs_descr + cs_drgtr + cs_furtv + cs_vcrim +
-                             cs_objcs + cs_other + wepnfnd + pct + year,
-                           data = log_data,
-                           family = &quot;binomial&quot;)
+ load(&quot;model.rda&quot;)
 
 
 #create a data frame with the odds ratios of each race relative to the white mean from the full control model
@@ -681,71 +675,190 @@ summary(model_full_control)</code></pre>
 ## 
 ## Deviance Residuals: 
 ##     Min       1Q   Median       3Q      Max  
-## -2.4762  -0.7068  -0.5652  -0.4130   3.3940  
+## -2.6097  -0.6993  -0.5228  -0.3331   3.3381  
 ## 
 ## Coefficients:
 ##                Estimate Std. Error  z value Pr(&gt;|z|)    
-## (Intercept)   4.659e+01  9.438e-01   49.359  &lt; 2e-16 ***
-## raceBlack     2.709e-01  7.988e-03   33.914  &lt; 2e-16 ***
-## raceHispanic  3.023e-01  8.178e-03   36.969  &lt; 2e-16 ***
-## raceOther     1.787e-01  1.078e-02   16.583  &lt; 2e-16 ***
-## raceU         1.755e-02  2.174e-02    0.807    0.419    
-## raceWhite    -9.332e-02  8.921e-03  -10.460  &lt; 2e-16 ***
-## sexM          5.015e-01  5.879e-03   85.292  &lt; 2e-16 ***
-## sexZ          4.373e-01  1.079e-02   40.545  &lt; 2e-16 ***
-## age          -3.608e-03  9.356e-05  -38.566  &lt; 2e-16 ***
-## I(age^2)      3.546e-07  9.870e-09   35.923  &lt; 2e-16 ***
-## inout        -1.786e-01  3.232e-03  -55.270  &lt; 2e-16 ***
-## daytime      -1.502e-01  2.703e-03  -55.571  &lt; 2e-16 ***
-## ac_incid     -1.434e-01  2.713e-03  -52.860  &lt; 2e-16 ***
-## ac_time      -1.279e-01  2.880e-03  -44.395  &lt; 2e-16 ***
-## offunif      -3.997e-01  2.681e-03 -149.112  &lt; 2e-16 ***
-## typeofidP    -5.397e-02  9.407e-03   -5.737 9.62e-09 ***
-## typeofidR    -3.116e-01  1.277e-02  -24.391  &lt; 2e-16 ***
-## typeofidV    -6.082e-02  9.438e-03   -6.444 1.16e-10 ***
-## othpers       3.675e-01  2.869e-03  128.090  &lt; 2e-16 ***
-## cs_bulge      9.607e-01  3.944e-03  243.555  &lt; 2e-16 ***
-## cs_cloth      2.392e-01  5.734e-03   41.707  &lt; 2e-16 ***
-## cs_casng     -4.676e-02  3.227e-03  -14.489  &lt; 2e-16 ***
-## cs_lkout     -7.087e-02  3.676e-03  -19.276  &lt; 2e-16 ***
-## cs_descr      6.370e-01  3.311e-03  192.381  &lt; 2e-16 ***
-## cs_drgtr     -4.663e-02  4.460e-03  -10.454  &lt; 2e-16 ***
-## cs_furtv      5.092e-01  2.682e-03  189.852  &lt; 2e-16 ***
-## cs_vcrim      5.480e-01  4.190e-03  130.795  &lt; 2e-16 ***
-## cs_objcs      1.513e-01  7.572e-03   19.982  &lt; 2e-16 ***
-## cs_other      3.334e-02  3.582e-03    9.307  &lt; 2e-16 ***
-## wepnfnd       1.308e+00  6.296e-03  207.709  &lt; 2e-16 ***
-## pct          -2.700e-03  3.863e-05  -69.892  &lt; 2e-16 ***
-## year         -2.411e-02  4.701e-04  -51.278  &lt; 2e-16 ***
+## (Intercept)  -1.696e+00  2.378e-02  -71.322  &lt; 2e-16 ***
+## raceBlack     1.829e-01  5.271e-03   34.705  &lt; 2e-16 ***
+## raceHispanic  1.297e-01  5.508e-03   23.541  &lt; 2e-16 ***
+## raceAsian    -2.620e-02  9.404e-03   -2.786 0.005334 ** 
+## raceOther     6.844e-02  8.978e-03    7.623 2.48e-14 ***
+## raceU        -8.214e-02  2.123e-02   -3.870 0.000109 ***
+## sexM          4.966e-01  5.977e-03   83.092  &lt; 2e-16 ***
+## sexZ          4.412e-01  1.100e-02   40.111  &lt; 2e-16 ***
+## age          -3.043e-03  9.213e-05  -33.028  &lt; 2e-16 ***
+## I(age^2)      2.968e-07  9.754e-09   30.430  &lt; 2e-16 ***
+## inout1       -1.585e-01  3.346e-03  -47.382  &lt; 2e-16 ***
+## daytime1     -1.308e-01  2.779e-03  -47.068  &lt; 2e-16 ***
+## ac_incid1    -1.222e-01  2.781e-03  -43.928  &lt; 2e-16 ***
+## ac_time1     -1.163e-01  2.950e-03  -39.436  &lt; 2e-16 ***
+## offunif1     -4.506e-01  2.821e-03 -159.741  &lt; 2e-16 ***
+## typeofidP    -8.287e-02  9.602e-03   -8.630  &lt; 2e-16 ***
+## typeofidR    -3.264e-01  1.303e-02  -25.046  &lt; 2e-16 ***
+## typeofidV    -9.745e-02  9.633e-03  -10.116  &lt; 2e-16 ***
+## othpers1      3.491e-01  3.013e-03  115.867  &lt; 2e-16 ***
+## cs_bulge1     9.029e-01  4.094e-03  220.536  &lt; 2e-16 ***
+## cs_cloth1     2.415e-01  5.872e-03   41.122  &lt; 2e-16 ***
+## cs_casng1     5.761e-03  3.338e-03    1.726 0.084356 .  
+## cs_lkout1    -5.972e-02  3.762e-03  -15.876  &lt; 2e-16 ***
+## cs_descr1     6.884e-01  3.413e-03  201.676  &lt; 2e-16 ***
+## cs_drgtr1    -3.051e-02  4.579e-03   -6.664 2.67e-11 ***
+## cs_furtv1     4.929e-01  2.757e-03  178.813  &lt; 2e-16 ***
+## cs_vcrim1     5.653e-01  4.306e-03  131.264  &lt; 2e-16 ***
+## cs_objcs1     1.987e-01  7.746e-03   25.645  &lt; 2e-16 ***
+## cs_other1     5.196e-02  3.677e-03   14.132  &lt; 2e-16 ***
+## wepnfnd1      1.336e+00  6.455e-03  206.947  &lt; 2e-16 ***
+## pct5          1.417e-01  2.532e-02    5.597 2.18e-08 ***
+## pct6          5.623e-02  2.596e-02    2.166 0.030299 *  
+## pct7         -8.365e-02  2.395e-02   -3.493 0.000477 ***
+## pct9         -3.386e-02  2.358e-02   -1.436 0.150936    
+## pct10         2.380e-02  2.491e-02    0.955 0.339522    
+## pct13         1.882e-01  2.375e-02    7.924 2.31e-15 ***
+## pct14        -8.299e-02  2.160e-02   -3.842 0.000122 ***
+## pct17         2.453e-02  3.051e-02    0.804 0.421474    
+## pct18         7.764e-02  2.581e-02    3.008 0.002631 ** 
+## pct19         3.925e-02  2.347e-02    1.672 0.094518 .  
+## pct20        -3.569e-01  2.629e-02  -13.574  &lt; 2e-16 ***
+## pct22        -1.119e+00  4.525e-02  -24.726  &lt; 2e-16 ***
+## pct23        -5.675e-01  2.153e-02  -26.359  &lt; 2e-16 ***
+## pct24        -4.867e-01  2.589e-02  -18.802  &lt; 2e-16 ***
+## pct25         2.618e-01  2.166e-02   12.083  &lt; 2e-16 ***
+## pct26        -5.255e-01  2.493e-02  -21.080  &lt; 2e-16 ***
+## pct28        -5.032e-02  2.229e-02   -2.258 0.023960 *  
+## pct30         2.515e-02  2.255e-02    1.115 0.264706    
+## pct32         7.688e-01  2.086e-02   36.853  &lt; 2e-16 ***
+## pct33         5.503e-02  2.295e-02    2.398 0.016472 *  
+## pct34         1.474e-01  2.185e-02    6.746 1.52e-11 ***
+## pct40         2.236e-01  2.073e-02   10.786  &lt; 2e-16 ***
+## pct41         6.257e-01  2.177e-02   28.743  &lt; 2e-16 ***
+## pct42        -3.745e-02  2.174e-02   -1.723 0.084925 .  
+## pct43         4.576e-03  2.149e-02    0.213 0.831386    
+## pct44         1.229e+00  2.077e-02   59.193  &lt; 2e-16 ***
+## pct45         1.275e-01  2.428e-02    5.252 1.51e-07 ***
+## pct46         9.257e-01  2.131e-02   43.442  &lt; 2e-16 ***
+## pct47         2.552e-01  2.169e-02   11.768  &lt; 2e-16 ***
+## pct48         5.617e-01  2.316e-02   24.249  &lt; 2e-16 ***
+## pct49        -7.812e-02  2.262e-02   -3.454 0.000552 ***
+## pct50         5.741e-01  2.488e-02   23.077  &lt; 2e-16 ***
+## pct52         4.014e-01  2.159e-02   18.594  &lt; 2e-16 ***
+## pct60         1.057e-01  2.180e-02    4.851 1.23e-06 ***
+## pct61        -6.831e-01  2.441e-02  -27.988  &lt; 2e-16 ***
+## pct62        -1.261e+00  2.811e-02  -44.869  &lt; 2e-16 ***
+## pct63        -2.890e-01  2.472e-02  -11.688  &lt; 2e-16 ***
+## pct66        -1.897e-01  2.422e-02   -7.834 4.74e-15 ***
+## pct67        -1.281e-01  2.154e-02   -5.949 2.70e-09 ***
+## pct68        -3.624e-01  2.753e-02  -13.165  &lt; 2e-16 ***
+## pct69         6.810e-01  2.195e-02   31.028  &lt; 2e-16 ***
+## pct70         4.657e-01  2.096e-02   22.213  &lt; 2e-16 ***
+## pct71        -4.441e-01  2.347e-02  -18.924  &lt; 2e-16 ***
+## pct72         2.187e-01  2.299e-02    9.515  &lt; 2e-16 ***
+## pct73        -4.566e-01  2.063e-02  -22.133  &lt; 2e-16 ***
+## pct75        -5.662e-01  2.047e-02  -27.656  &lt; 2e-16 ***
+## pct76        -2.125e-01  2.382e-02   -8.919  &lt; 2e-16 ***
+## pct77        -2.647e-01  2.144e-02  -12.344  &lt; 2e-16 ***
+## pct78        -9.072e-01  2.963e-02  -30.618  &lt; 2e-16 ***
+## pct79        -3.900e-01  2.107e-02  -18.512  &lt; 2e-16 ***
+## pct81        -5.387e-01  2.210e-02  -24.373  &lt; 2e-16 ***
+## pct83        -7.526e-02  2.164e-02   -3.478 0.000504 ***
+## pct84        -5.335e-01  2.587e-02  -20.624  &lt; 2e-16 ***
+## pct88        -9.001e-01  2.382e-02  -37.795  &lt; 2e-16 ***
+## pct90        -8.795e-01  2.271e-02  -38.720  &lt; 2e-16 ***
+## pct94        -6.841e-01  2.989e-02  -22.882  &lt; 2e-16 ***
+## pct100        5.047e-01  2.369e-02   21.299  &lt; 2e-16 ***
+## pct101        5.354e-02  2.139e-02    2.503 0.012314 *  
+## pct102        1.739e-01  2.202e-02    7.895 2.91e-15 ***
+## pct103        2.461e-01  2.059e-02   11.955  &lt; 2e-16 ***
+## pct104       -5.737e-01  2.341e-02  -24.505  &lt; 2e-16 ***
+## pct105       -2.951e-01  2.208e-02  -13.370  &lt; 2e-16 ***
+## pct106       -7.954e-01  2.399e-02  -33.150  &lt; 2e-16 ***
+## pct107       -9.094e-02  2.288e-02   -3.975 7.03e-05 ***
+## pct108       -1.214e+00  2.659e-02  -45.649  &lt; 2e-16 ***
+## pct109        1.633e-01  2.144e-02    7.617 2.59e-14 ***
+## pct110        3.007e-01  2.138e-02   14.067  &lt; 2e-16 ***
+## pct111       -1.168e+00  2.899e-02  -40.299  &lt; 2e-16 ***
+## pct112       -5.230e-01  2.694e-02  -19.412  &lt; 2e-16 ***
+## pct113        2.421e-01  2.151e-02   11.255  &lt; 2e-16 ***
+## pct114       -2.291e-01  2.174e-02  -10.541  &lt; 2e-16 ***
+## pct115        6.813e-01  2.108e-02   32.321  &lt; 2e-16 ***
+## pct120       -7.096e-02  2.091e-02   -3.394 0.000689 ***
+## pct121        1.899e-03  1.028e-01    0.018 0.985262    
+## pct122       -1.239e-01  2.257e-02   -5.489 4.04e-08 ***
+## pct123       -1.566e+00  3.624e-02  -43.211  &lt; 2e-16 ***
+## pct999       -3.045e-01  8.761e-02   -3.476 0.000509 ***
+## year2004     -1.556e-01  7.752e-03  -20.071  &lt; 2e-16 ***
+## year2005     -1.584e-01  8.127e-03  -19.489  &lt; 2e-16 ***
+## year2006     -2.169e-01  7.273e-03  -29.827  &lt; 2e-16 ***
+## year2007     -6.420e-02  7.448e-03   -8.620  &lt; 2e-16 ***
+## year2008     -7.150e-02  7.312e-03   -9.778  &lt; 2e-16 ***
+## year2009     -2.518e-02  7.229e-03   -3.483 0.000496 ***
+## year2010     -1.435e-01  7.244e-03  -19.809  &lt; 2e-16 ***
+## year2011     -2.545e-01  7.190e-03  -35.391  &lt; 2e-16 ***
+## year2012     -5.599e-01  7.634e-03  -73.346  &lt; 2e-16 ***
+## year2013     -4.984e-01  9.371e-03  -53.183  &lt; 2e-16 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
 ## (Dispersion parameter for binomial family taken to be 1)
 ## 
 ##     Null deviance: 4420894  on 4259666  degrees of freedom
-## Residual deviance: 4122989  on 4259635  degrees of freedom
+## Residual deviance: 3967692  on 4259550  degrees of freedom
 ##   (564405 observations deleted due to missingness)
-## AIC: 4123053
+## AIC: 3967926
 ## 
 ## Number of Fisher Scoring iterations: 5</code></pre>
 <pre class="r"><code>exp(coef(model_full_control))</code></pre>
-<pre><code>##  (Intercept)    raceBlack raceHispanic    raceOther        raceU 
-## 1.708127e+20 1.311152e+00 1.353020e+00 1.195663e+00 1.017703e+00 
-##    raceWhite         sexM         sexZ          age     I(age^2) 
-## 9.109063e-01 1.651149e+00 1.548567e+00 9.963984e-01 1.000000e+00 
-##        inout      daytime     ac_incid      ac_time      offunif 
-## 8.364331e-01 8.605397e-01 8.663913e-01 8.799671e-01 6.705089e-01 
-##    typeofidP    typeofidR    typeofidV      othpers     cs_bulge 
-## 9.474592e-01 7.323001e-01 9.409971e-01 1.444142e+00 2.613418e+00 
-##     cs_cloth     cs_casng     cs_lkout     cs_descr     cs_drgtr 
-## 1.270175e+00 9.543167e-01 9.315855e-01 1.890745e+00 9.544438e-01 
-##     cs_furtv     cs_vcrim     cs_objcs     cs_other      wepnfnd 
-## 1.663917e+00 1.729777e+00 1.163346e+00 1.033897e+00 3.697761e+00 
-##          pct         year 
-## 9.973035e-01 9.761801e-01</code></pre>
+<pre><code>##  (Intercept)    raceBlack raceHispanic    raceAsian    raceOther 
+##    0.1834559    1.2007311    1.1384531    0.9741386    1.0708344 
+##        raceU         sexM         sexZ          age     I(age^2) 
+##    0.9211399    1.6432033    1.5546483    0.9969617    1.0000003 
+##       inout1     daytime1    ac_incid1     ac_time1     offunif1 
+##    0.8533977    0.8773892    0.8850041    0.8901927    0.6372419 
+##    typeofidP    typeofidR    typeofidV     othpers1    cs_bulge1 
+##    0.9204701    0.7215183    0.9071473    1.4177749    2.4666674 
+##    cs_cloth1    cs_casng1    cs_lkout1    cs_descr1    cs_drgtr1 
+##    1.2731004    1.0057778    0.9420285    1.9904564    0.9699509 
+##    cs_furtv1    cs_vcrim1    cs_objcs1    cs_other1     wepnfnd1 
+##    1.6371128    1.7599519    1.2197605    1.0533317    3.8032892 
+##         pct5         pct6         pct7         pct9        pct10 
+##    1.1522672    1.0578361    0.9197550    0.9667041    1.0240809 
+##        pct13        pct14        pct17        pct18        pct19 
+##    1.2070550    0.9203562    1.0248308    1.0807375    1.0400303 
+##        pct20        pct22        pct23        pct24        pct25 
+##    0.6998522    0.3266460    0.5669514    0.6146484    1.2992091 
+##        pct26        pct28        pct30        pct32        pct33 
+##    0.5912697    0.9509219    1.0254714    2.1571219    1.0565751 
+##        pct34        pct40        pct41        pct42        pct43 
+##    1.1588432    1.2505238    1.8695104    0.9632439    1.0045860 
+##        pct44        pct45        pct46        pct47        pct48 
+##    3.4191854    1.1360181    2.5235204    1.2907226    1.7536668 
+##        pct49        pct50        pct52        pct60        pct61 
+##    0.9248495    1.7755270    1.4939465    1.1115107    0.5050701 
+##        pct62        pct63        pct66        pct67        pct68 
+##    0.2832938    0.7490239    0.8271836    0.8797288    0.6959943 
+##        pct69        pct70        pct71        pct72        pct73 
+##    1.9758117    1.5930615    0.6413744    1.2444744    0.6334046 
+##        pct75        pct76        pct77        pct78        pct79 
+##    0.5676917    0.8085647    0.7674492    0.4036707    0.6770675 
+##        pct81        pct83        pct84        pct88        pct90 
+##    0.5835034    0.9275032    0.5865498    0.4065247    0.4149844 
+##        pct94       pct100       pct101       pct102       pct103 
+##    0.5045619    1.6564218    1.0549978    1.1899020    1.2790573 
+##       pct104       pct105       pct106       pct107       pct108 
+##    0.5634629    0.7444296    0.4514131    0.9130720    0.2970130 
+##       pct109       pct110       pct111       pct112       pct113 
+##    1.1773760    1.3508572    0.3108849    0.5927175    1.2739097 
+##       pct114       pct115       pct120       pct121       pct122 
+##    0.7952400    1.9764166    0.9314958    1.0019006    0.8834710 
+##       pct123       pct999     year2004     year2005     year2006 
+##    0.2088566    0.7374745    0.8559124    0.8535189    0.8049818 
+##     year2007     year2008     year2009     year2010     year2011 
+##    0.9378184    0.9309977    0.9751377    0.8663279    0.7753272 
+##     year2012     year2013 
+##    0.5712391    0.6075025</code></pre>
 </div>
-<div id="run-fryers-logistic-regression-models" class="section level2">
-<h2>Run Fryer’s Logistic Regression Models</h2>
+<div id="results-of-fryers-logistic-regression-models" class="section level2">
+<h2>Results of Fryer’s Logistic Regression Models</h2>
 <pre class="r"><code>#Fryer&#39;s no control model
 fryer_no_control &lt;- data.frame(Model = &quot;No Control&quot;, WhiteMean = as.character(0.153),Black = 1.534, Hispanic = 1.582, Asian = 1.044,
                                 Others = 1.392)
@@ -983,16 +1096,16 @@ No Control
 0.161
 </td>
 <td style="text-align:right;">
-1.428
+1.492
 </td>
 <td style="text-align:right;">
-1.477
+1.544
 </td>
 <td style="text-align:right;">
-1.257
+1.045
 </td>
 <td style="text-align:right;">
-1.006
+1.314
 </td>
 </tr>
 <tr>
@@ -1005,16 +1118,16 @@ No Control
 <td style="text-align:left;">
 </td>
 <td style="text-align:right;">
-1.426
+1.453
 </td>
 <td style="text-align:right;">
-1.471
+1.499
 </td>
 <td style="text-align:right;">
-1.271
+1.019
 </td>
 <td style="text-align:right;">
-1.024
+1.296
 </td>
 </tr>
 <tr>
@@ -1027,16 +1140,16 @@ No Control
 <td style="text-align:left;">
 </td>
 <td style="text-align:right;">
-1.545
+1.634
 </td>
 <td style="text-align:right;">
-1.519
+1.607
 </td>
 <td style="text-align:right;">
-1.329
+1.058
 </td>
 <td style="text-align:right;">
-1.124
+1.406
 </td>
 </tr>
 <tr>
@@ -1049,16 +1162,16 @@ No Control
 <td style="text-align:left;">
 </td>
 <td style="text-align:right;">
-1.377
+1.476
 </td>
 <td style="text-align:right;">
-1.416
+1.517
 </td>
 <td style="text-align:right;">
-1.277
+1.071
 </td>
 <td style="text-align:right;">
-1.012
+1.368
 </td>
 </tr>
 <tr>
@@ -1071,16 +1184,16 @@ No Control
 <td style="text-align:left;">
 </td>
 <td style="text-align:right;">
-1.311
+1.201
 </td>
 <td style="text-align:right;">
-1.353
+1.138
 </td>
 <td style="text-align:right;">
-1.196
+0.974
 </td>
 <td style="text-align:right;">
-1.018
+1.071
 </td>
 </tr>
 </tbody>
