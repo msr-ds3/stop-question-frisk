@@ -111,8 +111,8 @@ log_data <- sf_data1 %>%
 
 
 #model with no control: race as the only predictor and Use of force as the outcome
-model_no_cntrl <- glm(X.any_force_used. ~ X.race.,
-                      data = log_data2,
+model_no_cntrl <- glm(any_force_used ~ race,
+                      data = log_data,
                       family = "binomial")
 
 #create a new data frame where the observations are only for the white population
@@ -193,7 +193,7 @@ model_full_control <- glm(any_force_used ~ race + sex + age + I(age^2) + inout +
                           family = "binomial")
 
 #create a data frame with the odds ratios of each race relative to the white mean from the full control model
-full_control <- data.frame(Model = "+ Precinct, Year", WhiteMean = "", Black = exp(coef(model_full_control))[2],
+full_control <- data.frame(Model = "(+) Precinct, Year", WhiteMean = "", Black = exp(coef(model_full_control))[2],
                            Hispanic = exp(coef(model_full_control))[3],
                            Asian = exp(coef(model_full_control))[4],
                            Others = exp(coef(model_full_control))[5])
@@ -273,9 +273,13 @@ dev.off()
 # write.csv(our_results, "our_results.csv", row.names = FALSE)
 # write.csv(log_data, "our_results.csv", row.names = FALSE)
 
-#save(log_data, file = here("log_data.RData"))
 
-# write.table(log_data, sep="\t", file="log.txt", row.names=FALSE)
-# log_data2 <- read.csv("~/GitHub/stop-question-frisk/log_data.csv"
-#                       , quote = "",
-#                       stringsAsFactors = FALSE)
+log_data <- log_data %>% select(any_force_used,race,sex,age,inout,daytime,ac_incid,ac_time,
+                                  offunif,typeofid,othpers,cs_bulge,cs_cloth,cs_casng,cs_lkout,
+                                  cs_descr,cs_drgtr,cs_furtv,cs_vcrim,
+                                  cs_objcs,cs_other,wepnfnd,pct,year)
+
+save(model_full_control,file = 'model.rda')
+saveRDS(log_data, file = here("log_data2.rds"))
+
+
