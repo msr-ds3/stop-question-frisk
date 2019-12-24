@@ -1,10 +1,11 @@
+library(pacman)
 library(tidyr)
 library(tidyselect)
 library(gridExtra)
 library(readr)
 
 #set working directory
-setwd("~/GitHub/stop-question-frisk/raw_data")
+setwd(here("raw_data"))
 load("sqf_03_13.RData")
 fryers <- read.csv("Fryers_results.csv")
 

@@ -3,13 +3,13 @@ all:
 sqf_2003.csv sqf_2004.csv sqf_2005.csv sqf_2006.csv sqf_2007.csv sqf_2008.csv sqf_2009.csv sqf_2010.csv sqf_2011.csv sqf_2012.csv sqf_2013.csv sqf_2014.csv sqf_2015.csv sqf_2016.csv sqf_2017.xlsx sqf_2018.xlsx: 01_download_sqf_data.sh
 	./01_download_sqf_data.sh
 
-: 02_stop_question_frisk_clean_data.R
+sqf_03_13.RData: 02_stop_question_frisk_clean_data.R sqf_2003.csv sqf_2004.csv sqf_2005.csv sqf_2006.csv sqf_2007.csv sqf_2008.csv sqf_2009.csv sqf_2010.csv sqf_2011.csv sqf_2012.csv sqf_2013.csv sqf_2014.csv sqf_2015.csv sqf_2016.csv sqf_2017.xlsx sqf_2018.xlsx
 	Rscript 02_stop_question_frisk_clean_data.R
 
-: 05_stop_and_frisk_clean_data.R
+sqf_03_18: 05_stop_and_frisk_clean_data.R sqf_03_13.RData
 	Rscript 05_stop_and_frisk_clean_data.R
 
-: 08_sqf_summary_stats.R
+: 08_sqf_summary_stats.R sqf_03_13.RData
 	Rscript 08_sqf_summary_stats.R
 
 : 10_a_sqf_logistic_regressions.R
