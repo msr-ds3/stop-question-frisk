@@ -183,13 +183,13 @@ sf_1718 <- sf_1718 %>%
 
 
 #bind all the data from 2003-2018 together
-#stop_and_frisk <- bind_rows(sf_data3, sf_1718)
+stop_and_frisk <- bind_rows(sf_data3, sf_1718)
 
 
 
 #save the 03-13 data_set
 #this is the prime dataset
-save(sf_data1, file = here("clean_data","sqf_03_13.RData"))
+#save(sf_data1, file = here("clean_data","sqf_03_13.RData"))
 
 
 #save the 03-18 dataset
