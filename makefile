@@ -1,4 +1,4 @@
-all: summarized_ppcs.RData summary_stats1.pdf sqf_03_18.RData model.rda log_data2.rds fryer_results.pdf our_result.pdf precinct_shape_file.RData census_race_data.RData
+all: summarized_ppcs.RData summary_stats1.pdf sqf_03_18.RData model.rda log_data2.rds fryer_results.pdf our_result.pdf black_stop_rates_by_precinct.html black_stop_rates_by_precinct.png white_stop_rates_by_precinct.html white_stop_rates_by_precinct.png
 
 sqf_2003.csv sqf_2004.csv sqf_2005.csv sqf_2006.csv sqf_2007.csv sqf_2008.csv sqf_2009.csv sqf_2010.csv sqf_2011.csv sqf_2012.csv sqf_2013.csv sqf_2014.csv sqf_2015.csv sqf_2016.csv sqf_2017.xlsx sqf_2018.xlsx: 01_download_sqf_data.sh
 	./01_download_sqf_data.sh
@@ -48,4 +48,9 @@ summarized_ppcs.RData: 09_ppcs_summary_stats.Rmd merged_ppcs.RData
 model.rda log_data2.rds fryer_results.pdf our_result.pdf: 10_a_sqf_logistic_regressions.R sqf_03_13.RData
 	Rscript 10_a_sqf_logistic_regressions.R
 
-clean: sqf_2003.csv sqf_2004.csv sqf_2005.csv sqf_2006.csv sqf_2007.csv sqf_2008.csv sqf_2009.csv sqf_2010.csv sqf_2011.csv sqf_2012.csv sqf_2013.csv sqf_2014.csv sqf_2015.csv sqf_2016.csv sqf_2017.xlsx sqf_2018.xlsx sqf_03_13.RData sqf_03_18.RData summary_stats1.pdf model.rda log_data2.rds fryer_results.pdf our_result.pdf ppcs_1999.RData ppcs_1996.RData ppcs_2008.RData ppcs_2005.RData ppcs_2002.RData ppcs_2011.RData ppcs_2015.RData merged_ppcs.RData summarized_ppcs.RData census_race_data.RData precinct_shape_file.RData
+# add in 11_ppcs_regressions.Rmd and its output here
+
+black_stop_rates_by_precinct.html black_stop_rates_by_precinct.png white_stop_rates_by_precinct.html white_stop_rates_by_precinct.png: 12_map_per_capita_stop_rates_by_race.R sqf_03_13.RData census_race_data.RData precinct_shape_file.RData
+	Rscript 12_map_per_capita_stop_rates_by_race.R
+
+clean: sqf_2003.csv sqf_2004.csv sqf_2005.csv sqf_2006.csv sqf_2007.csv sqf_2008.csv sqf_2009.csv sqf_2010.csv sqf_2011.csv sqf_2012.csv sqf_2013.csv sqf_2014.csv sqf_2015.csv sqf_2016.csv sqf_2017.xlsx sqf_2018.xlsx sqf_03_13.RData sqf_03_18.RData summary_stats1.pdf model.rda log_data2.rds fryer_results.pdf our_result.pdf ppcs_1999.RData ppcs_1996.RData ppcs_2008.RData ppcs_2005.RData ppcs_2002.RData ppcs_2011.RData ppcs_2015.RData merged_ppcs.RData summarized_ppcs.RData census_race_data.RData precinct_shape_file.RData black_stop_rates_by_precinct.html black_stop_rates_by_precinct.png white_stop_rates_by_precinct.html white_stop_rates_by_precinct.png
