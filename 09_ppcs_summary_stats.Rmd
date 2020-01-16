@@ -488,7 +488,7 @@ merged_ppcs <- merged_ppcs %>%
     at_least_kick_pepper_stun = as.factor(at_least_kick_pepper_stun),
     force = as.factor(force)
   ) 
-save(merged_ppcs, file = 'clean_data/merged_ppcs.RData')
+save(merged_ppcs, file = 'clean_data/summarized_ppcs.RData')
 sessionInfo()
 ```
 
