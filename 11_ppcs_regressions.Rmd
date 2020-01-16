@@ -16,12 +16,12 @@ library(ROCR)
 library(scales)
 library(here)
 
-load(here("clean_data", "merged_ppcs.RData"))
+load(here("clean_data", "summarized_ppcs.RData"))
 ```
 
 ```{r}
 # no control
-logit <- glm(force ~ civilian_race, family = "binomial", data= merged_ppcs)
+logit <- glm(force ~ civilian_race, family = "binomial", data= summarized_ppcs)
 exp(coef(logit))
 summary(logit)
 
