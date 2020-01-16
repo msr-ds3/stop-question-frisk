@@ -1,5 +1,8 @@
 all: summarized_ppcs.RData summary_stats1.pdf sqf_03_18.RData model.rda log_data2.rds fryer_results.pdf our_result.pdf black_stop_rates_by_precinct.html black_stop_rates_by_precinct.png white_stop_rates_by_precinct.html white_stop_rates_by_precinct.png 11_ppcs_regressions.html sqf_tables.html
 
+06999-0001-Data.txt 06999-0001-Setup.sas 03151-0001-Data.txt 03151-0001-Setup.sas 04273-0001-Data.txt 04273-0001-Setup.sas 20020-0001-Data.sav 32022-0001-Data.tsv 34276-0001-Data.rda ppcs_2015_raw.rda: 00_download_ppcs_data.sh
+	./00_download_ppcs_data.sh
+
 sqf_2003.csv sqf_2004.csv sqf_2005.csv sqf_2006.csv sqf_2007.csv sqf_2008.csv sqf_2009.csv sqf_2010.csv sqf_2011.csv sqf_2012.csv sqf_2013.csv sqf_2014.csv sqf_2015.csv sqf_2016.csv sqf_2017.xlsx sqf_2018.xlsx: 01_download_sqf_data.sh
 	./01_download_sqf_data.sh
 
