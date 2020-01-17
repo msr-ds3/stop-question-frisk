@@ -15,6 +15,7 @@ library(here)
 
 load(here("clean_data","sqf_03_13.Rdata"))
 
+
 #create a new data frame for the logistic regression model by converting the necessary columns to factors and creating new columns
 
 log_data <- sf_data1 %>%
@@ -186,4 +187,63 @@ actual_values_no_race <- as.numeric(as.character(df_no_race$actual))
 #calculate the area under the curve
 roc_obj_no_race <- roc(pred_probs_no_race,actual_values_no_race)
 auc(roc_obj_no_race)
+
+
+#########################################
+#ROC Curve for model_no_race
+#########################################
+
+pred_roc_no_race <- prediction(df_no_race$probs, df_no_race$actual)
+eval_no_race <- performance(pred_roc_no_race,  measure='tpr', x.measure='fpr')
+
+
+roc_eval_no_race <- data.frame(fpr_no_race=unlist(eval_no_race@x.values),
+                               tpr_no_race=unlist(eval_no_race@y.values))
+ggplot(data=roc_eval_no_race, aes(x=fpr_no_race, y=tpr_no_race)) +
+  theme_bw()+
+  geom_line(color = "#451878") +
+  geom_abline(linetype=2, color = "#451878") +
+  scale_x_continuous(labels=percent, lim=c(0,1)) +
+  scale_y_continuous(labels=percent, lim=c(0,1)) +
+  xlab('Probability of a False Alarm') +
+  ylab('Probability of Detecting Use of Force') +
+  labs(title = "ROC Curve (No Race)") +
+  theme(axis.title.x = element_text(face = "bold", size=20, color = "#0d693e"),
+        axis.title.y = element_text(face = "bold", size=20, color = "#0d693e"),
+        axis.text.x = element_text(face = "bold", size=15),
+        axis.text.y = element_text(face = "bold",size=18),
+        plot.title = element_text(hjust = 0.5,size=25, color = "#374687",face = "bold"),
+        legend.title = element_text(color = "#0d693e", face = "bold", size = 18 ),
+        legend.text = element_text(size = 15 ))+
+  ggsave(here("figures","sqf_roc_curve_no_race.png"),  width = 12, height = 10, dpi = 150, units = "in", device='png')
+
+#save(roc_eval_no_race, file = here("clean_data","evalrace.RData"))
+#save(roc_eval, file = here("clean_data","eval.RData"))
+
+#########################################
+#ROC Curve for model_ful_cntrl
+#########################################
+pred_roc <- prediction(df$probs, df$actual)
+eval <- performance(pred_roc,  measure='tpr', x.measure='fpr')
+
+
+roc_eval <- data.frame(fpr=unlist(eval@x.values), tpr=unlist(eval@y.values))
+ggplot(data=roc_eval, aes(x=fpr, y=tpr)) +
+  theme_bw()+
+  geom_line(color = "#451878") +
+  geom_abline(linetype=2, color = "#451878") +
+  scale_x_continuous(labels=percent, lim=c(0,1)) +
+  scale_y_continuous(labels=percent, lim=c(0,1)) +
+  xlab('Probability of a False Alarm') +
+  ylab('Probability of Detecting Use of Force') +
+  labs(title = "ROC Curve") +
+  theme(axis.title.x = element_text(face = "bold", size=20, color = "#0d693e"),
+        axis.title.y = element_text(face = "bold", size=20, color = "#0d693e"),
+        axis.text.x = element_text(face = "bold", size=15),
+        axis.text.y = element_text(face = "bold",size=18),
+        plot.title = element_text(hjust = 0.5,size=25, color = "#374687",face = "bold"),
+        legend.title = element_text(color = "#0d693e", face = "bold", size = 18 ),
+        legend.text = element_text(size = 15 ))+
+  ggsave(here("figures","sqf_roc_curve.png"),  width = 12, height = 10, dpi = 150, units = "in", device='png')
+
 

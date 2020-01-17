@@ -1,4 +1,4 @@
-library(pacman)
+library(data.table)
 library(tidyverse)
 library(naniar)
 library(scales)
@@ -9,20 +9,20 @@ library(here)
 #set directory to source file location
 
 #read in the stop, question, and frisk dataset for the years 2003-2018
-df3 <- read.csv(here("raw_data","sqf_2003.csv")) 
-df4 <- read.csv(here("raw_data","sqf_2004.csv")) 
-df5 <- read.csv(here("raw_data","sqf_2005.csv")) 
-df6 <- read.csv(here("raw_data","sqf_2006.csv"))
-df7 <- read.csv(here("raw_data","sqf_2007.csv")) 
-df8 <- read.csv(here("raw_data","sqf_2008.csv"))
-df9 <- read.csv(here("raw_data","sqf_2009.csv")) 
-df10 <- read.csv(here("raw_data","sqf_2010.csv")) 
-df11 <- read.csv(here("raw_data","sqf_2011.csv"))
-df12 <- read.csv(here("raw_data","sqf_2012.csv")) 
-df13 <- read.csv(here("raw_data","sqf_2013.csv")) 
-df14 <- read.csv(here("raw_data","sqf_2014.csv")) 
-df15 <- read.csv(here("raw_data","sqf_2015.csv"))
-df16 <- read.csv(here("raw_data","sqf_2016.csv"))
+df3 <- fread(here("raw_data","sqf_2003.csv")) 
+df4 <- fread(here("raw_data","sqf_2004.csv")) 
+df5 <- fread(here("raw_data","sqf_2005.csv")) 
+df6 <- fread(here("raw_data","sqf_2006.csv"))
+df7 <- fread(here("raw_data","sqf_2007.csv")) 
+df8 <- fread(here("raw_data","sqf_2008.csv"))
+df9 <- fread(here("raw_data","sqf_2009.csv")) 
+df10 <- fread(here("raw_data","sqf_2010.csv")) 
+df11 <- fread(here("raw_data","sqf_2011.csv"))
+df12 <- fread(here("raw_data","sqf_2012.csv")) 
+df13 <- fread(here("raw_data","sqf_2013.csv")) 
+df14 <- fread(here("raw_data","sqf_2014.csv")) 
+df15 <- fread(here("raw_data","sqf_2015.csv"))
+df16 <- fread(here("raw_data","sqf_2016.csv"))
 df17 <- readxl::read_xlsx(here("raw_data","sqf_2017.xlsx"))
 df18<- readxl::read_xlsx(here("raw_data","sqf_2018.xlsx"))
 
@@ -43,9 +43,9 @@ df6 <- df6 %>%
          "addrnum" = "adrnum", "addrpct" = "adrpct", "detailcm" = "details_") %>%
   mutate(forceuse = NA, linecm = NA)
 
-#change the "ï..year" column name to "year"
-df16 <- df16 %>%
-  rename("year" = "ï..year")
+# #change the "ï..year" column name to "year"
+# df16 <- df16 %>%
+#   rename("year" = "ï..year")
 
 #drop the detail1_ column in the 2006 data
 df6$detail1_ <- NULL
@@ -183,13 +183,13 @@ sf_1718 <- sf_1718 %>%
 
 
 #bind all the data from 2003-2018 together
-stop_and_frisk <- bind_rows(sf_data3, sf_1718)
+#stop_and_frisk <- bind_rows(sf_data3, sf_1718)
 
 
 
 #save the 03-13 data_set
-#this is the prime dataset
-#save(sf_data1, file = here("clean_data","sqf_03_13.RData"))
+#this is the dataset we use for the logistic regression
+save(sf_data1, file = here("clean_data","sqf_03_13.RData"))
 
 
 #save the 03-18 dataset
