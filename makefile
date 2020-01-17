@@ -1,4 +1,4 @@
-all: summarized_ppcs.RData summary_stats1.pdf sqf_03_18.RData model.rda log_data2.rds fryer_results.pdf our_result.pdf black_stop_rates_by_precinct.html black_stop_rates_by_precinct.png white_stop_rates_by_precinct.html white_stop_rates_by_precinct.png 11_ppcs_regressions.html sqf_tables.html
+all: summarized_ppcs.RData summary_stats1.pdf sqf_03_18.RData model.rda log_data2.rds fryer_results.pdf our_result.pdf black_stop_rates_by_precinct.html black_stop_rates_by_precinct.png white_stop_rates_by_precinct.html white_stop_rates_by_precinct.png 11_ppcs_regressions.html 10_c_sqf_tables.html sqf_roc_curve_no_race.png sqf_roc_curve.png
 
 06999-0001-Data.txt 06999-0001-Setup.sas 03151-0001-Data.txt 03151-0001-Setup.sas 04273-0001-Data.txt 04273-0001-Setup.sas 20020-0001-Data.sav 32022-0001-Data.tsv 34276-0001-Data.rda ppcs_2015_raw.rda: 00_download_ppcs_data.sh
 	./00_download_ppcs_data.sh
@@ -51,14 +51,17 @@ summarized_ppcs.RData 09_ppcs_summary_stats.html: 09_ppcs_summary_stats.Rmd merg
 model.rda log_data2.rds fryer_results.pdf our_result.pdf: 10_a_sqf_logistic_regressions.R sqf_03_13.RData
 	Rscript 10_a_sqf_logistic_regressions.R
 
+sqf_roc_curve_no_race.png sqf_roc_curve.png: 10_b_sqf_AUC.R sqf_03_13.RData
+	Rscript 10_b_sqf_AUC.R
+
+10_c_sqf_tables.html: 10_c_sqf_tables.Rmd log_data2.rds
+	Rscript -e 'rmarkdown::render("10_c_sqf_tables.Rmd")'
+
 11_ppcs_regressions.html: 11_ppcs_regressions.Rmd merged_ppcs.RData
 	Rscript -e 'rmarkdown::render("11_ppcs_regressions.Rmd")'
 
 black_stop_rates_by_precinct.html black_stop_rates_by_precinct.png white_stop_rates_by_precinct.html white_stop_rates_by_precinct.png: 12_map_per_capita_stop_rates_by_race.R sqf_03_13.RData census_race_data.RData precinct_shape_file.RData
 	Rscript 12_map_per_capita_stop_rates_by_race.R
 
-sqf_tables.html: sqf_tables.Rmd log_data2.rds
-	Rscript -e 'rmarkdown::render("sqf_tables.Rmd")'
-
 clean:
-	rm -r sqf_2003.csv sqf_2004.csv sqf_2005.csv sqf_2006.csv sqf_2007.csv sqf_2008.csv sqf_2009.csv sqf_2010.csv sqf_2011.csv sqf_2012.csv sqf_2013.csv sqf_2014.csv sqf_2015.csv sqf_2016.csv sqf_2017.xlsx sqf_2018.xlsx sqf_03_13.RData sqf_03_18.RData summary_stats1.pdf model.rda log_data2.rds fryer_results.pdf our_result.pdf ppcs_1999.RData ppcs_1996.RData ppcs_2008.RData ppcs_2005.RData ppcs_2002.RData ppcs_2011.RData ppcs_2015.RData merged_ppcs.RData summarized_ppcs.RData census_race_data.RData precinct_shape_file.RData black_stop_rates_by_precinct.html black_stop_rates_by_precinct.png white_stop_rates_by_precinct.html white_stop_rates_by_precinct.png 06999-0001-Data.txt 06999-0001-Setup.sas 03151-0001-Data.txt 03151-0001-Setup.sas 04273-0001-Data.txt 04273-0001-Setup.sas 20020-0001-Data.sav 32022-0001-Data.tsv 34276-0001-Data.rda ppcs_2015_raw.rda 11_ppcs_regressions.html sqf_tables.html
+	rm -r sqf_2003.csv sqf_2004.csv sqf_2005.csv sqf_2006.csv sqf_2007.csv sqf_2008.csv sqf_2009.csv sqf_2010.csv sqf_2011.csv sqf_2012.csv sqf_2013.csv sqf_2014.csv sqf_2015.csv sqf_2016.csv sqf_2017.xlsx sqf_2018.xlsx sqf_03_13.RData sqf_03_18.RData summary_stats1.pdf model.rda log_data2.rds fryer_results.pdf our_result.pdf ppcs_1999.RData ppcs_1996.RData ppcs_2008.RData ppcs_2005.RData ppcs_2002.RData ppcs_2011.RData ppcs_2015.RData merged_ppcs.RData summarized_ppcs.RData census_race_data.RData precinct_shape_file.RData black_stop_rates_by_precinct.html black_stop_rates_by_precinct.png white_stop_rates_by_precinct.html white_stop_rates_by_precinct.png 06999-0001-Data.txt 06999-0001-Setup.sas 03151-0001-Data.txt 03151-0001-Setup.sas 04273-0001-Data.txt 04273-0001-Setup.sas 20020-0001-Data.sav 32022-0001-Data.tsv 34276-0001-Data.rda ppcs_2015_raw.rda 11_ppcs_regressions.html 10_c_sqf_tables.html sqf_roc_curve_no_race.png sqf_roc_curve.png 
