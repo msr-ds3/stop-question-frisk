@@ -1,11 +1,11 @@
-[ -f 03151-0001-Data.txt?dl=1 ] || wget https://www.dropbox.com/sh/ttnstlh9iamwqm3/AADPAqudb2BJnogQtoI7XWJpa/03151-0001-Data.txt?dl=1
-[ -f 03151-0001-Setup.sas?dl=1 ] || wget https://www.dropbox.com/sh/ttnstlh9iamwqm3/AABLve63xfU-yAv2WPo74M3ua/03151-0001-Setup.sas?dl=1
-[ -f 04273-0001-Data.txt?dl=1 ] || wget https://www.dropbox.com/sh/ttnstlh9iamwqm3/AAAlsoyXYLDW_DSoIAXErXpTa/04273-0001-Data.txt?dl=1
-[ -f 04273-0001-Setup.sas?dl=1 ] || wget https://www.dropbox.com/sh/ttnstlh9iamwqm3/AADooBNfHlVRUbdJ54STfCwfa/04273-0001-Setup.sas?dl=1
-[ -f 06999-0001-Data.txt?dl=1 ] || wget https://www.dropbox.com/sh/ttnstlh9iamwqm3/AACS_qWyC35JgZkJsJOwNQl9a/06999-0001-Data.txt?dl=1
-[ -f 06999-0001-Setup.sas?dl=1 ] || wget https://www.dropbox.com/sh/ttnstlh9iamwqm3/AADiQkuZNRSUEwQBlv4Nf6W6a/06999-0001-Setup.sas?dl=1
-[ -f 20020-0001-Data.sav?dl=1 ] || wget https://www.dropbox.com/sh/ttnstlh9iamwqm3/AAB61kqOzXVcNu76Jxufjj6ea/20020-0001-Data.sav?dl=1
-[ -f 32022-0001-Data.tsv?dl=1 ] || wget https://www.dropbox.com/sh/ttnstlh9iamwqm3/AABlWYUGVvuH1YwbvNoTWmjUa/32022-0001-Data.tsv?dl=1
-[ -f 34276-0001-Data.rda?dl=1 ] || wget https://www.dropbox.com/sh/ttnstlh9iamwqm3/AABJXDP9tMnGw6u0ByGl1DHKa/34276-0001-Data.rda?dl=1
-[ -f 36653-0001-Data.rda?dl=1 ] || wget https://www.dropbox.com/sh/ttnstlh9iamwqm3/AABTKbB0VcPAMMRFzR5jP0oCa/36653-0001-Data.rda?dl=1
-[ -f ppcs_2015.RData?dl=1 ] || wget https://www.dropbox.com/sh/ttnstlh9iamwqm3/AADBvgwQUBYPrUIJDcsy9Sv9a/ppcs_2015.RData?dl=1
+[ -f raw_data/03151-0001-Data.txt ] || wget -O raw_data/03151-0001-Data.txt https://www.dropbox.com/sh/ttnstlh9iamwqm3/AADPAqudb2BJnogQtoI7XWJpa/03151-0001-Data.txt?dl=1
+[ -f raw_data/03151-0001-Setup.sas ] || wget -O raw_data/03151-0001-Setup.sas https://www.dropbox.com/sh/ttnstlh9iamwqm3/AABLve63xfU-yAv2WPo74M3ua/03151-0001-Setup.sas?dl=1
+[ -f raw_data/04273-0001-Data.txt ] || wget -O raw_data/04273-0001-Data.txt https://www.dropbox.com/sh/ttnstlh9iamwqm3/AAAlsoyXYLDW_DSoIAXErXpTa/04273-0001-Data.txt?dl=1
+[ -f raw_data/04273-0001-Setup.sas ] || wget -O raw_data/04273-0001-Setup.sas https://www.dropbox.com/sh/ttnstlh9iamwqm3/AADooBNfHlVRUbdJ54STfCwfa/04273-0001-Setup.sas?dl=1
+[ -f raw_data/06999-0001-Data.txt ] || wget -O raw_data/06999-0001-Data.txt https://www.dropbox.com/sh/ttnstlh9iamwqm3/AACS_qWyC35JgZkJsJOwNQl9a/06999-0001-Data.txt?dl=1
+[ -f raw_data/06999-0001-Setup.sas ] || wget -O raw_data/06999-0001-Setup.sas https://www.dropbox.com/sh/ttnstlh9iamwqm3/AADiQkuZNRSUEwQBlv4Nf6W6a/06999-0001-Setup.sas?dl=1
+[ -f raw_data/20020-0001-Data.sav ] || wget -O raw_data/20020-0001-Data.sav https://www.dropbox.com/sh/ttnstlh9iamwqm3/AAB61kqOzXVcNu76Jxufjj6ea/20020-0001-Data.sav?dl=1
+[ -f raw_data/32022-0001-Data.tsv ] || wget -O raw_data/32022-0001-Data.tsv https://www.dropbox.com/sh/ttnstlh9iamwqm3/AABlWYUGVvuH1YwbvNoTWmjUa/32022-0001-Data.tsv?dl=1
+[ -f raw_data/34276-0001-Data.rda ] || wget -O raw_data/34276-0001-Data.rda https://www.dropbox.com/sh/ttnstlh9iamwqm3/AABJXDP9tMnGw6u0ByGl1DHKa/34276-0001-Data.rda?dl=1
+[ -f raw_data/36653-0001-Data.rda ] || wget -O raw_data/36653-0001-Data.rda https://www.dropbox.com/sh/ttnstlh9iamwqm3/AABTKbB0VcPAMMRFzR5jP0oCa/36653-0001-Data.rda?dl=1
+[ -f raw_data/ppcs_2015.RData ] || wget -O raw_data/ppcs_2015.RData https://www.dropbox.com/sh/ttnstlh9iamwqm3/AADBvgwQUBYPrUIJDcsy9Sv9a/ppcs_2015.RData?dl=1
