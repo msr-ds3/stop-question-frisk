@@ -39,7 +39,7 @@ clean_data/ppcs_2011.RData 06F_clean_ppcs_2011.html: 06F_clean_ppcs_2011.Rmd raw
 clean_data/ppcs_2015.RData 06G_clean_ppcs_2015.html: 06G_clean_ppcs_2015.Rmd raw_data/ppcs_2015_raw.rda
 	Rscript -e 'rmarkdown::render("06G_clean_ppcs_2015.Rmd")'
 
-clean_data/merged_ppcs.RData 07_merge_ppcs.html: 07_merge_ppcs.Rmd clean_data/ppcs_1999.RData clean_data/ppcs_clean_data/1996.RData clean_data/ppcs_2008.RData clean_data/ppcs_2005.RData clean_data/ppcs_2002.RData clean_data/ppcs_2011.RData
+clean_data/merged_ppcs.RData 07_merge_ppcs.html: 07_merge_ppcs.Rmd clean_data/ppcs_1999.RData clean_data/ppcs_1996.RData clean_data/ppcs_2008.RData clean_data/ppcs_2005.RData clean_data/ppcs_2002.RData clean_data/ppcs_2011.RData
 	Rscript -e 'rmarkdown::render("07_merge_ppcs.Rmd")'
 
 summary_stats1.pdf: 08_sqf_summary_stats.R clean_data/sqf_03_13.RData
