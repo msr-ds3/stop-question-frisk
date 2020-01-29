@@ -10,6 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r load-libraries}
+library(pacman)
 library(tidyverse)
 library(asciiSetupReader)
 library(foreign)
