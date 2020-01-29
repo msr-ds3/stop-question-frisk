@@ -1,4 +1,4 @@
-all: summarized_ppcs.RData summary_stats1.pdf sqf_03_18.RData model.rda log_data2.rds fryer_results.pdf our_result.pdf black_stop_rates_by_precinct.html black_stop_rates_by_precinct.png white_stop_rates_by_precinct.html white_stop_rates_by_precinct.png 11_ppcs_regressions.html 10_c_sqf_tables.html sqf_roc_curve_no_race.png sqf_roc_curve.png
+all: clean_data/summarized_ppcs.RData summary_stats1.pdf clean_data/sqf_03_18.RData model.rda log_data2.rds fryer_results.pdf our_result.pdf figures/black_stop_rates_by_precinct.html figures/black_stop_rates_by_precinct.png figures/white_stop_rates_by_precinct.html figures/white_stop_rates_by_precinct.png 11_ppcs_regressions.html 10_c_sqf_tables.html figures/sqf_roc_curve_no_race.png figures/sqf_roc_curve.png
 
 raw_data/06999-0001-Data.txt raw_data/06999-0001-Setup.sas raw_data/03151-0001-Data.txt raw_data/03151-0001-Setup.sas raw_data/04273-0001-Data.txt raw_data/04273-0001-Setup.sas raw_data/20020-0001-Data.sav raw_data/32022-0001-Data.tsv raw_data/34276-0001-Data.rda raw_data/ppcs_2015_raw.rda: 00_download_ppcs_data.sh
 	./00_download_ppcs_data.sh
