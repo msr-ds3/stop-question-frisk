@@ -9,21 +9,21 @@ This is an R Markdown document. Markdown is a simple formatting syntax for autho
 
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
-```{r 2005 }
+```{r 2005a }
 library(tidyverse)
 library(foreign)
 library(here)
 ```
 
 
-```{r 2005 }
+```{r 2005b }
 # Loading in the dataset
 
 ppcs_2005 <- read.spss(here("raw_data", "20020-0001-Data.sav"), to.data.frame=TRUE)
 ```
 
 
-```{r 2005 }
+```{r 2005c }
 #Renaming columns to see the people who had some sort of contact with the police
 ppcs_2005 <- ppcs_2005 %>%
   mutate(face_to_face = V10) %>%

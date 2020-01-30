@@ -24,10 +24,10 @@ clean_data/ppcs_1996.RData 06A_clean_ppcs_1996.html: 06A_clean_ppcs_1996.Rmd raw
 clean_data/ppcs_1999.RData 06B_clean_ppcs_1999.html: 06B_clean_ppcs_1999.Rmd raw_data/03151-0001-Data.txt raw_data/03151-0001-Setup.sas
 	Rscript -e 'rmarkdown::render("06B_clean_ppcs_1999.Rmd")'
 
-clean_data/ppcs_2002.RData 06C_clean_ppcs_2002.html: 06C_clean_ppcs_2002.Rmd raw_data/04273-0001-Data.txt raw_data/04273-0001-Setup.sas
-	Rscript -e 'rmarkdown::render("06C_clean_ppcs_2002.Rmd")'
+clean_data/ppcs_2002.RData 06C_clean_ppcs_2002.html: 06C_clean_ppcs_2002.R raw_data/04273-0001-Data.txt raw_data/04273-0001-Setup.sas
+	Rscript 06C_clean_ppcs_2002.R
 
-clean_data/ppcs_2005.RData 06D_clean_ppcs_2005.html: 06D_clean_ppcs_2005.Rmd raw_data/ 20020-0001-Data.sav
+clean_data/ppcs_2005.RData 06D_clean_ppcs_2005.html: 06D_clean_ppcs_2005.Rmd raw_data/20020-0001-Data.sav
 	Rscript -e 'rmarkdown::render("06D_clean_ppcs_2005.Rmd")'
 
 clean_data/ppcs_2008.RData 06E_clean_ppcs_2008.html: 06E_clean_ppcs_2008.Rmd raw_data/32022-0001-Data.tsv
