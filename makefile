@@ -15,7 +15,7 @@ clean_data/census_race_data.RData: 03_download_census_race_data.R
 clean_data/precinct_shape_file.RData: 04_download_precinct_shapefiles.R
 	Rscript 04_download_precinct_shapefiles.R
 
-clean_data/sqf_03_18.RData: 05_stop_and_frisk_clean_data.R sqf_03_13.RData
+clean_data/sqf_03_18.RData: 05_stop_and_frisk_clean_data.R clean_data/sqf_03_13.RData
 	Rscript 05_stop_and_frisk_clean_data.R
 
 clean_data/ppcs_1996.RData 06A_clean_ppcs_1996.html: 06A_clean_ppcs_1996.Rmd raw_data/06999-0001-Data.txt raw_data/06999-0001-Setup.sas
