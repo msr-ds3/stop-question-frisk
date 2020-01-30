@@ -1,4 +1,5 @@
-library(pacman)
+# library(pacman)
+library(here)
 library(tidyr)
 library(tidyselect)
 library(gridExtra)
@@ -6,7 +7,7 @@ library(readr)
 
 #set working directory
 setwd(here("raw_data"))
-load("sqf_03_13.RData")
+load(here("clean_data", "sqf_03_13.RData"))
 fryers <- read.csv("Fryers_results.csv")
 
 sf_data1 <- sf_data1 %>%

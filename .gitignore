@@ -10,3 +10,7 @@ cache
 *.csv
 *.tsv
 *.xlsx
+*.rda
+*.sas
+*.txt
+*.sav
