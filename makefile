@@ -1,7 +1,7 @@
-all: clean_data/summarized_ppcs.RData summary_stats1.pdf clean_data/sqf_03_18.RData model.rda log_data2.rds fryer_results.pdf our_result.pdf figures/black_stop_rates_by_precinct.html figures/black_stop_rates_by_precinct.png figures/white_stop_rates_by_precinct.html figures/white_stop_rates_by_precinct.png 11_ppcs_regressions.html 10_c_sqf_tables.html figures/sqf_roc_curve_no_race.png figures/sqf_roc_curve.png
+all: clean_data/summarized_ppcs.RData summary_stats1.pdf model.rda log_data2.rds fryer_results.pdf our_result.pdf figures/black_stop_rates_by_precinct.html figures/black_stop_rates_by_precinct.png figures/white_stop_rates_by_precinct.html figures/white_stop_rates_by_precinct.png 11_ppcs_regressions.html 10_c_sqf_tables.html figures/sqf_roc_curve_no_race.png figures/sqf_roc_curve.png
 
-raw_data/06999-0001-Data.txt raw_data/06999-0001-Setup.sas raw_data/03151-0001-Data.txt raw_data/03151-0001-Setup.sas raw_data/04273-0001-Data.txt raw_data/04273-0001-Setup.sas raw_data/20020-0001-Data.sav raw_data/32022-0001-Data.tsv raw_data/34276-0001-Data.rda raw_data/ppcs_2015_raw.rda: 00_download_ppcs_data.sh
-	./00_download_ppcs_data.sh
+raw_data/06999-0001-Data.txt raw_data/06999-0001-Setup.sas raw_data/03151-0001-Data.txt raw_data/03151-0001-Setup.sas raw_data/04273-0001-Data.txt raw_data/04273-0001-Setup.sas raw_data/20020-0001-Data.sav raw_data/32022-0001-Data.tsv raw_data/34276-0001-Data.rda raw_data/ppcs_2015_raw.rda: 05_download_ppcs_data.sh
+	./05_download_ppcs_data.sh
 
 raw_data/sqf_2003.csv raw_data/sqf_2004.csv raw_data/sqf_2005.csv raw_data/sqf_2006.csv raw_data/sqf_2007.csv raw_data/sqf_2008.csv raw_data/sqf_2009.csv raw_data/sqf_2010.csv raw_data/sqf_2011.csv raw_data/sqf_2012.csv raw_data/sqf_2013.csv raw_data/sqf_2014.csv raw_data/sqf_2015.csv raw_data/sqf_2016.csv raw_data/sqf_2017.xlsx raw_data/sqf_2018.xlsx: 01_download_sqf_data.sh
 	./01_download_sqf_data.sh
@@ -14,9 +14,6 @@ clean_data/census_race_data.RData: 03_download_census_race_data.R
 
 clean_data/precinct_shape_file.RData: 04_download_precinct_shapefiles.R
 	Rscript 04_download_precinct_shapefiles.R
-
-clean_data/sqf_03_18.RData: 05_stop_and_frisk_clean_data.R clean_data/sqf_03_13.RData
-	Rscript 05_stop_and_frisk_clean_data.R
 
 clean_data/ppcs_1996.RData 06A_clean_ppcs_1996.html: 06A_clean_ppcs_1996.Rmd raw_data/06999-0001-Data.txt raw_data/06999-0001-Setup.sas
 	Rscript -e 'rmarkdown::render("06A_clean_ppcs_1996.Rmd")'
