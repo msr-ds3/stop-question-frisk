@@ -8,7 +8,7 @@ library(readr)
 #set working directory
 setwd(here("raw_data"))
 load(here("clean_data", "sqf_03_13.RData"))
-fryers <- read.csv("Fryers_results.csv")
+#fryers <- read.csv("Fryers_results.csv")
 
 sf_data1 <- sf_data1 %>%
   mutate(race = recode_factor(race,"P" = "B","Q" = "H"))

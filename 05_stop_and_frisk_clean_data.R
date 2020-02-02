@@ -181,7 +181,7 @@ sf_1718 <- sf_1718 %>%
 
 
 #bind all the data from 2003-2018 together
-stop_and_frisk <- bind_rows(sf_data3, sf_1718)
+#stop_and_frisk <- bind_rows(sf_data3, sf_1718)
 
 
 
@@ -190,6 +190,6 @@ stop_and_frisk <- bind_rows(sf_data3, sf_1718)
 save(sf_data1, file = "sqf_03_13.RData")
 
 #save the 03-18 dataset (the whole clean dataset)
-save(stop_and_frisk, file = "sqf_03_18.RData")
+#save(stop_and_frisk, file = "sqf_03_18.RData")
 
 
