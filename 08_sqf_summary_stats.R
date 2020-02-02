@@ -2,11 +2,12 @@
 library(here)
 library(tidyr)
 library(tidyselect)
+library(tidyverse)
 library(gridExtra)
 library(readr)
 
 #set working directory
-setwd(here("raw_data"))
+#setwd(here("raw_data"))
 load(here("clean_data", "sqf_03_13.RData"))
 #fryers <- read.csv("Fryers_results.csv")
 
