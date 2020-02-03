@@ -13,6 +13,7 @@ cache
 *.rda
 *.sas
 *.sav
+*.rds
 raw_data/06999-0001-Data.txt
 raw_data/03151-0001-Data.txt
 raw_data/04273-0001-Data.txt

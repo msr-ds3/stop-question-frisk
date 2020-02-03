@@ -4,6 +4,7 @@ output: html_document
 --
 
 ```{r}
+library(pacman)
 library(here)
 library(tidyverse)
 

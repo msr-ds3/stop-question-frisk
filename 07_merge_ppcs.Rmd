@@ -11,6 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Load Libraries
 ```{r}
+library(pacman)
 library(tidyverse)
 library(here)
 ```

@@ -1,4 +1,4 @@
-# library(pacman)
+library(pacman)
 library(here)
 library(tidyverse)
 library(tidycensus)
