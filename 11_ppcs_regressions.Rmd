@@ -22,7 +22,7 @@ load(here("clean_data", "summarized_ppcs.RData"))
 
 ```{r}
 # no control
-logit <- glm(force ~ civilian_race, family = "binomial", data= summarized_ppcs)
+logit <- glm(force ~ civilian_race, family = "binomial", data= merged_ppcs)
 exp(coef(logit))
 summary(logit)
 
