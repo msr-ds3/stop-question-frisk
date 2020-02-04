@@ -33,7 +33,7 @@ sqf_race_dist <- sf_data1 %>%
   ungroup()
 
 # Join the data frames
-joint <- left_join(census_race_dist, sqf_race_dist) %>%
+joint <- left_join(precinct_race, sqf_race_dist) %>%
   mutate(stop_rate = sqf_count/census_count)
 
 # Create separate data frames with only White and Black race data

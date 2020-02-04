@@ -43,7 +43,7 @@ summary_stats1.pdf: 08_sqf_summary_stats.R clean_data/sqf_03_13.RData
 	Rscript 08_sqf_summary_stats.R
 
 clean_data/summarized_ppcs.RData 09_ppcs_summary_stats.html: 09_ppcs_summary_stats.Rmd clean_data/merged_ppcs.RData
-	Rscript -e '("09_ppcs_summary_stats.Rmd")'
+	Rscript -e 'rmarkdown::render("09_ppcs_summary_stats.Rmd")'
 
 model.rda log_data2.rds fryer_results.pdf our_result.pdf: 10_a_sqf_logistic_regressions.R clean_data/sqf_03_13.RData
 	Rscript 10_a_sqf_logistic_regressions.R
