@@ -74,7 +74,7 @@ white_stop_rates <- leaflet(white_precinct_rates) %>%
             position = "topleft",
             title = "White<br>Stop Rate")
 
-white_stop_rates
+#white_stop_rates
 
 saveWidget(white_stop_rates, 
            here("figures", "white_stop_rates_by_precinct.html"),
@@ -97,7 +97,7 @@ black_stop_rates <- leaflet(black_precinct_rates) %>%
             position = "topleft",
             title = "Black<br>Stop Rate")
 
-black_stop_rates
+#black_stop_rates
 
 saveWidget(black_stop_rates, 
            here("figures", "black_stop_rates_by_precinct.html"),
