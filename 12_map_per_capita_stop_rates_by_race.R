@@ -1,14 +1,5 @@
-library(pacman)
-library(here)
-library(tidyverse)
-library(leaflet)
-library(tigris)
-library(tmap)
-library(maptools)
-library(tmaptools)
-library(sp)
-library(webshot)
-library(htmlwidgets)
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(here, tidyverse, leaflet, tigris, tmap, maptools, tmaptools, sp, webshot, htmlwidgets)
 
 
 # Load stop and frisk data for 2003-2013

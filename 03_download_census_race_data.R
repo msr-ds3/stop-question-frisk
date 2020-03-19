@@ -1,7 +1,5 @@
-library(pacman)
-library(here)
-library(tidyverse)
-library(tidycensus)
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(here, tidyverse, tidycensus)
 
 
 # Set up census data

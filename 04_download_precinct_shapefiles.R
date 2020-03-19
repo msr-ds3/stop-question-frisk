@@ -1,7 +1,5 @@
-library(pacman)
-library(httr)
-library(rgdal)
-library(here)
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(httr, rgdal, here)
 
 # get the police precinct shapefiles
 r <- GET('http://services5.arcgis.com/GfwWNkhOj9bNBqoJ/arcgis/rest/services/nypp/FeatureServer/0/query?where=1=1&outFields=*&outSR=4326&f=geojson')
