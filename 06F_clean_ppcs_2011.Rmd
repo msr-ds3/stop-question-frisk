@@ -4,9 +4,8 @@ output: html_document
 --
 
 ```{r}
-library(pacman)
-library(here)
-library(tidyverse)
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, here)
 
 load(here("raw_data", "34276-0001-Data.rda"))
 ppcs_2011 <- da34276.0001

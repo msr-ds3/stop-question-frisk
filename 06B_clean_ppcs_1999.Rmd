@@ -10,12 +10,8 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r load-libraries}
-library(pacman)
-library(tidyverse)
-library(asciiSetupReader)
-library(foreign)
-library(dplyr)
-library(here)
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, asciiSetupReader, foreign, dplyr, here)
 ```
 
 ``` {r load-data}

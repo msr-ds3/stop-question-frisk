@@ -10,12 +10,8 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
-library(pacman)
-library(tidyverse)
-library(pROC)
-library(ROCR)
-library(scales)
-library(here)
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, pROC, ROCR, scales, here)
 
 load(here("clean_data", "summarized_ppcs.RData"))
 ```

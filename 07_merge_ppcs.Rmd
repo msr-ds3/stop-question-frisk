@@ -11,9 +11,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Load Libraries
 ```{r}
-library(pacman)
-library(tidyverse)
-library(here)
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, here)
 ```
 
 # Load All PPCS years

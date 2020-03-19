@@ -11,11 +11,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Load Libraries
 ```{r}
-library(pacman)
-library(ggplot2)
-library(scales)
-library(here)
-library(tidyverse)
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(ggplot2, scales, here, tidyverse)
 ```
 
 ```{r load-data}

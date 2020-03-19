@@ -1,7 +1,5 @@
-library(pacman)
-library(asciiSetupReader)
-library(tidyverse)
-library(here)
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(asciiSetupReader, tidyverse, here)
 
 # loading in the dataset
 ppcs_2002 <- read_ascii_setup(here("raw_data", "04273-0001-Data.txt"), here("raw_data", "04273-0001-Setup.sas"))
