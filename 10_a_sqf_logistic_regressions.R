@@ -1,10 +1,5 @@
-library(pacman)
-library(tidyverse)
-library(gridExtra)
-library(naniar)
-library(scales)
-library(miceadds)
-library(here)
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, gridExtra, naniar, scales, miceadds, here)
 
 
 #load the 2003-2018 dataset

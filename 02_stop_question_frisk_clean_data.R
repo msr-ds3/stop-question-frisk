@@ -1,9 +1,5 @@
-library(pacman)
-library(data.table)
-library(tidyverse)
-library(naniar)
-library(scales)
-library(here)
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(data.table, tidyverse, naniar, scales, here)
 
 #make sure you have run "01_download_sqf_data.sh" before running this script
 
@@ -44,9 +40,9 @@ df6 <- df6 %>%
          "addrnum" = "adrnum", "addrpct" = "adrpct", "detailcm" = "details_") %>%
   mutate(forceuse = NA, linecm = NA)
 
-# #change the "ï..year" column name to "year"
+# #change the "?..year" column name to "year"
 # df16 <- df16 %>%
-#   rename("year" = "ï..year")
+#   rename("year" = "?..year")
 
 #drop the detail1_ column in the 2006 data
 df6$detail1_ <- NULL

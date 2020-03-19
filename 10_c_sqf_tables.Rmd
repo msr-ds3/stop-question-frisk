@@ -13,16 +13,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ```{r include=FALSE}
-library(pacman)
-library(tidyverse)
-library(gridExtra)
-library(naniar)
-library(scales)
-library(miceadds)
-library(here)
-library(data.table)
-library(knitr)
-library(kableExtra)
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, gridExtra, naniar, scales, miceadds, here, data.table, knitr, kableExtra)
 
 ```
 

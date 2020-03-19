@@ -1,12 +1,5 @@
-library(pacman)
-library(tidyverse)
-library(gridExtra)
-library(naniar)
-library(scales)
-library(miceadds)
-library(pROC)
-library(ROCR)
-library(here)
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, gridExtra, naniar, scales, miceadds, pROC, ROCR, here)
 
 #set directory to source file location
 

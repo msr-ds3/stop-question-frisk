@@ -1,10 +1,5 @@
-library(pacman)
-library(here)
-library(tidyr)
-library(tidyselect)
-library(tidyverse)
-library(gridExtra)
-library(readr)
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(here, tidyr, tidyselect, tidyverse, gridExtra, readr)
 
 #set working directory
 #setwd(here("raw_data"))
