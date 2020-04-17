@@ -11,9 +11,9 @@ To run this code with Ubuntu on Windows:
 - download this repository
 - run the 00_install_linux_requirements.sh script to install necessary packages
 - run the 00_install_R_requirements.R script to install necessary R packages
-- type "make all" on the Ubuntu command line to execute all the files in this directory
+- run the makefile with "make all" to execute all the files in this directory  
 
 To run this code on a Mac:
 - download this repository
 - run the 00_install_R_requirements.R script to install necessary R packages
-- type "make all" in the terminal to execute all the files in this directory
+- run the makefile with "make all" to execute all the files in this directory
