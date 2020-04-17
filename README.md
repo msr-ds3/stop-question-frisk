@@ -6,6 +6,7 @@ A replication and extension project from the [Microsoft Research Data Science Su
 To run this code with Ubuntu on Windows:
 - download Ubuntu
 - install R and tidyverse (see https://blog.zenggyu.com/en/post/2018-01-29/installing-r-r-packages-e-g-tidyverse-and-rstudio-on-ubuntu-linux/)
+- install pandoc (see https://github.com/jgm/pandoc/blob/master/INSTALL.md)
 - make sure R is at least version 3.5. if not, update (see https://www.r-bloggers.com/updating-r-on-ubuntu/)
 - download this repository
 - run the 00_install_linux_requirements.sh script to install necessary packages
