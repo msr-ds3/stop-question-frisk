@@ -65,14 +65,14 @@ white_stop_rates <- leaflet(white_precinct_rates) %>%
             position = "topleft",
             title = "White<br>Stop Rate")
 
-#white_stop_rates
+# white_stop_rates
 
 saveWidget(white_stop_rates, 
            here("figures", "white_stop_rates_by_precinct.html"),
            selfcontained = FALSE)
-webshot(url = here("figures", "white_stop_rates_by_precinct.html"),
-        file = here("figures", "white_stop_rates_by_precinct.png"),
-        cliprect = "viewport")
+#webshot(url = here("figures", "white_stop_rates_by_precinct.html"),
+#        file = here("figures", "white_stop_rates_by_precinct.png"),
+#        cliprect = "viewport")
 
 # Same as above, but for a black person
 black_stop_rates <- leaflet(black_precinct_rates) %>%
@@ -88,13 +88,13 @@ black_stop_rates <- leaflet(black_precinct_rates) %>%
             position = "topleft",
             title = "Black<br>Stop Rate")
 
-#black_stop_rates
+# black_stop_rates
 
 saveWidget(black_stop_rates, 
            here("figures", "black_stop_rates_by_precinct.html"),
            selfcontained = FALSE)
-webshot(url = here("figures", "black_stop_rates_by_precinct.html"),
-        file = here("figures", "black_stop_rates_by_precinct.png"),
-        cliprect = "viewport")
+#webshot(url = here("figures", "black_stop_rates_by_precinct.html"),
+#        file = here("figures", "black_stop_rates_by_precinct.png"),
+#        cliprect = "viewport")
 
 sessionInfo()

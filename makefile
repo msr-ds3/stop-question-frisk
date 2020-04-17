@@ -1,4 +1,5 @@
-all: clean_data/summarized_ppcs.RData summary_stats1.pdf model.rda log_data2.rds fryer_results.pdf our_result.pdf 11_ppcs_regressions.html 10_c_sqf_tables.html figures/sqf_roc_curve_no_race.png figures/sqf_roc_curve.png figures/black_stop_rates_by_precinct.html figures/white_stop_rates_by_precinct.html figures/white_stop_rates_by_precinct.png figures/black_stop_rates_by_precinct.png
+all: clean_data/summarized_ppcs.RData summary_stats1.pdf model.rda log_data2.rds fryer_results.pdf our_result.pdf 11_ppcs_regressions.html 10_c_sqf_tables.html figures/sqf_roc_curve_no_race.png figures/sqf_roc_curve.png figures/black_stop_rates_by_precinct.html figures/white_stop_rates_by_precinct.html 
+# figures/white_stop_rates_by_precinct.png figures/black_stop_rates_by_precinct.png
 
 raw_data/06999-0001-Data.txt raw_data/06999-0001-Setup.sas raw_data/03151-0001-Data.txt raw_data/03151-0001-Setup.sas raw_data/04273-0001-Data.txt raw_data/04273-0001-Setup.sas raw_data/20020-0001-Data.sav raw_data/32022-0001-Data.tsv raw_data/34276-0001-Data.rda raw_data/ppcs_2015_raw.rda raw_data/36653-0001-Data.rda: 05_download_ppcs_data.sh
 	./05_download_ppcs_data.sh
@@ -57,8 +58,8 @@ figures/sqf_roc_curve_no_race.png figures/sqf_roc_curve.png: 10_b_sqf_AUC.R clea
 figures/black_stop_rates_by_precinct.html  figures/white_stop_rates_by_precinct.html: 12a_map_per_capita_stop_rates_by_race.R clean_data/sqf_03_13.RData clean_data/census_race_data.RData clean_data/precinct_shape_file.RData
 	Rscript 12a_map_per_capita_stop_rates_by_race.R
 	
-figures/black_stop_rates_by_precinct.png figures/white_stop_rates_by_precinct.png: figures/black_stop_rates_by_precinct.html  figures/white_stop_rates_by_precinct.html 12b_map_per_capita_stop_rates_by_race.R
-	Rscript 12b_map_per_capita_stop_rates_by_race.R
+#figures/black_stop_rates_by_precinct.png figures/white_stop_rates_by_precinct.png: figures/black_stop_rates_by_precinct.html  figures/white_stop_rates_by_precinct.html 12b_map_per_capita_stop_rates_by_race.R
+#	Rscript 12b_map_per_capita_stop_rates_by_race.R
 
 clean:
 	rm -r raw_data/sqf_2003.csv raw_data/sqf_2004.csv raw_data/sqf_2005.csv raw_data/sqf_2006.csv raw_data/sqf_2007.csv raw_data/sqf_2008.csv raw_data/sqf_2009.csv raw_data/sqf_2010.csv raw_data/sqf_2011.csv raw_data/sqf_2012.csv raw_data/sqf_2013.csv raw_data/sqf_2014.csv raw_data/sqf_2015.csv raw_data/sqf_2016.csv raw_data/sqf_2017.xlsx raw_data/sqf_2018.xlsx clean_data/sqf_03_13.RData model.rda log_data2.rds clean_data/ppcs_1999.RData clean_data/ppcs_1996.RData clean_data/ppcs_2008.RData clean_data/ppcs_2005.RData clean_data/ppcs_2002.RData clean_data/ppcs_2011.RData clean_data/merged_ppcs.RData clean_data/summarized_ppcs.RData clean_data/census_race_data.RData clean_data/precinct_shape_file.RData figures/black_stop_rates_by_precinct.html figures/black_stop_rates_by_precinct.png figures/white_stop_rates_by_precinct.html figures/white_stop_rates_by_precinct.png raw_data/06999-0001-Data.txt raw_data/06999-0001-Setup.sas raw_data/03151-0001-Data.txt raw_data/03151-0001-Setup.sas raw_data/04273-0001-Data.txt raw_data/04273-0001-Setup.sas raw_data/20020-0001-Data.sav raw_data/32022-0001-Data.tsv raw_data/34276-0001-Data.rda raw_data/36653-0001-Data.rda 11_ppcs_regressions.html 10_c_sqf_tables.html figures/sqf_roc_curve_no_race.png figures/sqf_roc_curve.png 
