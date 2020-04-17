@@ -1,0 +1,6 @@
+update.packages()
+install.packages('rmarkdown')
+install.packages('sf')
+install.packages('devtools')
+devtools::install_github("r-spatial/lwgeom", force = T)
+install.packages("xml2", INSTALL_opts = c('--no-lock'))
