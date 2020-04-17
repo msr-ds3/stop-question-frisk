@@ -1,17 +1,12 @@
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(tidyverse, gridExtra, naniar, scales, miceadds, pROC, ROCR, here)
 
-#set directory to source file location
-
 #make sure you have run "01_download_sqf_data.sh" and "02_stop_and_frisk_clean_data.R" before running this script (only for the first time. After the first time, you can just load the RData file)
-
 #make sure you set the directory using "setwd" to the "stop-question-frisk" directory before loading the "here" library
 
 load(here("clean_data","sqf_03_13.Rdata"))
 
-
 #create a new data frame for the logistic regression model by converting the necessary columns to factors and creating new columns
-
 log_data <- sf_data1 %>%
   filter(race != "X" & race != " " & typeofid != " ") %>%
   mutate(race = recode_factor(race,"P" = "B","Q" = "H"),
