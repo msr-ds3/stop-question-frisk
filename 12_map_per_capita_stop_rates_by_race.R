@@ -70,7 +70,7 @@ white_stop_rates <- leaflet(white_precinct_rates) %>%
 saveWidget(white_stop_rates, 
            here("figures", "white_stop_rates_by_precinct.html"),
            selfcontained = FALSE)
-webshot(here("figures", "white_stop_rates_by_precinct.html"),
+webshot(url = here("figures", "white_stop_rates_by_precinct.html"),
         file = here("figures", "white_stop_rates_by_precinct.png"),
         cliprect = "viewport")
 
@@ -93,7 +93,7 @@ black_stop_rates <- leaflet(black_precinct_rates) %>%
 saveWidget(black_stop_rates, 
            here("figures", "black_stop_rates_by_precinct.html"),
            selfcontained = FALSE)
-webshot(here("figures", "black_stop_rates_by_precinct.html"),
+webshot(url = here("figures", "black_stop_rates_by_precinct.html"),
         file = here("figures", "black_stop_rates_by_precinct.png"),
         cliprect = "viewport")
 
