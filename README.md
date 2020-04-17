@@ -5,7 +5,7 @@ A replication and extension project from the [Microsoft Research Data Science Su
 
 To run this code:
 - download this repository
-- run the 00_install_R_requirements.R script to install necessary R packages
+- run the ```00_install_R_requirements.R``` script to install necessary R packages
 - run the makefile with ```make all``` to execute all the files in this directory
 
 To run with WSL, in addition to the above:
