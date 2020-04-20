@@ -47,6 +47,8 @@ data_03_13 <- rbind(data_03_10, data_11_13)
 #bind the rows of all the data from 2003 - 2013 including 2006
 sf_data1 <- rbind(df6, data_03_13)
 
+# remove columns that we don't use to speed up saving and loading this dataset
+sf_data1 <- sf_data1 %>% select(-ser_num, -datestop, -recstat, -trhsloc, -perobs, -crimsusp, -perstop, -explnstp, -arstoffn, -sumoffen, -compyear, -comppct, -officrid, -adtlrept, -pf_other, -radio,-ac_rept, -ac_inves, -rf_vcrim, -rf_othsw, -ac_proxm, -rf_attir, -rf_vcact, -ac_evasv, -ac_assoc, -rf_rfcmp, -ac_cgdir, -rf_verbl, -rf_knowl, -ac_stsnd, -ac_other, -sb_hdobj, -sb_outln, -sb_admis, -sb_other, -repcmd, -revcmd, -rf_furt, -rf_bulg, -offverb, -offshld, -wepfound, -dettypcm, -detailcm, -dob, -ht_feet, -ht_inch, -weight, -haircolr, -eyecolor, -build, -othfeatr, -addrtyp, -rescode, -premtype, -premname, -addrnum, -stname, -stinter, -aptnum, -city, -state, -zip, -sector, -beat, -post, -xcoord, -ycoord, -crossst, -forceuse, -linecm )
 
 #save the 03-13 data_set
 #this is the dataset we use for the logistic regression
