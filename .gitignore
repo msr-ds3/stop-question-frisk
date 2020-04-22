@@ -17,3 +17,6 @@ cache
 raw_data/06999-0001-Data.txt
 raw_data/03151-0001-Data.txt
 raw_data/04273-0001-Data.txt
+*.html
+*.pdf
+*.png
