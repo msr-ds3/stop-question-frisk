@@ -129,9 +129,8 @@ log_data <- sf_data1 %>%
 
 ```
 
-
 #model with precinct and year levels added as controls
-```{r model-no-control}
+```{r model-full-control}
 model_full_control <- glm(any_force_used ~ race + sex + age + I(age^2) + inout + daytime + ac_incid + ac_time +
                             offunif + typeofid + othpers + cs_bulge + cs_cloth + cs_casng + cs_lkout +
                             cs_descr + cs_drgtr + cs_furtv + cs_vcrim +
