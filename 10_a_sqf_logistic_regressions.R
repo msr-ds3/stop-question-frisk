@@ -107,74 +107,74 @@ log_data <- sf_data1 %>%
 
 
 #model with no control: race as the only predictor and Use of force as the outcome
-model_no_cntrl <- glm(any_force_used ~ race,
-                      data = log_data,
-                      family = "binomial")
+# model_no_cntrl <- glm(any_force_used ~ race,
+#                       data = log_data,
+#                       family = "binomial")
 
-#create a new data frame where the observations are only for the white population
-log_w <- log_data %>%
-  filter(race == "White")
-
-#calculate the white mean to 3 decimal points
-white_mean <- round(mean(log_w$any_force_used == 1),3)
-
-#create a data frame with the odds ratios of each race relative to the white mean from the no control model
-no_control <- data.frame(Model= "No Control", WhiteMean = as.character(white_mean),
-                         Black = exp(coef(model_no_cntrl))[2], Hispanic = exp(coef(model_no_cntrl))[3],
-                         Asian = exp(coef(model_no_cntrl))[4], Others = exp(coef(model_no_cntrl))[5])
-
-
-
-
-#model with civilian demographics added as control
-model_civilian_demo <- glm(any_force_used ~ race + sex + age + I(age^2),
-                           data = log_data,
-                           family = "binomial")
-
-#create a data frame with the odds ratios of each race relative to the white mean from the civilian demographics model
-civilian_demographics <- data.frame(Model = "+ Civilian Demographics", WhiteMean = "",
-                                    Black = exp(coef(model_civilian_demo))[2], Hispanic = exp(coef(model_civilian_demo))[3],
-                                    Asian = exp(coef(model_civilian_demo))[4], Others = exp(coef(model_civilian_demo))[5])
-
-
-
-
-
-
-
-#model with encounter characteristics added as control
-model_encnt_char <- glm(any_force_used ~ race + sex + I(age^2)
-                        + inout + daytime + ac_incid + ac_time +
-                          offunif + typeofid + othpers,
-                        data = log_data,
-                        family = "binomial")
-
-#create a data frame with the odds ratios of each race relative to the white mean from the encounter characteristics model
-encounter_characteristics <- data.frame(Model = "+ Encounter Characteristics", WhiteMean = "",
-                                        Black = exp(coef(model_encnt_char))[2],
-                                        Hispanic = exp(coef(model_encnt_char))[3],
-                                        Asian = exp(coef(model_encnt_char))[4],
-                                        Others = exp(coef(model_encnt_char))[5])
-
-
-
-
-
-
-
-#model with civilian behavior added as control
-model_civ_behv <- glm(any_force_used ~ race + sex + I(age^2) + inout + daytime + ac_incid + ac_time +
-                        offunif + typeofid + othpers + cs_bulge + cs_cloth + cs_casng + cs_lkout +
-                        cs_descr + cs_drgtr + cs_furtv + cs_vcrim +
-                        cs_objcs + cs_other + wepnfnd,
-                      data = log_data,
-                      family = "binomial")
-
-#create a data frame with the odds ratios of each race relative to the white mean from the civilian behavior model
-civilian_behavior <- data.frame(Model = "+ Civilian Behavior", WhiteMean = "", Black = exp(coef(model_civ_behv))[2],
-                                Hispanic = exp(coef(model_civ_behv))[3],
-                                Asian = exp(coef(model_civ_behv))[4],
-                                Others = exp(coef(model_civ_behv))[5])
+# #create a new data frame where the observations are only for the white population
+# log_w <- log_data %>%
+#   filter(race == "White")
+# 
+# #calculate the white mean to 3 decimal points
+# white_mean <- round(mean(log_w$any_force_used == 1),3)
+# 
+# #create a data frame with the odds ratios of each race relative to the white mean from the no control model
+# no_control <- data.frame(Model= "No Control", WhiteMean = as.character(white_mean),
+#                          Black = exp(coef(model_no_cntrl))[2], Hispanic = exp(coef(model_no_cntrl))[3],
+#                          Asian = exp(coef(model_no_cntrl))[4], Others = exp(coef(model_no_cntrl))[5])
+# 
+# 
+# 
+# 
+# #model with civilian demographics added as control
+# model_civilian_demo <- glm(any_force_used ~ race + sex + age + I(age^2),
+#                            data = log_data,
+#                            family = "binomial")
+# 
+# #create a data frame with the odds ratios of each race relative to the white mean from the civilian demographics model
+# civilian_demographics <- data.frame(Model = "+ Civilian Demographics", WhiteMean = "",
+#                                     Black = exp(coef(model_civilian_demo))[2], Hispanic = exp(coef(model_civilian_demo))[3],
+#                                     Asian = exp(coef(model_civilian_demo))[4], Others = exp(coef(model_civilian_demo))[5])
+# 
+# 
+# 
+# 
+# 
+# 
+# 
+# #model with encounter characteristics added as control
+# model_encnt_char <- glm(any_force_used ~ race + sex + I(age^2)
+#                         + inout + daytime + ac_incid + ac_time +
+#                           offunif + typeofid + othpers,
+#                         data = log_data,
+#                         family = "binomial")
+# 
+# #create a data frame with the odds ratios of each race relative to the white mean from the encounter characteristics model
+# encounter_characteristics <- data.frame(Model = "+ Encounter Characteristics", WhiteMean = "",
+#                                         Black = exp(coef(model_encnt_char))[2],
+#                                         Hispanic = exp(coef(model_encnt_char))[3],
+#                                         Asian = exp(coef(model_encnt_char))[4],
+#                                         Others = exp(coef(model_encnt_char))[5])
+# 
+# 
+# 
+# 
+# 
+# 
+# 
+# #model with civilian behavior added as control
+# model_civ_behv <- glm(any_force_used ~ race + sex + I(age^2) + inout + daytime + ac_incid + ac_time +
+#                         offunif + typeofid + othpers + cs_bulge + cs_cloth + cs_casng + cs_lkout +
+#                         cs_descr + cs_drgtr + cs_furtv + cs_vcrim +
+#                         cs_objcs + cs_other + wepnfnd,
+#                       data = log_data,
+#                       family = "binomial")
+# 
+# #create a data frame with the odds ratios of each race relative to the white mean from the civilian behavior model
+# civilian_behavior <- data.frame(Model = "+ Civilian Behavior", WhiteMean = "", Black = exp(coef(model_civ_behv))[2],
+#                                 Hispanic = exp(coef(model_civ_behv))[3],
+#                                 Asian = exp(coef(model_civ_behv))[4],
+#                                 Others = exp(coef(model_civ_behv))[5])
 
 
 
@@ -189,76 +189,76 @@ model_full_control <- glm(any_force_used ~ race + sex + age + I(age^2) + inout +
                           family = "binomial")
 
 #create a data frame with the odds ratios of each race relative to the white mean from the full control model
-full_control <- data.frame(Model = "(+) Precinct, Year", WhiteMean = "", Black = exp(coef(model_full_control))[2],
-                           Hispanic = exp(coef(model_full_control))[3],
-                           Asian = exp(coef(model_full_control))[4],
-                           Others = exp(coef(model_full_control))[5])
-
-
-
-
-#creating a dataframe with our results
-our_results <- bind_rows(no_control, civilian_demographics, encounter_characteristics,
-                         civilian_behavior, full_control) %>%
-  mutate(Black = round(Black, 3),
-         Hispanic = round(Hispanic,3), Asian = round(Asian, 3), Others = round(Others, 3))
-
-
-#assigning new row names to the "our_results" data frame
-rownames(our_results) <- c("(a)", "(b)",
-                           "(c)",
-                           "(d)", "(e)")
-
-
-#outputting the "our_results" data frame as a table in a pdf file
-pdf("our_result.pdf", height=11, width=10)
-grid.table(our_results)
-dev.off()
-
-
-
-#Fryer's no control model
-fryer_no_control <- data.frame(Model = "No Control", WhiteMean = as.character(0.153),Black = 1.534, Hispanic = 1.582, Asian = 1.044,
-                               Others = 1.392)
-
-
-
-#Fryer's model with civilian demographics added as control
-fryer_civilian_demographics <- data.frame(Model = "+ Civilian Demographics", WhiteMean = "", Black = 1.480, Hispanic = 1.517,
-                                          Asian = 1.010,
-                                          Others = 1.346)
-
-
-#Fryer's model with encounter characteristics added as control
-fryer_encounter_characteristics <- data.frame(Model = "+ Encounter Characteristics", WhiteMean = "", Black = 1.655, Hispanic = 1.641,
-                                              Asian = 1.059,
-                                              Others = 1.452)
-
-#Fryer's model with civilian behavior added as control
-fryer_civilian_behavior <- data.frame(Model = "+ Civilian Behavior", WhiteMean = "", Black = 1.462, Hispanic = 1.516,
-                                      Asian = 1.051,
-                                      Others = 1.372)
-
-
-#Fryer's model with full control added as control
-fryer_full_control <- data.frame(Model = "+ Precinct, Year", WhiteMean = "", Black = 1.178, Hispanic = 1.122, Asian = 0.953,
-                                 Others = 1.060)
-
-
-#creating a dataframe with Fryer's results
-fryer_results <- bind_rows(fryer_no_control, fryer_civilian_demographics,
-                           fryer_encounter_characteristics,fryer_civilian_behavior, fryer_full_control)
-
-
-#assigning new row names to the "fryer_results " data frame
-rownames(fryer_results ) <- c("(a)", "(b)",
-                           "(c)",
-                           "(d)", "(e)")
-
-#outputting the "fryer_results" data frame as a table in a pdf file
-pdf("fryer_results.pdf", height=11, width=10)
-grid.table(fryer_results )
-dev.off()
+# full_control <- data.frame(Model = "(+) Precinct, Year", WhiteMean = "", Black = exp(coef(model_full_control))[2],
+#                            Hispanic = exp(coef(model_full_control))[3],
+#                            Asian = exp(coef(model_full_control))[4],
+#                            Others = exp(coef(model_full_control))[5])
+# 
+# 
+# 
+# 
+# #creating a dataframe with our results
+# our_results <- bind_rows(no_control, civilian_demographics, encounter_characteristics,
+#                          civilian_behavior, full_control) %>%
+#   mutate(Black = round(Black, 3),
+#          Hispanic = round(Hispanic,3), Asian = round(Asian, 3), Others = round(Others, 3))
+# 
+# 
+# #assigning new row names to the "our_results" data frame
+# rownames(our_results) <- c("(a)", "(b)",
+#                            "(c)",
+#                            "(d)", "(e)")
+# 
+# 
+# #outputting the "our_results" data frame as a table in a pdf file
+# pdf("our_result.pdf", height=11, width=10)
+# grid.table(our_results)
+# dev.off()
+# 
+# 
+# 
+# #Fryer's no control model
+# fryer_no_control <- data.frame(Model = "No Control", WhiteMean = as.character(0.153),Black = 1.534, Hispanic = 1.582, Asian = 1.044,
+#                                Others = 1.392)
+# 
+# 
+# 
+# #Fryer's model with civilian demographics added as control
+# fryer_civilian_demographics <- data.frame(Model = "+ Civilian Demographics", WhiteMean = "", Black = 1.480, Hispanic = 1.517,
+#                                           Asian = 1.010,
+#                                           Others = 1.346)
+# 
+# 
+# #Fryer's model with encounter characteristics added as control
+# fryer_encounter_characteristics <- data.frame(Model = "+ Encounter Characteristics", WhiteMean = "", Black = 1.655, Hispanic = 1.641,
+#                                               Asian = 1.059,
+#                                               Others = 1.452)
+# 
+# #Fryer's model with civilian behavior added as control
+# fryer_civilian_behavior <- data.frame(Model = "+ Civilian Behavior", WhiteMean = "", Black = 1.462, Hispanic = 1.516,
+#                                       Asian = 1.051,
+#                                       Others = 1.372)
+# 
+# 
+# #Fryer's model with full control added as control
+# fryer_full_control <- data.frame(Model = "+ Precinct, Year", WhiteMean = "", Black = 1.178, Hispanic = 1.122, Asian = 0.953,
+#                                  Others = 1.060)
+# 
+# 
+# #creating a dataframe with Fryer's results
+# fryer_results <- bind_rows(fryer_no_control, fryer_civilian_demographics,
+#                            fryer_encounter_characteristics,fryer_civilian_behavior, fryer_full_control)
+# 
+# 
+# #assigning new row names to the "fryer_results " data frame
+# rownames(fryer_results ) <- c("(a)", "(b)",
+#                            "(c)",
+#                            "(d)", "(e)")
+# 
+# #outputting the "fryer_results" data frame as a table in a pdf file
+# pdf("fryer_results.pdf", height=11, width=10)
+# grid.table(fryer_results )
+# dev.off()
 
 
 # kable(our_results, format = "latex", booktabs = T, caption = "Our Results") %>%
