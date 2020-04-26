@@ -44,8 +44,8 @@ summary_stats1.pdf: 08_sqf_summary_stats.R clean_data/sqf_03_13.RData
 clean_data/summarized_ppcs.RData 09_ppcs_summary_stats.html: 09_ppcs_summary_stats.Rmd clean_data/merged_ppcs.RData
 	Rscript -e 'rmarkdown::render("09_ppcs_summary_stats.Rmd")'
 
-model.rda log_data2.rds figures/sqf_roc_curve_no_race.png figures/sqf_roc_curve.png: 10_a_sqf_logistic_regressions.Rmd clean_data/sqf_03_13.RData
-	Rscript -e 'rmarkdown::render("10_a_sqf_logistic_regressions.Rmd")'
+model.rda log_data2.rds figures/sqf_roc_curve_no_race.png figures/sqf_roc_curve.png: 10_a_sqf_logistic_regressions_new.R clean_data/sqf_03_13.RData
+	Rscript 10_a_sqf_logistic_regressions_new.R
 
 #figures/sqf_roc_curve_no_race.png figures/sqf_roc_curve.png: 10_b_sqf_AUC.R clean_data/sqf_03_13.RData
 #	Rscript 10_b_sqf_AUC.R
