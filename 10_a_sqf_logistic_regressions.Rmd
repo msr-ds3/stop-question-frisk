@@ -35,10 +35,9 @@ load(here("clean_data","sqf_03_13.Rdata"))
 log_data <- sf_data1 %>%
   mutate(any_force_used = paste(pf_hands, pf_grnd, pf_wall, pf_drwep, pf_ptwep,
                                 pf_hcuff,pf_baton, pf_pepsp, sep = ""),
-         wepnfnd = paste(contrabn,asltweap,pistol,riflshot,knifcuti,machgun,othrweap, sep = ""),
-         daytime = as.factor(ifelse(600<=timestop & timestop<=1700,1,0))
+         wepnfnd = paste(contrabn,asltweap,pistol,riflshot,knifcuti,machgun,othrweap, sep = "")
          )%>%
-  select(any_force_used,race,sex,age,inout,daytime,ac_incid,ac_time,timestop,
+  select(any_force_used,race,sex,age,inout,ac_incid,ac_time,timestop,
                                   offunif,typeofid,othpers,cs_bulge,cs_cloth,cs_casng,cs_lkout,
                                   cs_descr,cs_drgtr,cs_furtv,cs_vcrim,
                                   cs_objcs,cs_other,wepnfnd,pct,year)%>%
@@ -48,6 +47,7 @@ log_data <- sf_data1 %>%
          sex = as.factor(sex),
          inout = as.factor(if_else(grepl("I",inout), 1, 0)),
          timestop = as.numeric(gsub(":","",timestop)),
+         daytime = as.factor(ifelse(600<=timestop & timestop<=1700,1,0)),
          ac_incid = as.factor(if_else(grepl("Y",ac_incid), 1, 0)),
          ac_time = as.factor(if_else(grepl("Y",ac_time), 1, 0)),
          offunif = as.factor(if_else(grepl("Y",offunif), 1, 0)),
