@@ -33,14 +33,16 @@ load(here("clean_data","sqf_03_13.Rdata"))
 ```{r create-data-frame}
 
 log_data <- sf_data1 %>%
+  mutate(any_force_used = paste(pf_hands, pf_grnd, pf_wall, pf_drwep, pf_ptwep,
+                                pf_hcuff,pf_baton, pf_pepsp, sep = ""),
+         wepnfnd = paste(contrabn,asltweap,pistol,riflshot,knifcuti,machgun,othrweap, sep = "")
+         )%>%
   select(any_force_used,race,sex,age,inout,daytime,ac_incid,ac_time,timestop,
                                   offunif,typeofid,othpers,cs_bulge,cs_cloth,cs_casng,cs_lkout,
                                   cs_descr,cs_drgtr,cs_furtv,cs_vcrim,
                                   cs_objcs,cs_other,wepnfnd,pct,year)%>%
   filter(race != "X" & race != " " & typeofid != " ") %>%
   mutate(race = recode_factor(race,"P" = "B","Q" = "H"),
-         any_force_used = paste(pf_hands, pf_grnd, pf_wall, pf_drwep, pf_ptwep,
-                                pf_hcuff,pf_baton, pf_pepsp, sep = ""),
          any_force_used = as.factor(if_else(grepl("Y",any_force_used), 1, 0)),
          sex = as.factor(sex),
          inout = as.factor(if_else(grepl("I",inout), 1, 0)),
@@ -60,7 +62,6 @@ log_data <- sf_data1 %>%
          cs_vcrim = as.factor(if_else(grepl("Y",cs_vcrim), 1, 0)),
          cs_bulge = as.factor(if_else(grepl("Y",cs_bulge), 1, 0)),
          cs_other = as.factor(if_else(grepl("Y",cs_other), 1, 0)),
-         wepnfnd = paste(contrabn,asltweap,pistol,riflshot,knifcuti,machgun,othrweap, sep = ""),
          wepnfnd = as.factor(if_else(grepl("Y",wepnfnd), 1, 0)),
          race = recode_factor(race, "W" = "White", "B" = "Black",  "H" ="Hispanic",
                               "A" = "Asian", "I" ="Other", "Z" = "Other"),
