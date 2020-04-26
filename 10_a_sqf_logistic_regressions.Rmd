@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r include=FALSE}
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load(tidyverse, gridExtra, naniar, scales, miceadds, here)
+pacman::p_load(tidyverse, gridExtra, naniar, scales, miceadds, here, pROC, ROCR)
 
 ```
 
