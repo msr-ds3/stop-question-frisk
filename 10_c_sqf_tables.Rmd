@@ -35,7 +35,7 @@ log_data <- readRDS('log_data2.rds')
 #model with no control: race as the only predictor and Use of force as the outcome
 model_no_cntrl <- glm(any_force_used ~ race,
                        data = log_data,
-                       family = "binomial")
+                       family = "binomial", y=FALSE, model=FALSE)
 
 
 #create a data frame with the odds ratios of each race relative to the white mean from the no control model
@@ -52,7 +52,7 @@ exp(coef(model_no_cntrl))
 #model with civilian demographics added as control
  model_civilian_demo <- glm(any_force_used ~ race + sex + age + I(age^2),
                             data = log_data,
-                            family = "binomial")
+                            family = "binomial", y=FALSE, model=FALSE)
 
 #create a data frame with the odds ratios of each race relative to the white mean from the civilian demographics model
  
@@ -74,7 +74,7 @@ exp(coef(model_civilian_demo))
                          + inout + daytime + ac_incid + ac_time +
                            offunif + typeofid + othpers,
                          data = log_data,
-                         family = "binomial")
+                         family = "binomial", y=FALSE, model=FALSE)
 
  
 #create a data frame with the odds ratios of each race relative to the white mean from the encounter characteristics model
@@ -99,7 +99,7 @@ exp(coef(model_encnt_char))
                          cs_descr + cs_drgtr + cs_furtv + cs_vcrim +
                          cs_objcs + cs_other + wepnfnd,
                        data = log_data,
-                       family = "binomial")
+                       family = "binomial", y=FALSE, model=FALSE)
 
 #create a data frame with the odds ratios of each race relative to the white mean from the civilian behavior model
  civilian_behavior <- data.frame(Model = "(+) Civilian Behavior", WhiteMean = "", Black = exp(coef(model_civ_behv))[2],

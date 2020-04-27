@@ -52,7 +52,7 @@ model_full_control <- glm(any_force_used ~ race + sex + age + I(age^2) + inout +
                             cs_descr + cs_drgtr + cs_furtv + cs_vcrim +
                             cs_objcs + cs_other + wepnfnd + pct + year,
                           data = log_data,
-                          family = "binomial")
+                          family = "binomial", y=FALSE, model=FALSE)
 
 #model with no control: race as the only predictor and Use of force as the outcome
 model_no_race <- glm(any_force_used ~ sex + age + I(age^2) + inout + daytime + ac_incid + ac_time +
@@ -60,7 +60,7 @@ model_no_race <- glm(any_force_used ~ sex + age + I(age^2) + inout + daytime + a
                        cs_descr + cs_drgtr + cs_furtv + cs_vcrim +
                        cs_objcs + cs_other + wepnfnd + pct + year,
                      data = log_data,
-                     family = "binomial")
+                     family = "binomial", y=FALSE, model=FALSE)
 
 
 #calculating AUC for model_ful_cntrl
@@ -110,7 +110,6 @@ auc(roc_obj_no_race)
 #ROC Curve for model_ful_cntrl
 pred_roc <- prediction(df$probs, df$actual)
 eval <- performance(pred_roc,  measure='tpr', x.measure='fpr')
-
 
 roc_eval <- data.frame(fpr=unlist(eval@x.values), tpr=unlist(eval@y.values))
 ggplot(data=roc_eval, aes(x=fpr, y=tpr)) +
